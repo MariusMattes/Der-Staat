@@ -1,6 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
+import os
+import json
+from django.http import JsonResponse
 
-def index(request):
-    return HttpResponse("Moin")
-# Create your views here.
+
+def test_views(request):
+        return render(request, 'rechtApp/test.html')
+

@@ -16,14 +16,20 @@ Including another URLconf
 """
 
 from django.urls import path
-from rechtApp import views as tmpl_views
+from rechtApp import views
 
 #ro/o = der pfad in der Adressleiste
 #test_views = name der Funktion in der views.py
 #name="test" = interner name
 
 urlpatterns = [
-    path('ro/test', tmpl_views.test_views, name="test"), 
+    path('ro/test', views.test_views, name="test"), 
+    path('ro/hauptseite', views.hauptseite, name='hauptseite'),
+    path('ro/strafen', views.strafen, name='strafen'),
+    path('ro/bussgelder', views.bussgelder, name='bussgelder'),
+    path('ro/urteile', views.urteile, name='urteile'),
+    path('ro/gesetze', views.gesetze, name='gesetze'),
+
 ]
 
 """

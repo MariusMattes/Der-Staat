@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Urteil-Seite</title>
+    <link rel="stylesheet" href="{% static 'css/all.css' %}">
+</head>
+<body>
+    {% include "rechtApp/navigationsleiste.html" %}
+
+    <div class=".hauptDIV">
+        <h2>Urteile</h2>
+        <ul>
+            {% for urteil in urteile %}
+            <li> Urteil {{ forloop.counter }}
+                <ul>
+                    <li>Person: {{ urteil.person }}</li>
+                    <li>Richter: {{ urteil.richter }} </li>
+                    <li>Gesetz-ID: {{ urteil.gesetz_id }}</li>
+                    <li>Bußgeld-ID: {% if urteil.bussgeld_id %}{{ urteil.bussgeld_id }}{% else %}Kein Bußgeld{% endif %}</li>
+                    <li>Jahre-ID: {% if urteil.strafen_id %}{{ urteil.strafen_id }}{% else %}Keine Strafe{% endif %}</li>
+                </ul>
+            </li>
+            {% empty %}
+            <li>Keine Urteile vorhanden.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {% include "rechtApp/banner.html" %}
+</body>
+</html>

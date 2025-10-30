@@ -1,0 +1,11 @@
+[
+    {"id": 1, "titel": "Geschwindigkeitsbegrenzung einhalten", "beschreibung": "Man darf nicht schneller als die erlaubte Geschwindigkeit fahren."},
+    {"id": 2, "titel": "Öffentliche Ruhestörung verboten", "beschreibung": "Man darf die Öffentlichkeit nicht stören."},
+    {"id": 3, "titel": "Mord verboten", "beschreibung": "Es ist verboten, eine andere Person vorsätzlich zu töten."},
+    {"id": 4, "titel": "Diebstahl verboten", "beschreibung": "Es ist verboten, fremdes Eigentum zu stehlen."},
+    {"id": 5, "titel": "Drogenhandel verboten", "beschreibung": "Der Verkauf illegaler Drogen ist verboten."},
+    {"id": 6, "titel": "Fahren ohne Führerschein verboten", "beschreibung": "Man darf kein Fahrzeug ohne gültigen Führerschein fahren."},
+    {"id": 7, "titel": "Illegale Müllentsorgung verboten", "beschreibung": "Müll darf nicht illegal entsorgt werden."},
+    {"id": 8, "titel": "Korruption verboten", "beschreibung": "Bestechung und Korruption sind verboten."}
+    
+]

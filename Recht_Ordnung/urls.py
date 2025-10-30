@@ -20,7 +20,7 @@ from rechtApp import views as tmpl_views
 
 #ro/o = der pfad in der Adressleiste
 #test_views = name der Funktion in der views.py
-#name="test" = name
+#name="test" = interner name
 
 urlpatterns = [
     path('ro/test', tmpl_views.test_views, name="test"), 

@@ -19,7 +19,6 @@ benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 #Einzelne XML-Datei
 gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
 
-
 #Hilfsfunktionen
 def ladeJson(pfad):
     try:
@@ -44,7 +43,6 @@ def ladeBenutzer():
 def speicherBenutzer(daten):
     with open(benutzerJsonPfad, 'w', encoding='utf-8') as f:
         json.dump(daten, f, indent=4, ensure_ascii=False)
-
 
 #Test-HTML
 def test_views(request):

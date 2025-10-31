@@ -23,6 +23,9 @@ from rechtApp import views
 #name="test" = interner name
 
 urlpatterns = [
+    path('ro/login', views.login, name='login'),
+    path('ro/logout', views.logout, name='logout'),
+    path('ro/registrieren', views.registrieren, name='registrieren'),
     path('ro/test', views.test_views, name="test"), 
     path('ro/hauptseite', views.hauptseite, name='hauptseite'),
     path('ro/strafen', views.strafen, name='strafen'),

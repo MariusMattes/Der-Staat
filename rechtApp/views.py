@@ -5,7 +5,7 @@ import json
 from django.http import JsonResponse
 from django.conf import settings
 from lxml import etree as ET
- 
+
 #Allgemeiner Datenbankpfad
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
 

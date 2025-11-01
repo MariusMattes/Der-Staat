@@ -200,3 +200,4 @@ def registrieren(request):
 
 def logout(request):
     return redirect('login')
+

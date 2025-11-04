@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Strafen-Seite</title>
+    <link rel="stylesheet" href="{% static 'css/recht.css' %}">
+</head>
+<body>
+
+    {% include "rechtApp/navigationsleiste.html" %}
+
+    <div class="hauptbereichDivCLASS">
+        <h2 class="UeberschriftCLASS">Strafen</h2>
+        <div class="gesamtDivCLASS">
+            {% for strafe in strafen %}
+            <div class="karteDivCLASS">
+                <p class="inhaltNummerDivCLASS">Art. {{ strafe.gesetz_id }}</p>
+                <p class="inhaltDivCLASS">Strafe: {{ strafe.beschreibung }}</p>
+                <p class="inhaltDivCLASS">Jahre: {{ strafe.jahre }}</p>
+            </div>
+            {% empty %}
+            <p class="keinInhaltCLASS">Keine Strafen vorhanden.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include "rechtApp/banner.html" %}
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Gesetz-Seite</title>
+    <link rel="stylesheet" href="{% static 'css/recht.css' %}">
+</head>
+<body>
+    {% include "rechtApp/navigationsleiste.html" %}
+
+    <div class="hauptbereichDivCLASS">
+        <h2 class="UeberschriftCLASS">Gesetze</h2>
+        <div class="gesamtDivCLASS">
+            {% for gesetz in gesetze %}
+            <div class="karteDivCLASS">
+                <p class="inhaltNummerDivCLASS">Art. {{ gesetz.id }}</p>
+                <p class="inhaltDivCLASS">Titel: {{ gesetz.titel }}</p>
+                <p class="inhaltDivCLASS">Beschreibung: {{ gesetz.beschreibung }}</p>
+            </div>
+            {% empty %}
+            <p class="keinInhaltCLASS">Keine Gesetze vorhanden.</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% include "rechtApp/banner.html" %}
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Bußgeld-Seite</title>
+    <link rel="stylesheet" href="{% static 'css/recht.css' %}">
+</head>
+<body>
+
+    {% include "rechtApp/navigationsleiste.html" %}
+
+    <div class="hauptbereichDivCLASS">
+        <h2 class="UeberschriftCLASS">Bußgelder</h2>
+        <div class="gesamtDivCLASS">
+            {% for bussgeld in bussgelder %}
+            <div class="karteDivCLASS">
+                <p class="inhaltNummerDivCLASS">Art. {{ bussgeld.gesetz_id }}</p>
+                <p class="inhaltDivCLASS">Vergehen: {{ bussgeld.beschreibung }}</p>
+                <p class="inhaltDivCLASS">Betrag: {{ bussgeld.betrag }}€</p>
+            </div>
+            {% empty %}
+            <p class="keinInhaltCLASS">Keine Bußgelder vorhanden.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include "rechtApp/banner.html" %}
+
+</body>
+</html>

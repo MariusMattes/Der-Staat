@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/recht.css' %}">
+</head>
+<body>
+    <div class="hauptbereichDivCLASS">
+        <h2 class="UeberschriftCLASS">Login</h2>
+
+        <div class="gesamtDivCLASS">
+
+            <div class="karteDivCLASS">
+                <form method="POST" class="formularDivCLASS">
+                    {% csrf_token %}
+                    <label>Benutzername:</label>
+                    <input type="text" name="benutzername" required class="eingabeFeldCLASS">
+
+                    <label>Passwort:</label>
+                    <input type="password" name="passwort" required class="eingabeFeldCLASS">
+
+                    <button type="submit" class="buttonPrimarCLASS">Einloggen</button>
+                </form>
+            </div>
+
+            <div class="karteDivCLASS">
+                <form action="{% url 'registrieren' %}" method="get">
+                    <button type="submit" class="buttonSekundaerCLASS">Jetzt registrieren</button>
+                </form>
+            </div>
+
+        </div>
+
+        {% include "rechtApp/banner.html" %}
+    </div>
+</body>
+</html>

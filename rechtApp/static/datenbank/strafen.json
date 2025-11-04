@@ -1,0 +1,6 @@
+[
+    {"id": 1, "gesetz_id": 3, "beschreibung": "Mord", "jahre": 50},
+    {"id": 2, "gesetz_id": 4, "beschreibung": "Diebstahl", "jahre": 5},
+    {"id": 3, "gesetz_id": 5, "beschreibung": "Drogenhandel", "jahre": 10},
+    {"id": 4, "gesetz_id": 8, "beschreibung": "Korruption", "jahre": 7}
+]

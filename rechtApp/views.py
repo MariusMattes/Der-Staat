@@ -56,7 +56,7 @@ def hauptseite(request):
 
 # Strafen-HTML
 def strafen(request):
-    data = ladeJson(strafenJsonPfad)
+    data = ladeJson(strafenJsonPfad) #Beschreibung sollte aus GesetzID geholt werden bei der strafen.json
     return render(request, 'rechtApp/strafen.html', {'strafen': data})
 
 # Bußgelder-HTML
@@ -83,6 +83,8 @@ def ladeGesetze():
             'id': gesetz.find('id').text,
             'titel': gesetz.find('titel').text,
             'beschreibung': gesetz.find('beschreibung').text,
+            'strafe': gesetz.find('strafe').text,
+            'bussgeld': gesetz.find('bussgeld').text,
         })
     
     return gesetze_liste

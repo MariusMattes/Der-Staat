@@ -17,6 +17,8 @@
                 <p class="inhaltNummerDivCLASS">Art. {{ gesetz.id }}</p>
                 <p class="inhaltDivCLASS">Titel: {{ gesetz.titel }}</p>
                 <p class="inhaltDivCLASS">Beschreibung: {{ gesetz.beschreibung }}</p>
+                <p class="inhaltDivCLASS">Strafe: {{ gesetz.strafe }} Jahre</p>
+                <p class="inhaltDivCLASS">Bußgeld: {{ gesetz.bussgeld }}€</p>
             </div>
             {% empty %}
             <p class="keinInhaltCLASS">Keine Gesetze vorhanden.</p>

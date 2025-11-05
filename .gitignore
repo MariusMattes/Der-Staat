@@ -1,4 +1,5 @@
 venv/
+Der-Staat/venv/
 **/__pycache__/
 /__pycache__/
 web_project/__pycache__/

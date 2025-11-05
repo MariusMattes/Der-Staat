@@ -29,7 +29,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "[2001:7c0:2320:2:f816:3eff:fe61:30b1]" #BW Cloud Server Andre
+    "[2001:7c0:2320:2:f816:3eff:fe61:30b1]",#BW Cloud Server Andre
+    "[2001:7c0:2320:2:f816:3eff:fe79:999d]" #BW Cloud Server Marius
     ]
 
 

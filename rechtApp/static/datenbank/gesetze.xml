@@ -1,0 +1,58 @@
+<gesetze>
+    <gesetz>
+        <id>1</id>
+        <titel>Geschwindigkeitsbegrenzung einhalten</titel>
+        <beschreibung>Man darf nicht schneller als die erlaubte Geschwindigkeit fahren.</beschreibung>
+        <bussgeld>100</bussgeld>
+        <strafe>0</strafe>
+    </gesetz>
+    <gesetz>
+        <id>2</id>
+        <titel>Öffentliche Ruhestörung verboten</titel>
+        <beschreibung>Man darf die Öffentlichkeit nicht stören.</beschreibung>
+        <bussgeld>50</bussgeld>
+        <strafe>0</strafe>
+    </gesetz>
+    <gesetz>
+        <id>3</id>
+        <titel>Mord verboten</titel>
+        <beschreibung>Es ist verboten, eine andere Person vorsätzlich zu töten.</beschreibung>
+        <bussgeld>0</bussgeld>
+        <strafe>50</strafe>
+    </gesetz>
+    <gesetz>
+        <id>4</id>
+        <titel>Diebstahl verboten</titel>
+        <beschreibung>Es ist verboten, fremdes Eigentum zu stehlen.</beschreibung>
+        <bussgeld>0</bussgeld>
+        <strafe>5</strafe>
+    </gesetz>
+    <gesetz>
+        <id>5</id>
+        <titel>Drogenhandel verboten</titel>
+        <beschreibung>Der Verkauf illegaler Drogen ist verboten.</beschreibung>
+        <bussgeld>0</bussgeld>
+        <strafe>10</strafe>
+    </gesetz>
+    <gesetz>
+        <id>6</id>
+        <titel>Fahren ohne Führerschein verboten</titel>
+        <beschreibung>Man darf kein Fahrzeug ohne gültigen Führerschein fahren.</beschreibung>
+        <bussgeld>500</bussgeld>
+        <strafe>0</strafe>
+    </gesetz>
+    <gesetz>
+        <id>7</id>
+        <titel>Illegale Müllentsorgung verboten</titel>
+        <beschreibung>Müll darf nicht illegal entsorgt werden.</beschreibung>
+        <bussgeld>200</bussgeld>
+        <strafe>0</strafe>
+    </gesetz>
+    <gesetz>
+        <id>8</id>
+        <titel>Korruption verboten</titel>
+        <beschreibung>Bestechung und Korruption sind verboten.</beschreibung>
+        <bussgeld>0</bussgeld>
+        <strafe>7</strafe>
+    </gesetz>
+</gesetze>

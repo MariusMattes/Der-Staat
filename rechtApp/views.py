@@ -64,7 +64,7 @@ def bussgelder(request):
     data = ladeJson(bussgelderJsonPfad)
     return render(request, 'rechtApp/bussgelder.html', {'bussgelder': data})
 
-# Urteile-HTML
+# Urteile-HTML 
 def urteile(request):
     data = ladeJson(urteileJsonPfad)
     return render(request, 'rechtApp/urteile.html', {'urteile': data})

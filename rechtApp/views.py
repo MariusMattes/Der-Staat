@@ -61,12 +61,28 @@ def strafen(request):
 
 # Bußgelder-HTML
 def bussgelder(request):
+    qualifkation = request.session.get('qualifikation') 
     data = ladeJson(bussgelderJsonPfad)
+    if not qualifkation == "Polizist":
+        return HttpResponse("""
+                        <script>
+                            alert("Schleich di, du bist kein Polizist!");
+                            window.history.back();
+                        </script>
+                        """)
     return render(request, 'rechtApp/bussgelder.html', {'bussgelder': data})
 
 # Urteile-HTML 
 def urteile(request):
+    qualifkation = request.session.get('qualifikation') 
     data = ladeJson(urteileJsonPfad)
+    if not qualifkation == "Richter":
+        return HttpResponse("""
+                        <script>
+                            alert("Schleich di, du bist kein Richter!");
+                            window.history.back();
+                        </script>
+                        """)
     return render(request, 'rechtApp/urteile.html', {'urteile': data})
 
 # Gesetze-HTML
@@ -100,6 +116,7 @@ def login(request):
         benutzername = request.POST['benutzername']
         passwort = request.POST['passwort']
 
+
         benutzer_liste = ladeBenutzer()
         if not benutzer_liste:
             return HttpResponse("""
@@ -116,6 +133,9 @@ def login(request):
                 benutzername_existiert = True
                 if benutzer['passwort'] == passwort:
                     gefundener_benutzer = benutzer
+                    qualifikation = benutzer["qualifikation"]
+                    request.session['qualifikation'] = qualifikation
+                    print(request.session.get('qualifikation'))
                 break
 
         if not benutzername_existiert:
@@ -202,3 +222,29 @@ def registrieren(request):
 
 def logout(request):
     return redirect('login')
+
+def ist_richter(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False  # wenn kein benutzer gefunden
+
+    for benutzer in benutzer_liste:
+        if benutzer["id"] == id_benutzer and benutzer["qualifikation"] == "Richter":
+            return True
+    return False
+
+def ist_polizist(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False  # wenn kein benutzer gefunden
+
+    for benutzer in benutzer_liste:
+        if benutzer["id"] == id_benutzer and benutzer["qualifikation"] == "Polizist":
+            return True
+    return False
+
+

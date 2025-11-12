@@ -2,15 +2,22 @@
     {
         "id": 1,
         "benutzername": "Sin",
-        "email": "sin@gmail.com",
+        "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
         "qualifikation": "Richter"
     },
     {
         "id": 2,
         "benutzername": "Nis",
-        "email": "Nis@gmail.com",
+        "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
         "qualifikation": "Handwerker"
+    },
+    {
+        "id": 3,
+        "benutzername": "Hans",
+        "email": "chronoszeitbuchung@gmail.com",
+        "passwort": "Sin",
+        "qualifikation": "Polizist"
     }
 ]

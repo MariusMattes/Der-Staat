@@ -276,3 +276,35 @@ def ist_legislative(id_benutzer):
     return False
 
 
+def gesetzErlassen(request):
+    if request.method == "POST":
+        titel = request.POST.get("titel")
+        beschreibung = request.POST.get("beschreibung")
+        bussgeld = request.POST.get("bussgeld")
+        strafe = request.POST.get("strafe")
+
+        tree = xmlStrukturierenGesetze()
+        root = tree.getroot()
+
+        ids = []
+        for gesetz in root.findall("gesetz"):
+            id_text = gesetz.find("id").text
+            ids.append(int(id_text))
+
+        neue_id = max(ids) + 1
+
+        neues_gesetz = ET.SubElement(root, "gesetz")
+
+        ET.SubElement(neues_gesetz, "id").text = str(neue_id)
+        ET.SubElement(neues_gesetz, "titel").text = titel
+        ET.SubElement(neues_gesetz, "beschreibung").text = beschreibung
+        ET.SubElement(neues_gesetz, "bussgeld").text = bussgeld
+        ET.SubElement(neues_gesetz, "strafe").text = strafe
+
+        tree.write(gesetzeXmlPfad, encoding="utf-8", xml_declaration=True)
+
+        return redirect("gesetz_erstellen")
+
+    return render(request, "gesetze.html")
+
+

@@ -25,6 +25,27 @@
             {% endfor %}
         </div>
     </div>
+
+        <div class="hauptbereichDivCLASS">
+        <h2 class="UeberschriftCLASS">Gesetz erlassen:</h2>
+        <form method="POST">
+            {% csrf_token %}
+
+            <label>Titel:</label><br>
+            <input type="text" name="titel" required>
+
+            <label>Beschreibung:</label><br>
+            <textarea name="beschreibung" required></textarea>
+
+            <label>Bußgeld:</label><br>
+            <input type="number" name="bussgeld" value="0" required>
+
+            <label>Strafe:</label><br>
+            <input type="number" name="strafe" value="0" required>
+
+            <button type="submit">Gesetz speichern</button>
+        </form>
+    </div>
     {% include "rechtApp/banner.html" %}
 </body>
 </html>

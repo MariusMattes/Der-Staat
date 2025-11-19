@@ -32,7 +32,7 @@ urlpatterns = [
     path('ro/bussgelder', views.bussgelder, name='bussgelder'),
     path('ro/urteile', views.urteile, name='urteile'),
     path('ro/gesetze', views.gesetze, name='gesetze'),
-    path("ro/gesetze", views.gesetzErlassen, name="gesetzErlassen"),
+    path("ro/gesetze/erstellen", views.gesetzErlassen, name="gesetzErlassen"),
 
 ]
 

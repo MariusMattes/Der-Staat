@@ -4,20 +4,28 @@
         "benutzername": "Sin",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
-        "qualifikation": "Richter"
+        "qualifikation": ["Richter"]
     },
     {
         "id": 2,
         "benutzername": "Nis",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
-        "qualifikation": "Handwerker"
+        "qualifikation": ["Handwerker", "Legislative"]
     },
     {
         "id": 3,
         "benutzername": "Hans",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
-        "qualifikation": "Polizist"
+        "qualifikation": ["Polizist"]
+    },
+    {
+        "id": 4,
+        "benutzername": "Hans2",
+        "email": "chronoszeitbuchung@gmail.com",
+        "passwort": "Sin",
+        "qualifikation": ["Legislative"]
     }
+
 ]

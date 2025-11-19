@@ -226,18 +226,6 @@ def registrieren(request):
 def logout(request):
     return redirect('login')
 
-#A
-def ist_richter(id_benutzer):
-    try:
-        with open(benutzerJsonPfad, "r") as f:
-            benutzer_liste = json.load(f)
-    except FileNotFoundError:
-        return False  # wenn kein benutzer gefunden
-
-    for benutzer in benutzer_liste:
-        if benutzer["id"] == id_benutzer and benutzer["qualifikation"] == "Richter":
-            return True
-    return False
 
 #A
 def ist_polizist(id_benutzer):
@@ -245,10 +233,45 @@ def ist_polizist(id_benutzer):
         with open(benutzerJsonPfad, "r") as f:
             benutzer_liste = json.load(f)
     except FileNotFoundError:
-        return False  # wenn kein benutzer gefunden
+        return False
 
     for benutzer in benutzer_liste:
-        if benutzer["id"] == id_benutzer and benutzer["qualifikation"] == "Polizist":
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Polizist" in benutzer.get("qualifikation", [])
+        ):
+            return True
+    return False
+
+#A
+def ist_richter(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Richter" in benutzer.get("qualifikation", [])
+        ):
+            return True
+    return False
+
+#A
+def ist_legislative(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Legislative" in benutzer.get("qualifikation", [])
+        ):
             return True
     return False
 

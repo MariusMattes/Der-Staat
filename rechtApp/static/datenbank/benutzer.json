@@ -22,10 +22,10 @@
     },
     {
         "id": 4,
-        "benutzername": "Hans",
+        "benutzername": "Hans2",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
         "qualifikation": ["Legislative"]
-    },
+    }
 
 ]

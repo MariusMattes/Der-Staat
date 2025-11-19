@@ -26,7 +26,7 @@
         </div>
     </div>
 
-    {% if "Legislative" in benutzer.qualifikation %}
+    {% if "Legislative" in qualifikation %}
     <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetz erlassen:</h2>
         <form method="POST" action="{% url 'gesetzErlassen' %}" class="formularDivCLASS">

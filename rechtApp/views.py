@@ -62,9 +62,9 @@ def strafen(request):
 # Bußgelder-HTML
 # S und A
 def bussgelder(request):
-    qualifkation = request.session.get('qualifikation') 
+    qualifkation = request.session.get('qualifikation', []) 
     data = ladeJson(bussgelderJsonPfad)
-    if not qualifkation == "Polizist":
+    if "Polizist" not in qualifkation:
         return HttpResponse("""
                         <script>
                             alert("Schleich di, du bist kein Polizist!");
@@ -76,9 +76,9 @@ def bussgelder(request):
 # Urteile-HTML
 #S und A
 def urteile(request):
-    qualifkation = request.session.get('qualifikation') 
+    qualifkation = request.session.get('qualifikation', []) 
     data = ladeJson(urteileJsonPfad)
-    if not qualifkation == "Richter":
+    if "Richter" not in qualifkation:
         return HttpResponse("""
                         <script>
                             alert("Schleich di, du bist kein Richter!");
@@ -134,7 +134,12 @@ def gesetzErlassen(request):
 
         tree.write(gesetzeXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
-        return redirect("gesetzErlassen")
+        gesetze_liste = ladeGesetze()
+        return render(request, "rechtApp/gesetze.html", {
+            "gesetze": gesetze_liste,
+            "qualifikation": request.session.get('qualifikation', []),
+        })
+        
 
     gesetze_liste = ladeGesetze()
     return render(request, "rechtApp/gesetze.html", {"gesetze": gesetze_liste})
@@ -142,7 +147,12 @@ def gesetzErlassen(request):
 #S
 def gesetze(request):
     gesetze_liste = ladeGesetze()
-    return render(request, "rechtApp/gesetze.html", {"gesetze": gesetze_liste})
+    qualifikation = request.session.get('qualifikation', [])
+
+    return render(request, "rechtApp/gesetze.html", {
+        "gesetze": gesetze_liste,
+        "qualifikation": qualifikation,
+    })
 
 
 #Login-HTML

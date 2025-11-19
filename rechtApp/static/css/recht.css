@@ -159,4 +159,37 @@ body {
     font-family: Arial;
     font-size: 16px;
 }
-/*Login/registrierung*/
+
+.formularDivCLASS {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 60%;      
+    margin: 0 auto 40px auto;
+    text-align: left;
+}
+
+.eingabeFeldCLASS {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #800000;
+    border-radius: 5px;
+    font-size: 16px;
+    font-family: Arial;
+}
+
+.buttonErlassCLASS {
+    background-color: #800000;
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.buttonErlassCLASS:hover {
+    background-color: #550000;
+}

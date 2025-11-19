@@ -60,6 +60,7 @@ def strafen(request):
     return render(request, 'rechtApp/strafen.html', {'strafen': data})
 
 # Bußgelder-HTML
+# S und A
 def bussgelder(request):
     qualifkation = request.session.get('qualifikation') 
     data = ladeJson(bussgelderJsonPfad)
@@ -72,7 +73,8 @@ def bussgelder(request):
                         """)
     return render(request, 'rechtApp/bussgelder.html', {'bussgelder': data})
 
-# Urteile-HTML 
+# Urteile-HTML
+#S und A
 def urteile(request):
     qualifkation = request.session.get('qualifikation') 
     data = ladeJson(urteileJsonPfad)
@@ -111,6 +113,7 @@ def gesetze(request):
 
 
 #Login-HTML
+#S und A
 def login(request):
     if request.method == 'POST':
         benutzername = request.POST['benutzername']
@@ -223,6 +226,7 @@ def registrieren(request):
 def logout(request):
     return redirect('login')
 
+#A
 def ist_richter(id_benutzer):
     try:
         with open(benutzerJsonPfad, "r") as f:
@@ -235,6 +239,7 @@ def ist_richter(id_benutzer):
             return True
     return False
 
+#A
 def ist_polizist(id_benutzer):
     try:
         with open(benutzerJsonPfad, "r") as f:

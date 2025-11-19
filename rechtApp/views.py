@@ -108,7 +108,7 @@ def ladeGesetze():
     return gesetze_liste
 
 #S
-def gesetzErlassen(request):
+def gesetzErlassen(request): 
     if request.method == "POST":
         titel = request.POST.get("titel")
         beschreibung = request.POST.get("beschreibung")

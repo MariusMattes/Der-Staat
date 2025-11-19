@@ -26,6 +26,7 @@
         </div>
     </div>
 
+    {% if "Legislative" in benutzer.qualifikation %}
     <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetz erlassen:</h2>
         <form method="POST" action="{% url 'gesetzErlassen' %}" class="formularDivCLASS">
@@ -46,6 +47,7 @@
             <button type="submit" class="buttonPrimarCLASS">Gesetz speichern</button>
         </form>
     </div>
+    {% endif %}
     {% include "rechtApp/banner.html" %}
 </body>
 </html>

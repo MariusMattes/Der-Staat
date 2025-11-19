@@ -26,26 +26,28 @@
         </div>
     </div>
 
-        <div class="hauptbereichDivCLASS">
+    {% if "Legislative" in benutzer.qualifikation %}
+    <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetz erlassen:</h2>
-        <form method="POST">
+        <form method="POST" action="{% url 'gesetzErlassen' %}" class="formularDivCLASS">
             {% csrf_token %}
 
-            <label>Titel:</label><br>
-            <input type="text" name="titel" required>
+            <label>Titel:</label>
+            <input class="eingabeFeldCLASS" type="text" name="titel" required>
 
-            <label>Beschreibung:</label><br>
-            <textarea name="beschreibung" required></textarea>
+            <label>Beschreibung:</label>
+            <textarea class="eingabeFeldCLASS" name="beschreibung" required></textarea>
 
-            <label>Bußgeld:</label><br>
-            <input type="number" name="bussgeld" value="0" required>
+            <label>Bußgeld:</label>
+            <input class="eingabeFeldCLASS" type="number" name="bussgeld" value="0" required>
 
-            <label>Strafe:</label><br>
-            <input type="number" name="strafe" value="0" required>
+            <label>Strafe:</label>
+            <input class="eingabeFeldCLASS" type="number" name="strafe" value="0" required>
 
-            <button type="submit">Gesetz speichern</button>
+            <button type="submit" class="buttonPrimarCLASS">Gesetz speichern</button>
         </form>
     </div>
+    {% endif %}
     {% include "rechtApp/banner.html" %}
 </body>
 </html>

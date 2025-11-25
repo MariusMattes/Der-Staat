@@ -27,8 +27,7 @@ ARBEIT_API_URL = "noch nicht bekannt"
 
 #A
 def hole_ID_aus_URL(request):
-    # HIER wird sie aus der URL gelesen:
-    buerger_id = request.GET.get("buerger_id")
+    buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
 
     if not buerger_id:
         return HttpResponseBadRequest("Fehlende buerger_id")

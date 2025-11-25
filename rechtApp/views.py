@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 import os
 import json
 from django.http import JsonResponse
 from django.conf import settings
 from lxml import etree as ET
+import requests
  
 #Allgemeiner Datenbankpfad
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
@@ -18,6 +19,29 @@ benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 
 #Einzelne XML-Datei
 gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
+
+#A
+#Bekannte Schnittstellen
+MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
+
+#A
+def hole_ID_aus_URL(request):
+    # HIER wird sie aus der URL gelesen:
+    buerger_id = request.GET.get("buerger_id")
+
+    if not buerger_id:
+        return HttpResponseBadRequest("Fehlende buerger_id")
+#A
+def hole_buergerdaten(buerger_id: str): #dict wird erwartet
+    payload = {"buerger_id": buerger_id}
+
+    try:
+        response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird
+        #response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        return None
 
 #Hilfsfunktionen
 def ladeJson(pfad):

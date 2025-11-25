@@ -293,7 +293,6 @@ def registrieren(request):
 def logout(request):
     return redirect('login')
 
-
 #A
 def ist_polizist(id_benutzer):
     try:
@@ -343,3 +342,18 @@ def ist_legislative(id_benutzer):
     return False
 
 
+# statt "ist beruf" eventuell Liste mit Berechtigungen erstellen und abgleichen ob Person in Liste? von f
+
+def berechtigungen_abgleichen(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Platzhalter" in "qualifikationsliste" #vielleicht verstehe ich auch gerade falsch wie es gedacht war, könnt mich da gerne aufklären; von f
+        ):
+            return True
+    return False

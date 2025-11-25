@@ -23,6 +23,7 @@ gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
 #A
 #Bekannte Schnittstellen
 MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
+ARBEIT_API_URL = "noch nicht bekannt"
 
 #A
 def hole_ID_aus_URL(request):
@@ -31,6 +32,7 @@ def hole_ID_aus_URL(request):
 
     if not buerger_id:
         return HttpResponseBadRequest("Fehlende buerger_id")
+    
 #A
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
     payload = {"buerger_id": buerger_id}
@@ -42,6 +44,20 @@ def hole_buergerdaten(buerger_id: str): #dict wird erwartet
         return response.json()
     except requests.RequestException:
         return None
+
+#A
+def hole_qualifikation_von_arbeit(buerger_id: str):
+    payload = {"buerger_id": buerger_id}
+
+    try:
+        response = requests.post(ARBEIT_API_URL, json=payload, timeout=5)
+        response.raise_for_status()
+        daten = response.json()
+        #höchstwahrscheinlich etwas wie: {"buerger_id": "...", "qualifikation": ["Polizist", ...]}
+        return daten.get("qualifikation", [])
+    except requests.RequestException:
+        return []
+    
 
 #Hilfsfunktionen
 def ladeJson(pfad):

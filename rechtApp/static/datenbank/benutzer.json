@@ -26,6 +26,13 @@
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
         "qualifikation": ["Legislative"]
+    },
+    {
+       "id": 5,
+        "benutzername": "Hans3",
+        "email": "chronoszeitbuchung@gmail.com",
+        "passwort": "Sin",
+        "qualifikation": ["Legislative", "Richter"] 
     }
 
 ]

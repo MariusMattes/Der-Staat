@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 import os
 import json
 from django.http import JsonResponse
 from django.conf import settings
 from lxml import etree as ET
+import requests
  
 #Allgemeiner Datenbankpfad
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
@@ -19,7 +20,47 @@ benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 #Einzelne XML-Datei
 gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
 
+<<<<<<< HEAD
 gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
+=======
+#A
+#Bekannte Schnittstellen
+MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
+ARBEIT_API_URL = "noch nicht bekannt"
+
+#A
+def hole_ID_aus_URL(request):
+    buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
+
+    if not buerger_id:
+        return HttpResponseBadRequest("Fehlende buerger_id")
+    
+#A
+def hole_buergerdaten(buerger_id: str): #dict wird erwartet
+    payload = {"buerger_id": buerger_id}
+
+    try:
+        response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird
+        #response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        return None
+
+#A
+def hole_qualifikation_von_arbeit(buerger_id: str):
+    payload = {"buerger_id": buerger_id}
+
+    try:
+        response = requests.post(ARBEIT_API_URL, json=payload, timeout=5)
+        response.raise_for_status()
+        daten = response.json()
+        #höchstwahrscheinlich etwas wie: {"buerger_id": "...", "qualifikation": ["Polizist", ...]}
+        return daten.get("qualifikation", [])
+    except requests.RequestException:
+        return []
+    
+>>>>>>> 5c6a46c6499d4829536defe673b5b1f39b4c7598
 
 #Hilfsfunktionen
 def ladeJson(pfad):
@@ -135,7 +176,7 @@ def ladeGesetzentwurf():
     return gesetze_liste
 
 #S
-def gesetzErlassen(request):
+def gesetzErlassen(request): 
     if request.method == "POST":
         titel = request.POST.get("titel")
         beschreibung = request.POST.get("beschreibung")
@@ -403,7 +444,6 @@ def registrieren(request):
 def logout(request):
     return redirect('login')
 
-
 #A
 def ist_polizist(id_benutzer):
     try:
@@ -453,3 +493,18 @@ def ist_legislative(id_benutzer):
     return False
 
 
+# statt "ist beruf" eventuell Liste mit Berechtigungen erstellen und abgleichen ob Person in Liste? von f
+
+def berechtigungen_abgleichen(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Platzhalter" in "qualifikationsliste" #vielleicht verstehe ich auch gerade falsch wie es gedacht war, könnt mich da gerne aufklären; von f
+        ):
+            return True
+    return False

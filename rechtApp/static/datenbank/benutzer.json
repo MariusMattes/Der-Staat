@@ -16,7 +16,7 @@
     {
         "id": 3,
         "benutzername": "Hans",
-        "email": "chronoszeitbuchung@gmail.com",
+        "email": "chronoszeitbuchung@gmail.com", 
         "passwort": "Sin",
         "qualifikation": ["Polizist"]
     },

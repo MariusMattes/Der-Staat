@@ -20,9 +20,7 @@ benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 #Einzelne XML-Datei
 gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
 
-<<<<<<< HEAD
 gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
-=======
 #A
 #Bekannte Schnittstellen
 MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
@@ -60,7 +58,6 @@ def hole_qualifikation_von_arbeit(buerger_id: str):
     except requests.RequestException:
         return []
     
->>>>>>> 5c6a46c6499d4829536defe673b5b1f39b4c7598
 
 #Hilfsfunktionen
 def ladeJson(pfad):

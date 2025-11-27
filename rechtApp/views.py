@@ -20,6 +20,7 @@ benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 #Einzelne XML-Datei
 gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
 
+gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #A
 #Bekannte Schnittstellen
 MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
@@ -71,6 +72,11 @@ def ladeJson(pfad):
 def xmlStrukturierenGesetze():
     parser = ET.XMLParser(remove_blank_text=True)
     return ET.parse(gesetzeXmlPfad, parser)
+
+def xmlStrukturierenGesetzentwurf():
+    parser = ET.XMLParser(remove_blank_text=True)
+    return ET.parse(gesetzentwurfXmlPfad, parser)
+
 
 def ladeBenutzer():
     try:
@@ -146,6 +152,26 @@ def ladeGesetze():
 
     return gesetze_liste
 
+def ladeGesetzentwurf():
+    if not os.path.exists(gesetzentwurfXmlPfad):
+        return []
+
+    tree = xmlStrukturierenGesetzentwurf()
+    root = tree.getroot()
+    
+    gesetze_liste = []
+    for gesetz in root.xpath('//gesetz'):
+        gesetze_liste.append({
+            'id': gesetz.find('id').text,
+            'titel': gesetz.find('titel').text,
+            'beschreibung': gesetz.find('beschreibung').text,
+            'strafe': gesetz.find('strafe').text,
+            'bussgeld': gesetz.find('bussgeld').text,
+            'zustimmung': gesetz.find('zustimmung').text
+        })
+
+    return gesetze_liste
+
 #S
 def gesetzErlassen(request): 
     if request.method == "POST":
@@ -154,7 +180,7 @@ def gesetzErlassen(request):
         bussgeld = request.POST.get("bussgeld")
         strafe = request.POST.get("strafe")
 
-        tree = xmlStrukturierenGesetze()
+        tree = xmlStrukturierenGesetzentwurf()
         root = tree.getroot()
 
         gesetze = root.findall("gesetz")
@@ -170,26 +196,132 @@ def gesetzErlassen(request):
         ET.SubElement(neues_gesetz, "beschreibung").text = beschreibung
         ET.SubElement(neues_gesetz, "bussgeld").text = bussgeld
         ET.SubElement(neues_gesetz, "strafe").text = str(strafe)
+        ET.SubElement(neues_gesetz, "zustimmung").text = "0"
 
-        tree.write(gesetzeXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
+        tree.write(gesetzentwurfXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
+        gesetzentwurf_liste = ladeGesetzentwurf()
         gesetze_liste = ladeGesetze()
+
         return render(request, "rechtApp/gesetze.html", {
             "gesetze": gesetze_liste,
+            "gesetzentwurf": gesetzentwurf_liste,
             "qualifikation": request.session.get('qualifikation', []),
         })
         
-
-    gesetze_liste = ladeGesetze()
     return render(request, "rechtApp/gesetze.html", {"gesetze": gesetze_liste})
+
+def gesetzFreigeben(request, gesetz_id):
+    if request.method == "POST" and request.POST.get("zustimmung") == "ja":
+        benutzer_id = request.session.get("benutzer_id")
+
+        # 1. Prüfen: ist der Benutzer eingeloggt und Legislative?
+        if not benutzer_id or not ist_legislative(benutzer_id):
+            return HttpResponse("""
+                <script>
+                    alert("Du bist nicht berechtigt, abzustimmen.");
+                    window.history.back();
+                </script>
+            """)
+
+        # 2. Gesetzentwurf laden
+        tree_entwurf = xmlStrukturierenGesetzentwurf()
+        root_entwurf = tree_entwurf.getroot()
+
+        for gesetz in root_entwurf.findall("gesetz"):
+            if gesetz.find("id").text == str(gesetz_id):
+                # 3. Liste der bereits Abstimmenden auslesen/erzeugen
+                abgestimmt_el = gesetz.find("abgestimmt_ids")
+                if abgestimmt_el is None:
+                    abgestimmt_el = ET.SubElement(gesetz, "abgestimmt_ids")
+                    abgestimmt_el.text = ""
+
+                bereits_abgestimmt = set(
+                    filter(None, (abgestimmt_el.text or "").split(","))
+                )
+
+                # 4. Prüfen: hat dieser Benutzer schon abgestimmt?
+                if str(benutzer_id) in bereits_abgestimmt:
+                    tree_entwurf.write(
+                        gesetzentwurfXmlPfad,
+                        encoding="utf-8",
+                        xml_declaration=True,
+                        pretty_print=True,
+                    )
+                    return HttpResponse("""
+                        <script>
+                            alert("Du hast bereits abgestimmt.");
+                            window.history.back();
+                        </script>
+                    """)
+
+                # 5. Benutzer-ID hinzufügen
+                bereits_abgestimmt.add(str(benutzer_id))
+                abgestimmt_el.text = ",".join(bereits_abgestimmt)
+
+                # 6. Zustimmung hochzählen
+                zustimmung_el = gesetz.find("zustimmung")
+                aktuelle_zustimmung = int(zustimmung_el.text or "0")
+                neue_zustimmung = aktuelle_zustimmung + 1
+                zustimmung_el.text = str(neue_zustimmung)
+
+                # 7. Wenn mindestens 3 Stimmen → in gesetze.xml übernehmen
+                if neue_zustimmung >= 3:
+                    # Normale Gesetze laden
+                    try:
+                        tree_gesetze = xmlStrukturierenGesetze()
+                        root_gesetze = tree_gesetze.getroot()
+                    except FileNotFoundError:
+                        root_gesetze = ET.Element("gesetze")
+                        tree_gesetze = ET.ElementTree(root_gesetze)
+
+                    vorhandene_gesetze = root_gesetze.findall("gesetz")
+                    if vorhandene_gesetze:
+                        letzte_id = int(vorhandene_gesetze[-1].find("id").text)
+                        neue_id = letzte_id + 1
+                    else:
+                        neue_id = 1
+
+                    # Neues Gesetz in gesetze.xml anlegen
+                    neues_gesetz = ET.SubElement(root_gesetze, "gesetz")
+                    ET.SubElement(neues_gesetz, "id").text = str(neue_id)
+                    ET.SubElement(neues_gesetz, "titel").text = (gesetz.find("titel").text or "")
+                    ET.SubElement(neues_gesetz, "beschreibung").text = (gesetz.find("beschreibung").text or "")
+                    ET.SubElement(neues_gesetz, "bussgeld").text = (gesetz.find("bussgeld").text or "0")
+                    ET.SubElement(neues_gesetz, "strafe").text = (gesetz.find("strafe").text or "0")
+
+                    # In gesetze.xml speichern
+                    tree_gesetze.write(
+                        gesetzeXmlPfad,
+                        encoding="utf-8",
+                        xml_declaration=True,
+                        pretty_print=True,
+                    )
+
+                    # Entwurf aus gesetzentwurf.xml entfernen
+                    root_entwurf.remove(gesetz)
+
+                # 8. Entwurfsdatei (mit Zustimmungen / Abstimmer-Liste) speichern
+                tree_entwurf.write(
+                    gesetzentwurfXmlPfad,
+                    encoding="utf-8",
+                    xml_declaration=True,
+                    pretty_print=True,
+                )
+                break
+
+    return redirect("gesetze")
+
 
 #S
 def gesetze(request):
     gesetze_liste = ladeGesetze()
+    gesetzentwurf_liste = ladeGesetzentwurf()
     qualifikation = request.session.get('qualifikation', [])
 
     return render(request, "rechtApp/gesetze.html", {
         "gesetze": gesetze_liste,
+        "gesetzentwurf": gesetzentwurf_liste,
         "qualifikation": qualifikation,
     })
 
@@ -200,7 +332,6 @@ def login(request):
     if request.method == 'POST':
         benutzername = request.POST['benutzername']
         passwort = request.POST['passwort']
-
 
         benutzer_liste = ladeBenutzer()
         if not benutzer_liste:
@@ -218,8 +349,9 @@ def login(request):
                 benutzername_existiert = True
                 if benutzer['passwort'] == passwort:
                     gefundener_benutzer = benutzer
-                    qualifikation = benutzer["qualifikation"]
+                    qualifikation = benutzer.get("qualifikation", [])
                     request.session['qualifikation'] = qualifikation
+                    request.session['benutzer_id'] = benutzer['id']
                     print(request.session.get('qualifikation'))
                 break
 
@@ -242,6 +374,7 @@ def login(request):
         return redirect('hauptseite')
 
     return render(request, 'rechtApp/login.html')
+
 
 #Registrieren-HTML
 def registrieren(request):

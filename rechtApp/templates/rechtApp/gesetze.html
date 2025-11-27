@@ -47,6 +47,30 @@
             <button type="submit" class="buttonPrimarCLASS">Gesetz speichern</button>
         </form>
     </div>
+     <div class="hauptbereichDivCLASS">
+        <h2 class="UeberschriftCLASS">Gesetzentwurf</h2>
+        <div class="gesamtDivCLASS">
+            {% for gesetz in gesetzentwurf %}
+            <div class="karteDivCLASS">
+                <p class="inhaltNummerDivCLASS">Entwurfnr. {{ gesetz.id }}</p>
+                <p class="inhaltDivCLASS">Titel: {{ gesetz.titel }}</p>
+                <p class="inhaltDivCLASS">Beschreibung: {{ gesetz.beschreibung }}</p>
+                <p class="inhaltDivCLASS">Strafe: {{ gesetz.strafe }} Jahre</p>
+                <p class="inhaltDivCLASS">Bußgeld: {{ gesetz.bussgeld }}€</p>
+                <p class="inhaltDivCLASS">Zustimmungen: {{ gesetz.zustimmung }}</p>
+                <form method="POST" action="{% url 'gesetzFreigeben' gesetz.id %}" class="formularDivCLASS">
+                {% csrf_token %}
+                <button type="submit" name="zustimmung" value="ja" class="buttonPrimarCLASS">
+                    Zustimmen
+                </button>
+                </form>
+
+            </div>
+            {% empty %}
+            <p class="keinInhaltCLASS">Keine Gesetzentwürfe vorhanden.</p>
+            {% endfor %}
+        </div>
+    </div>
     {% endif %}
     {% include "rechtApp/banner.html" %}
 </body>

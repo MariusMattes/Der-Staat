@@ -28,7 +28,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #A
 #Bekannte Schnittstellen
 MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
-ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]:8000/ro/arbeit/qualifikation_api"#BW Cloud Server Andre für testzwecke, später von der gruppe arbeit
+ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]/ro/arbeit/qualifikation_api"#BW Cloud Server Andre für testzwecke, später von der gruppe arbeit
 
 
 #A
@@ -58,6 +58,7 @@ def hole_qualifikation_von_arbeit(benutzer_id: int):
         response = requests.post(ARBEIT_API_URL, json=payload, timeout=5)
         response.raise_for_status()
         daten = response.json()
+        print(daten)
         return daten.get("qualifikation", [])
     except requests.RequestException:
         # Wenn dein Server nicht erreichbar ist oder Fehler liefert
@@ -408,6 +409,7 @@ def login(request):
 
                     # ID wird immer noch aus benutzer.json geholt
                     benutzer_id = benutzer['id']
+                    print(benutzer_id)
                     request.session['benutzer_id'] = benutzer_id
 
                     # quali über schnittstelle
@@ -590,6 +592,7 @@ def qualifikation_api(request):
 
     for eintrag in daten:
         if eintrag.get("id") == benutzer_id:
+            print(eintrag)
             return JsonResponse({
                 "id": benutzer_id,
                 "qualifikation": eintrag.get("qualifikation", [])

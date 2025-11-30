@@ -132,7 +132,7 @@ def urteile(request):
                         """)
     return render(request, 'rechtApp/urteile.html', {'urteile': data})
 
-# Gesetze-HTML
+# Gesetze-HTML 
 def ladeGesetze():
     if not os.path.exists(gesetzeXmlPfad):
         return []

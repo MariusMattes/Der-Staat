@@ -138,13 +138,8 @@ def urteile(request):
                         </script>
                         """)
     return render(request, 'rechtApp/urteile.html', {'urteile': data})
-<<<<<<< HEAD
- 
-# Gesetze-HTML
-=======
 
 # Gesetze-HTML 
->>>>>>> 39d0a9dd0f90b45a6d3458c041dfb6a400eafb7c
 def ladeGesetze():
     if not os.path.exists(gesetzeXmlPfad):
         return []
@@ -221,8 +216,6 @@ def gesetzErlassen(request):
             "qualifikation": request.session.get('qualifikation', []),
         })
         
-<<<<<<< HEAD
-=======
     return render(request, "rechtApp/gesetze.html", {"gesetze": gesetze_liste})
 
 def gesetzFreigeben(request, gesetz_id):
@@ -326,7 +319,6 @@ def gesetzFreigeben(request, gesetz_id):
 
     return redirect("gesetze")
 
->>>>>>> 39d0a9dd0f90b45a6d3458c041dfb6a400eafb7c
 
 #S
 def gesetze(request):

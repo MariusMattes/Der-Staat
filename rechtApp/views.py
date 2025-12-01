@@ -86,7 +86,7 @@ def urteile(request):
                         </script>
                         """)
     return render(request, 'rechtApp/urteile.html', {'urteile': data})
-
+ 
 # Gesetze-HTML
 def ladeGesetze():
     if not os.path.exists(gesetzeXmlPfad):
@@ -140,9 +140,6 @@ def gesetzErlassen(request):
             "qualifikation": request.session.get('qualifikation', []),
         })
         
-
-    gesetze_liste = ladeGesetze()
-    return render(request, "rechtApp/gesetze.html", {"gesetze": gesetze_liste})
 
 #S
 def gesetze(request):

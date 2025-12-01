@@ -61,7 +61,6 @@ def hole_qualifikation_von_arbeit(benutzer_id: int):
         print(daten)
         return daten.get("qualifikation", [])
     except requests.RequestException:
-        # Wenn dein Server nicht erreichbar ist oder Fehler liefert
         return []
 
     
@@ -571,7 +570,7 @@ def berechtigungen_abgleichen(id_benutzer):
     return False
 
 
-#A nur für testzwecke
+#A nur für testzwecke, der teil (o.ä.) liegt später bei team arbeit
 @csrf_exempt
 @require_POST
 def qualifikation_api(request):
@@ -582,11 +581,11 @@ def qualifikation_api(request):
     try:
         body = json.loads(request.body.decode("utf-8"))
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Ungültiges JSON"}, status=400)
+        return JsonResponse({"error": "ungültiges JSON"}, status=400)
 
     benutzer_id = body.get("id")
     if benutzer_id is None:
-        return JsonResponse({"error": "id fehlt"}, status=400)
+        return JsonResponse({"error": "ID fehlt"}, status=400)
 
     daten = ladeJson(arbeitQualiJsonPfad)
 

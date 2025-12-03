@@ -21,6 +21,7 @@ strafenJsonPfad = os.path.join(allgemeinerPfad, 'strafen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
+buergerAkteJsonPfad = os.path.join(allgemeinerPfad, 'recht_buergerakte.json')
 
 #Einzelne XML-Datei
 #S
@@ -56,6 +57,21 @@ def ladeJson(pfad):
     except FileNotFoundError:
         print(f"Datei nicht gefunden: {pfad}")
         return []
+    
+#A    
+def lade_buergerakte(buerger_id: str):
+    akten = ladeJson(buergerAkteJsonPfad)
+
+    for akte in akten:
+        if akte.get("buerger_id") == buerger_id:
+            return akte
+        
+    return {
+        "buerger_id": buerger_id,
+        "vorstrafen": [],
+        "bussgelder": []
+    }
+
     
 def xmlStrukturierenGesetze():
     parser = ET.XMLParser(remove_blank_text=True)
@@ -450,21 +466,21 @@ def logout(request):
     return redirect('login')
 
 #A 
-@csrf_exempt
-@require_POST
-def vorstrafen_api(request):
-    body = json.loads(request.body.decode("utf-8"))
-    benutzer_id = body["id"]
+def vorstrafen_api(request, buerger_id):
+    akten = ladeJson(buergerAkteJsonPfad)
 
-    for eintrag in ladeJson(vorstrafenJsonPfad):
-        if eintrag.get("id") == benutzer_id:
+    for akte in akten:
+        if akte.get("buerger_id") == buerger_id:
+            vorstrafen = akte.get("vorstrafen", [])
             return JsonResponse({
-                "id": benutzer_id,
-                "vorstrafen": eintrag.get("vorstrafen", False) #wenn er vostrafen eintrag nicht findet = false
+                "buerger_id": buerger_id,
+                "hat_vorstrafen": bool(vorstrafen),
+                "vorstrafen": vorstrafen
             })
 
-    #wenn keine id gefunden = keine vorstrafen
+    # keine akte = keine vorstrafen
     return JsonResponse({
-        "id": benutzer_id,
-        "vorstrafen": False
+        "buerger_id": buerger_id,
+        "hat_vorstrafen": False,
+        "vorstrafen": []
     })

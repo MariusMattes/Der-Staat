@@ -10,9 +10,11 @@ from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
  
 #Allgemeiner Datenbankpfad
+#S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
 
-# Einzelne JSON-Dateien
+#Einzelne JSON-Dateien
+#S
 gesetzeJsonPfad = os.path.join(allgemeinerPfad, 'gesetze.json')
 bussgelderJsonPfad = os.path.join(allgemeinerPfad, 'bussgelder.json')
 strafenJsonPfad = os.path.join(allgemeinerPfad, 'strafen.json')
@@ -22,9 +24,10 @@ arbeitQualiJsonPfad = os.path.join(allgemeinerPfad, 'arbeit_qualifikation.json')
 
 
 #Einzelne XML-Datei
+#S
 gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
-
 gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
+
 #A
 #Bekannte Schnittstellen
 MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
@@ -38,13 +41,13 @@ def hole_ID_aus_URL(request):
     if not buerger_id:
         return HttpResponseBadRequest("Fehlende buerger_id")
     
-#A
+#A 
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
     payload = {"buerger_id": buerger_id}
 
     try:
         response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird
-        #response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
+        response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
         response.raise_for_status()
         return response.json()
     except requests.RequestException:
@@ -61,12 +64,10 @@ def hole_qualifikation_von_arbeit(benutzer_id: int):
         print(daten)
         return daten.get("qualifikation", [])
     except requests.RequestException:
-        # Wenn dein Server nicht erreichbar ist oder Fehler liefert
         return []
 
-    
-
 #Hilfsfunktionen
+#S
 def ladeJson(pfad):
     try:
         with open(pfad, 'r', encoding='utf-8') as f:
@@ -97,16 +98,19 @@ def speicherBenutzer(daten):
         json.dump(daten, f, indent=4, ensure_ascii=False)
 
 #Test-HTML
+#S
 def test_views(request):
         return render(request, 'rechtApp/ztest.html')
 
 
 #Hauptseite-HTML
+#S
 def hauptseite(request):
     return render(request, 'rechtApp/hauptseite.html')
 
 
 # Strafen-HTML
+#S
 def strafen(request):
     data = ladeJson(strafenJsonPfad) #Beschreibung sollte aus GesetzID geholt werden bei der strafen.json
     return render(request, 'rechtApp/strafen.html', {'strafen': data})
@@ -140,6 +144,7 @@ def urteile(request):
     return render(request, 'rechtApp/urteile.html', {'urteile': data})
 
 # Gesetze-HTML 
+#S
 def ladeGesetze():
     if not os.path.exists(gesetzeXmlPfad):
         return []
@@ -159,6 +164,7 @@ def ladeGesetze():
 
     return gesetze_liste
 
+#M
 def ladeGesetzentwurf():
     if not os.path.exists(gesetzentwurfXmlPfad):
         return []
@@ -179,7 +185,7 @@ def ladeGesetzentwurf():
 
     return gesetze_liste
 
-#S
+#S und M
 def gesetzErlassen(request): 
     if request.method == "POST":
         titel = request.POST.get("titel")
@@ -218,6 +224,7 @@ def gesetzErlassen(request):
         
     return render(request, "rechtApp/gesetze.html", {"gesetze": gesetze_liste})
 
+#M
 def gesetzFreigeben(request, gesetz_id):
     if request.method == "POST" and request.POST.get("zustimmung") == "ja":
         benutzer_id = request.session.get("benutzer_id")
@@ -441,6 +448,7 @@ def login(request):
 
 
 #Registrieren-HTML
+#S
 def registrieren(request):
     if request.method == 'POST':
         benutzername = request.POST['benutzername']
@@ -571,7 +579,7 @@ def berechtigungen_abgleichen(id_benutzer):
     return False
 
 
-#A nur für testzwecke
+#A nur für testzwecke, der teil (o.ä.) liegt später bei team arbeit
 @csrf_exempt
 @require_POST
 def qualifikation_api(request):
@@ -582,11 +590,11 @@ def qualifikation_api(request):
     try:
         body = json.loads(request.body.decode("utf-8"))
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Ungültiges JSON"}, status=400)
+        return JsonResponse({"error": "ungültiges JSON"}, status=400)
 
     benutzer_id = body.get("id")
     if benutzer_id is None:
-        return JsonResponse({"error": "id fehlt"}, status=400)
+        return JsonResponse({"error": "ID fehlt"}, status=400)
 
     daten = ladeJson(arbeitQualiJsonPfad)
 
@@ -599,6 +607,27 @@ def qualifikation_api(request):
             })
 
     return JsonResponse({"error": "Benutzer nicht gefunden"}, status=404)
+<<<<<<< HEAD
 
 def backup_api(request):
     pass
+=======
+#weniger ist mehr
+# @csrf_exempt
+# @require_POST
+# def qualifikation_api(request):
+#     body = json.loads(request.body.decode("utf-8"))
+#     benutzer_id = body["id"]
+
+#     for eintrag in ladeJson(arbeitQualiJsonPfad):
+#         if eintrag.get("id") == benutzer_id:
+#             return JsonResponse({
+#                 "id": benutzer_id,
+#                 "qualifikation": eintrag.get("qualifikation", [])
+#             })
+
+#     return JsonResponse({
+#         "id": benutzer_id,
+#         "qualifikation": []
+#     })
+>>>>>>> 96d7dbfc4ef3a4bf11fc193bd0b0c4fe87a09211

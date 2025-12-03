@@ -5,13 +5,9 @@ import json
 from django.http import JsonResponse
 from django.conf import settings
 from lxml import etree as ET
-<<<<<<< HEAD
-#import requests
-=======
 import requests
 from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
->>>>>>> 7d4c1745d7da9cb6fd844e89d2b03699eeb04319
  
 #Allgemeiner Datenbankpfad
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')

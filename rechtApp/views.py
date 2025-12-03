@@ -5,13 +5,9 @@ import json
 from django.http import JsonResponse
 from django.conf import settings
 from lxml import etree as ET
-<<<<<<< HEAD
-#import requests
-=======
 import requests
 from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
->>>>>>> 7d4c1745d7da9cb6fd844e89d2b03699eeb04319
  
 #Allgemeiner Datenbankpfad
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
@@ -37,10 +33,10 @@ ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]/ro/arbeit/qualifi
 
 #A
 def hole_ID_aus_URL(request):
-   # buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
+    buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
 
-    #if not buerger_id:
-      #  return HttpResponseBadRequest("Fehlende buerger_id")
+    if not buerger_id:
+        return HttpResponseBadRequest("Fehlende buerger_id")
     
 #A
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
@@ -66,12 +62,6 @@ def hole_qualifikation_von_arbeit(benutzer_id: int):
         return daten.get("qualifikation", [])
     except requests.RequestException:
         return []
-<<<<<<< HEAD
-   
-=======
-
-    
->>>>>>> 7d4c1745d7da9cb6fd844e89d2b03699eeb04319
 
 #Hilfsfunktionen
 def ladeJson(pfad):

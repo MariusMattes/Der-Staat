@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST #für testzwecke
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
 
-# Einzelne JSON-Dateien
+#Einzelne JSON-Dateien
 #S
 gesetzeJsonPfad = os.path.join(allgemeinerPfad, 'gesetze.json')
 bussgelderJsonPfad = os.path.join(allgemeinerPfad, 'bussgelder.json')
@@ -41,9 +41,9 @@ def hole_ID_aus_URL(request):
     if not buerger_id:
         return HttpResponseBadRequest("Fehlende buerger_id")
     
-#A
+#A 
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
-    #payload = {"buerger_id": buerger_id}
+    payload = {"buerger_id": buerger_id}
 
     try:
         response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird

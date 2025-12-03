@@ -34,7 +34,8 @@ urlpatterns = [
     path('ro/gesetze', views.gesetze, name='gesetze'),
     path("ro/gesetze/erstellen", views.gesetzErlassen, name="gesetzErlassen"),
     path("ro/gesetze/entwurf/<int:gesetz_id>", views.gesetzFreigeben, name="gesetzFreigeben"),
-    path("ro/arbeit/qualifikation_api", views.qualifikation_api, name="qualifikation_api")
+    path("ro/vorstrafen_api", views.vorstrafen_api, name="vorstrafen_api"),
+    
 ]
 
 """

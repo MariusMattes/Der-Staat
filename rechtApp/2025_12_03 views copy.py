@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 import os
 import json
 from django.http import JsonResponse
@@ -20,7 +20,9 @@ bussgelderJsonPfad = os.path.join(allgemeinerPfad, 'bussgelder.json')
 strafenJsonPfad = os.path.join(allgemeinerPfad, 'strafen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
+arbeitQualiJsonPfad = os.path.join(allgemeinerPfad, 'arbeit_qualifikation.json') #nur für testzwecke
 vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
+
 
 #Einzelne XML-Datei
 #S
@@ -29,9 +31,43 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 
 #A
 #Bekannte Schnittstellen
-ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
+MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
+#ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]/ro/arbeit/qualifikation_api"#BW Cloud Server Andre für testzwecke, später von der gruppe arbeit
+ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/21312-123123-dfasdasd1231-123123123"
 
-def hole_beruf_von_arbeit(benutzer_id: str):
+#A
+def hole_ID_aus_URL(request):
+    buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
+
+    if not buerger_id:
+        return HttpResponseBadRequest("Fehlende buerger_id")
+    
+#A 
+def hole_buergerdaten(buerger_id: str): #dict wird erwartet
+    payload = {"buerger_id": buerger_id}
+
+    try:
+        response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird Test 
+        response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        return None
+
+#A
+# def hole_qualifikation_von_arbeit(benutzer_id: str):
+#     payload = {"id": benutzer_id}
+
+#     try:
+#         response = requests.post(ARBEIT_API_URL, json=payload, timeout=5)
+#         response.raise_for_status()
+#         daten = response.json()
+#         print(daten)
+#         return daten.get("beruf")
+#     except requests.RequestException:
+#         return []
+
+def hole_qualifikation_von_arbeit(benutzer_id: str):
     try:
         url = f"{ARBEIT_API_URL}{benutzer_id}"
         response = requests.get(url, timeout=5)
@@ -41,10 +77,11 @@ def hole_beruf_von_arbeit(benutzer_id: str):
 
         beruf = daten.get("beruf")
         if beruf:
-            return beruf
-        return None
+            return [beruf]   
+        return []
     except requests.RequestException:
-        return None
+        return []
+
 
 #Hilfsfunktionen
 #S
@@ -98,9 +135,9 @@ def strafen(request):
 # Bußgelder-HTML
 # S und A
 def bussgelder(request):
-    beruf = request.session.get('beruf') 
+    qualifkation = request.session.get('qualifikation', []) 
     data = ladeJson(bussgelderJsonPfad)
-    if beruf != "Polizist":
+    if "Polizist" not in qualifkation:
         return HttpResponse("""
                         <script>
                             alert("Schleich di, du bist kein Polizist!");
@@ -112,9 +149,9 @@ def bussgelder(request):
 # Urteile-HTML
 #S und A
 def urteile(request):
-    beruf = request.session.get('beruf') 
+    qualifkation = request.session.get('qualifikation', []) 
     data = ladeJson(urteileJsonPfad)
-    if beruf != "Richter":
+    if "Richter" not in qualifkation:
         return HttpResponse("""
                         <script>
                             alert("Schleich di, du bist kein Richter!");
@@ -199,25 +236,18 @@ def gesetzErlassen(request):
         return render(request, "rechtApp/gesetze.html", {
             "gesetze": gesetze_liste,
             "gesetzentwurf": gesetzentwurf_liste,
-            "beruf": request.session.get('beruf'),
+            "qualifikation": request.session.get('qualifikation', []),
         })
         
-    gesetze_liste = ladeGesetze()
-    gesetzentwurf_liste = ladeGesetzentwurf()
-    return render(request, "rechtApp/gesetze.html", {
-        "gesetze": gesetze_liste,
-        "gesetzentwurf": gesetzentwurf_liste,
-        "beruf": request.session.get('beruf'),
-    })
+    return render(request, "rechtApp/gesetze.html", {"gesetze": gesetze_liste})
 
 #M
 def gesetzFreigeben(request, gesetz_id):
     if request.method == "POST" and request.POST.get("zustimmung") == "ja":
         benutzer_id = request.session.get("benutzer_id")
-        beruf = request.session.get("beruf")
 
         # 1. Prüfen: ist der Benutzer eingeloggt und Legislative?
-        if not benutzer_id or beruf != "Legislative":
+        if not benutzer_id or not ist_legislative(benutzer_id):
             return HttpResponse("""
                 <script>
                     alert("Du bist nicht berechtigt, abzustimmen.");
@@ -318,13 +348,120 @@ def gesetzFreigeben(request, gesetz_id):
 def gesetze(request):
     gesetze_liste = ladeGesetze()
     gesetzentwurf_liste = ladeGesetzentwurf()
-    beruf = request.session.get('beruf')
+    qualifikation = request.session.get('qualifikation', [])
 
     return render(request, "rechtApp/gesetze.html", {
         "gesetze": gesetze_liste,
         "gesetzentwurf": gesetzentwurf_liste,
-        "beruf": beruf,
+        "qualifikation": qualifikation,
     })
+
+
+#Login-HTML
+#S und A
+#Login mit Quali von eigener benutzer.json
+# def login(request):
+#     if request.method == 'POST':
+#         benutzername = request.POST['benutzername']
+#         passwort = request.POST['passwort']
+
+#         benutzer_liste = ladeBenutzer()
+#         if not benutzer_liste:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Keine Benutzer vorhanden");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         gefundener_benutzer = None
+#         benutzername_existiert = False
+#         for benutzer in benutzer_liste:
+#             if benutzer['benutzername'] == benutzername:
+#                 benutzername_existiert = True
+#                 if benutzer['passwort'] == passwort:
+#                     gefundener_benutzer = benutzer
+#                     qualifikation = benutzer.get("qualifikation", [])
+#                     request.session['qualifikation'] = qualifikation
+#                     request.session['benutzer_id'] = benutzer['id']
+#                     print(request.session.get('qualifikation'))
+#                 break
+
+#         if not benutzername_existiert:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Benutzername existiert nicht");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         if gefundener_benutzer is None:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Falsches Passwort");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         return redirect('hauptseite')
+
+#     return render(request, 'rechtApp/login.html')
+
+#A und S, quali wird über schnittstelle geholt
+def login(request):
+    if request.method == 'POST':
+        benutzername = request.POST['benutzername']
+        passwort = request.POST['passwort']
+
+        benutzer_liste = ladeBenutzer()
+        if not benutzer_liste:
+            return HttpResponse("""
+                <script>
+                    alert("Keine Benutzer vorhanden");
+                    window.history.back();
+                </script>
+            """)
+
+        gefundener_benutzer = None
+        benutzername_existiert = False
+
+        for benutzer in benutzer_liste:
+            if benutzer['benutzername'] == benutzername:
+                benutzername_existiert = True
+                if benutzer['passwort'] == passwort:
+                    gefundener_benutzer = benutzer
+
+                    # ID wird immer noch aus benutzer.json geholt
+                    benutzer_id = benutzer['id']
+                    print(benutzer_id)
+                    request.session['benutzer_id'] = benutzer_id
+
+                    # quali über schnittstelle
+                    qualifikation = hole_qualifikation_von_arbeit(benutzer_id)
+                    request.session['qualifikation'] = qualifikation
+
+                    print("Qualifikation aus Arbeit-API:", request.session.get('qualifikation'))
+                break
+
+        if not benutzername_existiert:
+            return HttpResponse("""
+                <script>
+                    alert("Benutzername existiert nicht");
+                    window.history.back();
+                </script>
+            """)
+
+        if gefundener_benutzer is None:
+            return HttpResponse("""
+                <script>
+                    alert("Falsches Passwort");
+                    window.history.back();
+                </script>
+            """)
+
+        return redirect('hauptseite')
+
+    return render(request, 'rechtApp/login.html')
 
 
 #Registrieren-HTML
@@ -390,64 +527,127 @@ def registrieren(request):
 
     return render(request, 'rechtApp/registrieren.html')
 
-#A und S, quali wird über schnittstelle geholt
-def login(request):
-    if request.method == 'POST':
-        benutzername = request.POST['benutzername']
-        passwort = request.POST['passwort']
-
-        benutzer_liste = ladeBenutzer()
-        if not benutzer_liste:
-            return HttpResponse("""
-                <script>
-                    alert("Keine Benutzer vorhanden");
-                    window.history.back();
-                </script>
-            """)
-
-        gefundener_benutzer = None
-        benutzername_existiert = False
-
-        for benutzer in benutzer_liste:
-            if benutzer['benutzername'] == benutzername:
-                benutzername_existiert = True
-                if benutzer['passwort'] == passwort:
-                    gefundener_benutzer = benutzer
-
-                    # ID wird immer noch aus benutzer.json geholt
-                    benutzer_id = benutzer['id']
-                    print(benutzer_id)
-                    request.session['benutzer_id'] = benutzer_id
-
-                    # quali über schnittstelle
-                    beruf = hole_beruf_von_arbeit(benutzer_id)
-                    request.session['beruf'] = beruf
-
-                    print("Beruf aus Arbeit-API:", request.session.get('beruf'))
-                break
-
-        if not benutzername_existiert:
-            return HttpResponse("""
-                <script>
-                    alert("Benutzername existiert nicht");
-                    window.history.back();
-                </script>
-            """)
-
-        if gefundener_benutzer is None:
-            return HttpResponse("""
-                <script>
-                    alert("Falsches Passwort");
-                    window.history.back();
-                </script>
-            """)
-
-        return redirect('hauptseite')
-
-    return render(request, 'rechtApp/login.html')
-
 def logout(request):
     return redirect('login')
+
+#A
+def ist_polizist(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Polizist" in benutzer.get("qualifikation", [])
+        ):
+            return True
+    return False
+
+#A
+def ist_richter(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Richter" in benutzer.get("qualifikation", [])
+        ):
+            return True
+    return False
+
+#A
+def ist_legislative(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Legislative" in benutzer.get("qualifikation", [])
+        ):
+            return True
+    return False
+
+
+# statt "ist beruf" eventuell Liste mit Berechtigungen erstellen und abgleichen ob Person in Liste? von f
+
+def berechtigungen_abgleichen(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Platzhalter" in "qualifikationsliste" #vielleicht verstehe ich auch gerade falsch wie es gedacht war, könnt mich da gerne aufklären; von f
+        ):
+            return True
+    return False
+
+
+#A nur für testzwecke, der teil (o.ä.) liegt später bei team arbeit
+@csrf_exempt
+@require_POST
+def qualifikation_api(request):
+    """
+    Erwartet POST mit JSON: {"id": 1}
+    Antwortet mit z.B.: {"id": 1, "qualifikation": ["Polizist"]}
+    """
+    try:
+        body = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "ungültiges JSON"}, status=400)
+
+    benutzer_id = body.get("id")
+    if benutzer_id is None:
+        return JsonResponse({"error": "ID fehlt"}, status=400)
+
+    daten = ladeJson(arbeitQualiJsonPfad)
+
+    for eintrag in daten:
+        if eintrag.get("id") == benutzer_id:
+            print(eintrag)
+            return JsonResponse({
+                "id": benutzer_id,
+                "qualifikation": eintrag.get("qualifikation", [])
+            })
+
+    return JsonResponse({"error": "Benutzer nicht gefunden"}, status=404)
+#<<<<<<< HEAD
+
+def backup_api(request):
+    pass
+#=======
+#weniger ist mehr
+# @csrf_exempt
+# @require_POST
+# def qualifikation_api(request):
+#     body = json.loads(request.body.decode("utf-8"))
+#     benutzer_id = body["id"]
+
+#     for eintrag in ladeJson(arbeitQualiJsonPfad):
+#         if eintrag.get("id") == benutzer_id:
+#             return JsonResponse({
+#                 "id": benutzer_id,
+#                 "qualifikation": eintrag.get("qualifikation", [])
+#             })
+
+#     return JsonResponse({
+#         "id": benutzer_id,
+#         "qualifikation": []
+#     })
+#>>>>>>> 96d7dbfc4ef3a4bf11fc193bd0b0c4fe87a09211
 
 #A 
 @csrf_exempt

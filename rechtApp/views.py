@@ -5,7 +5,13 @@ import json
 from django.http import JsonResponse
 from django.conf import settings
 from lxml import etree as ET
+<<<<<<< HEAD
 #import requests
+=======
+import requests
+from django.views.decorators.csrf import csrf_exempt #für testzwecke
+from django.views.decorators.http import require_POST #für testzwecke
+>>>>>>> 7d4c1745d7da9cb6fd844e89d2b03699eeb04319
  
 #Allgemeiner Datenbankpfad
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
@@ -16,6 +22,8 @@ bussgelderJsonPfad = os.path.join(allgemeinerPfad, 'bussgelder.json')
 strafenJsonPfad = os.path.join(allgemeinerPfad, 'strafen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
+arbeitQualiJsonPfad = os.path.join(allgemeinerPfad, 'arbeit_qualifikation.json') #nur für testzwecke
+
 
 #Einzelne XML-Datei
 gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
@@ -24,7 +32,8 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #A
 #Bekannte Schnittstellen
 MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
-ARBEIT_API_URL = "noch nicht bekannt"
+ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]/ro/arbeit/qualifikation_api"#BW Cloud Server Andre für testzwecke, später von der gruppe arbeit
+
 
 #A
 def hole_ID_aus_URL(request):
@@ -46,18 +55,23 @@ def hole_buergerdaten(buerger_id: str): #dict wird erwartet
         return None
 
 #A
-def hole_qualifikation_von_arbeit(buerger_id: str):
-    payload = {"buerger_id": buerger_id}
+def hole_qualifikation_von_arbeit(benutzer_id: int):
+    payload = {"id": benutzer_id}
 
     try:
         response = requests.post(ARBEIT_API_URL, json=payload, timeout=5)
         response.raise_for_status()
         daten = response.json()
-        #höchstwahrscheinlich etwas wie: {"buerger_id": "...", "qualifikation": ["Polizist", ...]}
+        print(daten)
         return daten.get("qualifikation", [])
     except requests.RequestException:
         return []
+<<<<<<< HEAD
    
+=======
+
+    
+>>>>>>> 7d4c1745d7da9cb6fd844e89d2b03699eeb04319
 
 #Hilfsfunktionen
 def ladeJson(pfad):
@@ -132,7 +146,7 @@ def urteile(request):
                         """)
     return render(request, 'rechtApp/urteile.html', {'urteile': data})
 
-# Gesetze-HTML
+# Gesetze-HTML 
 def ladeGesetze():
     if not os.path.exists(gesetzeXmlPfad):
         return []
@@ -328,6 +342,55 @@ def gesetze(request):
 
 #Login-HTML
 #S und A
+#Login mit Quali von eigener benutzer.json
+# def login(request):
+#     if request.method == 'POST':
+#         benutzername = request.POST['benutzername']
+#         passwort = request.POST['passwort']
+
+#         benutzer_liste = ladeBenutzer()
+#         if not benutzer_liste:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Keine Benutzer vorhanden");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         gefundener_benutzer = None
+#         benutzername_existiert = False
+#         for benutzer in benutzer_liste:
+#             if benutzer['benutzername'] == benutzername:
+#                 benutzername_existiert = True
+#                 if benutzer['passwort'] == passwort:
+#                     gefundener_benutzer = benutzer
+#                     qualifikation = benutzer.get("qualifikation", [])
+#                     request.session['qualifikation'] = qualifikation
+#                     request.session['benutzer_id'] = benutzer['id']
+#                     print(request.session.get('qualifikation'))
+#                 break
+
+#         if not benutzername_existiert:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Benutzername existiert nicht");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         if gefundener_benutzer is None:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Falsches Passwort");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         return redirect('hauptseite')
+
+#     return render(request, 'rechtApp/login.html')
+
+#A und S, quali wird über schnittstelle geholt
 def login(request):
     if request.method == 'POST':
         benutzername = request.POST['benutzername']
@@ -344,15 +407,23 @@ def login(request):
 
         gefundener_benutzer = None
         benutzername_existiert = False
+
         for benutzer in benutzer_liste:
             if benutzer['benutzername'] == benutzername:
                 benutzername_existiert = True
                 if benutzer['passwort'] == passwort:
                     gefundener_benutzer = benutzer
-                    qualifikation = benutzer.get("qualifikation", [])
+
+                    # ID wird immer noch aus benutzer.json geholt
+                    benutzer_id = benutzer['id']
+                    print(benutzer_id)
+                    request.session['benutzer_id'] = benutzer_id
+
+                    # quali über schnittstelle
+                    qualifikation = hole_qualifikation_von_arbeit(benutzer_id)
                     request.session['qualifikation'] = qualifikation
-                    request.session['benutzer_id'] = benutzer['id']
-                    print(request.session.get('qualifikation'))
+
+                    print("Qualifikation aus Arbeit-API:", request.session.get('qualifikation'))
                 break
 
         if not benutzername_existiert:
@@ -505,3 +576,51 @@ def berechtigungen_abgleichen(id_benutzer):
         ):
             return True
     return False
+
+
+#A nur für testzwecke, der teil (o.ä.) liegt später bei team arbeit
+@csrf_exempt
+@require_POST
+def qualifikation_api(request):
+    """
+    Erwartet POST mit JSON: {"id": 1}
+    Antwortet mit z.B.: {"id": 1, "qualifikation": ["Polizist"]}
+    """
+    try:
+        body = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "ungültiges JSON"}, status=400)
+
+    benutzer_id = body.get("id")
+    if benutzer_id is None:
+        return JsonResponse({"error": "ID fehlt"}, status=400)
+
+    daten = ladeJson(arbeitQualiJsonPfad)
+
+    for eintrag in daten:
+        if eintrag.get("id") == benutzer_id:
+            print(eintrag)
+            return JsonResponse({
+                "id": benutzer_id,
+                "qualifikation": eintrag.get("qualifikation", [])
+            })
+
+    return JsonResponse({"error": "Benutzer nicht gefunden"}, status=404)
+#weniger ist mehr
+# @csrf_exempt
+# @require_POST
+# def qualifikation_api(request):
+#     body = json.loads(request.body.decode("utf-8"))
+#     benutzer_id = body["id"]
+
+#     for eintrag in ladeJson(arbeitQualiJsonPfad):
+#         if eintrag.get("id") == benutzer_id:
+#             return JsonResponse({
+#                 "id": benutzer_id,
+#                 "qualifikation": eintrag.get("qualifikation", [])
+#             })
+
+#     return JsonResponse({
+#         "id": benutzer_id,
+#         "qualifikation": []
+#     })

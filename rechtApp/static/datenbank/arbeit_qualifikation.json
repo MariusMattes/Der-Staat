@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "qualifikation": ["Richter"]
+    },
+    {
+        "id": 2,
+        "qualifikation": ["Handwerker", "Legislative"]
+    },
+    {
+        "id": 3,
+        "qualifikation": ["Polizist"]
+    },
+    {
+        "id": 4,
+        "qualifikation": ["Legislative"]
+    },
+    {
+        "id": 5,
+        "qualifikation": ["Legislative", "Richter"] 
+    }
+
+]

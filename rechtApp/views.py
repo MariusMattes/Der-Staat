@@ -5,7 +5,7 @@ import json
 from django.http import JsonResponse
 from django.conf import settings
 from lxml import etree as ET
-import requests
+#import requests
  
 #Allgemeiner Datenbankpfad
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
@@ -28,18 +28,18 @@ ARBEIT_API_URL = "noch nicht bekannt"
 
 #A
 def hole_ID_aus_URL(request):
-    buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
+   # buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
 
-    if not buerger_id:
-        return HttpResponseBadRequest("Fehlende buerger_id")
+    #if not buerger_id:
+      #  return HttpResponseBadRequest("Fehlende buerger_id")
     
 #A
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
-    payload = {"buerger_id": buerger_id}
+    #payload = {"buerger_id": buerger_id}
 
     try:
         response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird
-        #response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
+        response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
         response.raise_for_status()
         return response.json()
     except requests.RequestException:
@@ -57,7 +57,7 @@ def hole_qualifikation_von_arbeit(buerger_id: str):
         return daten.get("qualifikation", [])
     except requests.RequestException:
         return []
-    
+   
 
 #Hilfsfunktionen
 def ladeJson(pfad):

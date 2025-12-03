@@ -63,4 +63,11 @@
     <bussgeld>0</bussgeld>
     <strafe>1</strafe>
   </gesetz>
+  <gesetz>
+    <id>10</id>
+    <titel>Test</titel>
+    <beschreibung>Test</beschreibung>
+    <bussgeld>10000</bussgeld>
+    <strafe>10</strafe>
+  </gesetz>
 </gesetze>

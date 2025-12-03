@@ -40,7 +40,7 @@ def hole_ID_aus_URL(request):
     
 #A
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
-    #payload = {"buerger_id": buerger_id}
+    payload = {"buerger_id": buerger_id}
 
     try:
         response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird

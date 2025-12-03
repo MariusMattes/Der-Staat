@@ -599,3 +599,6 @@ def qualifikation_api(request):
             })
 
     return JsonResponse({"error": "Benutzer nicht gefunden"}, status=404)
+
+def backup_api(request):
+    pass

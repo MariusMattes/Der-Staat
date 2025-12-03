@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST #für testzwecke
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
 
-# Einzelne JSON-Dateien
+#Einzelne JSON-Dateien
 #S
 gesetzeJsonPfad = os.path.join(allgemeinerPfad, 'gesetze.json')
 bussgelderJsonPfad = os.path.join(allgemeinerPfad, 'bussgelder.json')
@@ -41,7 +41,7 @@ def hole_ID_aus_URL(request):
     if not buerger_id:
         return HttpResponseBadRequest("Fehlende buerger_id")
     
-#A
+#A 
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
     payload = {"buerger_id": buerger_id}
 
@@ -607,6 +607,11 @@ def qualifikation_api(request):
             })
 
     return JsonResponse({"error": "Benutzer nicht gefunden"}, status=404)
+#<<<<<<< HEAD
+
+def backup_api(request):
+    pass
+#=======
 #weniger ist mehr
 # @csrf_exempt
 # @require_POST
@@ -625,3 +630,4 @@ def qualifikation_api(request):
 #         "id": benutzer_id,
 #         "qualifikation": []
 #     })
+#>>>>>>> 96d7dbfc4ef3a4bf11fc193bd0b0c4fe87a09211

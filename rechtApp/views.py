@@ -43,11 +43,11 @@ def hole_ID_aus_URL(request):
     
 #A
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
-    payload = {"buerger_id": buerger_id}
+    #payload = {"buerger_id": buerger_id}
 
     try:
         response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird
-        #response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
+        response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
         response.raise_for_status()
         return response.json()
     except requests.RequestException:
@@ -64,10 +64,7 @@ def hole_qualifikation_von_arbeit(benutzer_id: int):
         print(daten)
         return daten.get("qualifikation", [])
     except requests.RequestException:
-        # Wenn dein Server nicht erreichbar ist oder Fehler liefert
         return []
-
-    
 
 #Hilfsfunktionen
 #S
@@ -582,7 +579,7 @@ def berechtigungen_abgleichen(id_benutzer):
     return False
 
 
-#A nur für testzwecke
+#A nur für testzwecke, der teil (o.ä.) liegt später bei team arbeit
 @csrf_exempt
 @require_POST
 def qualifikation_api(request):
@@ -593,11 +590,11 @@ def qualifikation_api(request):
     try:
         body = json.loads(request.body.decode("utf-8"))
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Ungültiges JSON"}, status=400)
+        return JsonResponse({"error": "ungültiges JSON"}, status=400)
 
     benutzer_id = body.get("id")
     if benutzer_id is None:
-        return JsonResponse({"error": "id fehlt"}, status=400)
+        return JsonResponse({"error": "ID fehlt"}, status=400)
 
     daten = ladeJson(arbeitQualiJsonPfad)
 
@@ -610,3 +607,21 @@ def qualifikation_api(request):
             })
 
     return JsonResponse({"error": "Benutzer nicht gefunden"}, status=404)
+#weniger ist mehr
+# @csrf_exempt
+# @require_POST
+# def qualifikation_api(request):
+#     body = json.loads(request.body.decode("utf-8"))
+#     benutzer_id = body["id"]
+
+#     for eintrag in ladeJson(arbeitQualiJsonPfad):
+#         if eintrag.get("id") == benutzer_id:
+#             return JsonResponse({
+#                 "id": benutzer_id,
+#                 "qualifikation": eintrag.get("qualifikation", [])
+#             })
+
+#     return JsonResponse({
+#         "id": benutzer_id,
+#         "qualifikation": []
+#     })

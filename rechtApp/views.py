@@ -33,7 +33,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]/ro/arbeit/qualifikation_api"#BW Cloud Server Andre für testzwecke, später von der gruppe arbeit
 
-
+ 
 #A
 def hole_ID_aus_URL(request):
     buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden

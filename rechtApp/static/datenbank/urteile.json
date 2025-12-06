@@ -1,7 +1,7 @@
 [
-    {"id": 1, "person": "Max Mustermann", "richter": "Richter Müller", "gesetz_id": 1, "bussgeld_id": 1, "strafen_id": null},
-    {"id": 2, "person": "Martina Musterfrau", "richter": "Richter Schmid", "gesetz_id": 3, "bussgeld_id": null, "strafen_id": 1},
-    {"id": 3, "person": "Max Mustermann", "richter": "Richter Müller", "gesetz_id": 8, "bussgeld_id": null, "strafen_id": 4},
-    {"id": 4, "person": "Helmut Maier", "richter": "Richter Schmid", "gesetz_id": 6, "bussgeld_id": 3, "strafen_id": null}
+    {"id": 1, "person": "Sin", "richter": "Richter Müller", "gesetz_id": 1, "bussgeld_id": 1, "strafen_id": null},
+    {"id": 2, "person": "Sin", "richter": "Richter Schmid", "gesetz_id": 3, "bussgeld_id": null, "strafen_id": 1},
+    {"id": 3, "person": "Sin", "richter": "Richter Müller", "gesetz_id": 8, "bussgeld_id": null, "strafen_id": 4},
+    {"id": 4, "person": "Hans2", "richter": "Richter Schmid", "gesetz_id": 6, "bussgeld_id": 3, "strafen_id": null}
 
 ]

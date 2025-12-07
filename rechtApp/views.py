@@ -99,10 +99,119 @@ def test_views(request):
         return render(request, 'rechtApp/ztest.html')
 
 
-#Hauptseite-HTML
+#Profilseite-HTML
 #S
-def hauptseite(request):
-    return render(request, 'rechtApp/hauptseite.html')
+def profilseite(request):
+    benutzername = request.session.get("benutzername")
+    if not benutzername:
+        return redirect("login")
+
+    try:
+        with open(benutzerJsonPfad, "r", encoding="utf-8") as f:
+            benutzer_liste = json.load(f)
+    except:
+        return HttpResponse("Fehler beim Laden der Benutzerdaten.")
+
+    benutzer_daten = None
+    for b in benutzer_liste:
+        if b["benutzername"] == benutzername:
+            benutzer_daten = b
+            break
+
+    if not benutzer_daten:
+        return HttpResponse("Benutzer konnte nicht gefunden werden.")
+
+    try:
+        with open(urteileJsonPfad, "r", encoding="utf-8") as f:
+            urteile_liste = json.load(f)
+    except:
+        return HttpResponse("Fehler beim Laden der Urteile.")
+
+    eigene_urteile = []
+    for u in urteile_liste:
+        if u["person"] == benutzername:
+            eigene_urteile.append(u)
+
+    try:
+        tree = ET.parse(gesetzeXmlPfad)
+        root = tree.getroot()
+    except:
+        return HttpResponse("Fehler beim Laden der Gesetze.")
+
+    gesetze_dict = {}
+    for g in root.findall("gesetz"):
+        gid = int(g.find("id").text)
+        gesetze_dict[gid] = {
+            "id": gid,
+            "titel": g.find("titel").text,
+            "beschreibung": g.find("beschreibung").text,
+            "bussgeld": int(g.find("bussgeld").text),
+            "strafe": int(g.find("strafe").text),
+        }
+
+    try:
+        with open(strafenJsonPfad, "r", encoding="utf-8") as f:
+            strafen_liste = json.load(f)
+    except:
+        return HttpResponse("Fehler beim Laden der Strafen.")
+
+    strafen_dict = {}
+    for s in strafen_liste:
+        strafen_dict[s["id"]] = s
+
+    try:
+        with open(bussgelderJsonPfad, "r", encoding="utf-8") as f:
+            bussgelder_liste = json.load(f)
+    except:
+        return HttpResponse("Fehler beim Laden der Bußgelder.")
+
+    bussgelder_dict = {}
+    for bg in bussgelder_liste:
+        bussgelder_dict[bg["id"]] = bg
+
+    urteile_komplett = []
+
+    for u in eigene_urteile:
+
+        gesetz = None
+        if u["gesetz_id"] in gesetze_dict:
+            gesetz = gesetze_dict[u["gesetz_id"]]
+
+        if u["bussgeld_id"]:
+            if u["bussgeld_id"] in bussgelder_dict:
+                bussgeld = bussgelder_dict[u["bussgeld_id"]]
+            else:
+                bussgeld = None
+        else:
+            bussgeld = None
+
+        if u["strafen_id"]:
+            if u["strafen_id"] in strafen_dict:
+                strafe = strafen_dict[u["strafen_id"]]
+            else:
+                strafe = None
+        else:
+            strafe = None
+
+        urteile_komplett.append({
+            "id": u["id"],
+            "richter": u["richter"],
+            "gesetz": gesetz,
+            "bussgeld": bussgeld,
+            "strafe": strafe
+        })
+
+    beruf = request.session.get("beruf", "Unbekannt")
+
+    return render(request, "rechtApp/profilseite.html", {
+        "benutzer": benutzer_daten,
+        "beruf": beruf,
+        "urteile": urteile_komplett,
+    })
+
+
+
+
 
 
 # Strafen-HTML
@@ -434,6 +543,9 @@ def login(request):
                     benutzer_id = benutzer['id']
                     print(benutzer_id)
                     request.session['benutzer_id'] = benutzer_id
+                    
+                    # benutzername in session speichern
+                    request.session['benutzername'] = benutzername
 
                     # quali über schnittstelle
                     beruf = hole_beruf_von_arbeit(benutzer_id)
@@ -458,7 +570,7 @@ def login(request):
                 </script>
             """)
 
-        return redirect('hauptseite')
+        return redirect('profilseite')
 
     return render(request, 'rechtApp/login.html')
 

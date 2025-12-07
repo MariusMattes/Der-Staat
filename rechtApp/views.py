@@ -258,13 +258,24 @@ def ladeGesetze():
     root = tree.getroot()
     
     gesetze_liste = []
+    #A
     for gesetz in root.xpath('//gesetz'):
+        api_el = gesetz.find('api_relevant')
+        api_werte = [] #wenn es das el nicht geben soltle = leere liste
+        if api_el is not None:
+            api_werte = [
+                wert_el.text
+                for wert_el in api_el.findall('wert')
+                if wert_el.text
+            ]
+
         gesetze_liste.append({
             'id': gesetz.find('id').text,
             'titel': gesetz.find('titel').text,
             'beschreibung': gesetz.find('beschreibung').text,
             'strafe': gesetz.find('strafe').text,
             'bussgeld': gesetz.find('bussgeld').text,
+            'api_relevant': api_werte,
         })
 
     return gesetze_liste
@@ -596,5 +607,23 @@ def vorstrafen_api(request, buerger_id):
         "hat_vorstrafen": False,
         "vorstrafen": []
     })
+
+#A
+def gesetz_api(request, gesetz_id):
+    gesetze = ladeGesetze()
+
+    for gesetz in gesetze:
+        if gesetz.get("id") == str(gesetz_id):
+            api_werte = gesetz.get("api_relevant", [])
+            return JsonResponse({
+                "gesetz_id": gesetz.get("id"),
+                "titel": gesetz.get("titel"),
+                "werte": api_werte,
+            }, status = 200)
+
+    return JsonResponse({
+        "fehler": "Gesetz nicht gefunden",
+        "gesetz_id": str(gesetz_id),
+    }, status=404)
 
     

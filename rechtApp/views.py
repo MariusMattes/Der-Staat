@@ -484,3 +484,5 @@ def vorstrafen_api(request, buerger_id):
         "hat_vorstrafen": False,
         "vorstrafen": []
     })
+
+    

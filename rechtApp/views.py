@@ -599,14 +599,14 @@ def vorstrafen_api(request, buerger_id):
                 "buerger_id": buerger_id,
                 "hat_vorstrafen": bool(vorstrafen),
                 "vorstrafen": vorstrafen
-            })
+            }, status=200)
 
     # keine akte = keine vorstrafen
     return JsonResponse({
         "buerger_id": buerger_id,
         "hat_vorstrafen": False,
         "vorstrafen": []
-    })
+    }, status=200)
 
 #A
 def gesetz_api(request, gesetz_id):

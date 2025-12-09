@@ -65,9 +65,14 @@
   </gesetz>
   <gesetz>
     <id>10</id>
-    <titel>Test</titel>
-    <beschreibung>Test</beschreibung>
-    <bussgeld>10000</bussgeld>
-    <strafe>10</strafe>
+    <titel>Berufsverbot</titel>
+    <beschreibung>Personen mit Vorstrafen dürfen folgende Berufe nicht ausführen:</beschreibung>
+    <api_relevant>
+      <wert>Polizist</wert>
+      <wert>Richter</wert>
+      <wert>Legislative</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
   </gesetz>
 </gesetze>

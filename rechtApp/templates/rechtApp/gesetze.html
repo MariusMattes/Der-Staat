@@ -16,8 +16,16 @@
             <div class="karteDivCLASS">
                 <p class="inhaltNummerDivCLASS">Art. {{ gesetz.id }}</p>
                 <p class="inhaltDivCLASS">Titel: {{ gesetz.titel }}</p>
-                <p class="inhaltDivCLASS">Beschreibung: {{ gesetz.beschreibung }}</p>
-                <p class="inhaltDivCLASS">Strafe in Jahren: {{ gesetz.strafe }}</p>
+                <p class="inhaltDivCLASS">
+                    Beschreibung: {{ gesetz.beschreibung }}
+                    {% if gesetz.api_relevant %}
+                        <br>
+                        {% for wert in gesetz.api_relevant %}
+                            {{ wert }}<br>
+                        {% endfor %}
+                    {% endif %}
+                </p>
+                <p class="inhaltDivCLASS">Strafe in Jahren: {{ gesetz.strafe }} Jahre</p>
                 <p class="inhaltDivCLASS">Bußgeld: {{ gesetz.bussgeld }}€</p>
             </div>
             {% empty %}

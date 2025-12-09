@@ -30,24 +30,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 
 #A
 #Bekannte Schnittstellen
-<<<<<<< HEAD
-MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
-ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]/ro/arbeit/qualifikation_api"#BW Cloud Server Andre für testzwecke, später von der gruppe arbeit
-
-
-#A
-#def hole_ID_aus_URL(request):
-   # buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
-
-    #if not buerger_id:
-      #  return HttpResponseBadRequest("Fehlende buerger_id")
-    
-#A
-def hole_buergerdaten(buerger_id: str): #dict wird erwartet
-    #payload = {"buerger_id": buerger_id}
-=======
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
->>>>>>> d0c3464e1dc147e489a4d74a3bbe0ea50c99ed7f
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
@@ -64,24 +47,6 @@ def hole_beruf_von_arbeit(benutzer_id: str):
     except requests.RequestException:
         return None
 
-<<<<<<< HEAD
-#A
-def hole_qualifikation_von_arbeit(benutzer_id: int):
-    payload = {"id": benutzer_id}
-
-    try:
-        response = requests.post(ARBEIT_API_URL, json=payload, timeout=5)
-        response.raise_for_status()
-        daten = response.json()
-        print(daten)
-        return daten.get("qualifikation", [])
-    except requests.RequestException:
-        return []
-
-    
-
-=======
->>>>>>> d0c3464e1dc147e489a4d74a3bbe0ea50c99ed7f
 #Hilfsfunktionen
 #S
 def ladeJson(pfad):

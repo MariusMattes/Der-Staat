@@ -14,14 +14,14 @@
         "qualifikation": ["Handwerker", "Legislative"]
     },
     {
-        "id": 3,
+        "id": "polizist1",
         "benutzername": "Hans",
         "email": "chronoszeitbuchung@gmail.com", 
         "passwort": "Sin",
         "qualifikation": ["Polizist"]
     },
     {
-        "id": 4,
+        "id": "legislative1",
         "benutzername": "Hans2",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",

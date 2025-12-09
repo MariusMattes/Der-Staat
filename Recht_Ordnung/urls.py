@@ -27,14 +27,15 @@ urlpatterns = [
     path('ro/logout', views.logout, name='logout'),
     path('ro/registrieren', views.registrieren, name='registrieren'),
     path('ro/test', views.test_views, name="test"), 
-    path('ro/hauptseite', views.hauptseite, name='hauptseite'),
+    path('ro/profilseite', views.profilseite, name='profilseite'),
     path('ro/strafen', views.strafen, name='strafen'),
     path('ro/bussgelder', views.bussgelder, name='bussgelder'),
     path('ro/urteile', views.urteile, name='urteile'),
     path('ro/gesetze', views.gesetze, name='gesetze'),
     path("ro/gesetze/erstellen", views.gesetzErlassen, name="gesetzErlassen"),
     path("ro/gesetze/entwurf/<int:gesetz_id>", views.gesetzFreigeben, name="gesetzFreigeben"),
-    path("ro/arbeit/qualifikation_api", views.qualifikation_api, name="qualifikation_api")
+    path("ro/vorstrafen_api/<str:buerger_id>", views.vorstrafen_api, name="vorstrafen_api"),
+    path("ro/gesetz_api/<int:gesetz_id>", views.gesetz_api, name="gesetz_api"),
 ]
 
 """

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 import os
 import json
 from django.http import JsonResponse
@@ -20,8 +20,9 @@ bussgelderJsonPfad = os.path.join(allgemeinerPfad, 'bussgelder.json')
 strafenJsonPfad = os.path.join(allgemeinerPfad, 'strafen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
+arbeitQualiJsonPfad = os.path.join(allgemeinerPfad, 'arbeit_qualifikation.json') #nur für testzwecke
 vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
-buergerAkteJsonPfad = os.path.join(allgemeinerPfad, 'recht_buergerakte.json')
+
 
 #Einzelne XML-Datei
 #S
@@ -30,26 +31,43 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 
 #A
 #Bekannte Schnittstellen
-<<<<<<< HEAD
 MELDEWESEN_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personenstandsregister_api" #Benötigt bürger-Id, holt ... bürger-id (zumindest stand jetzt :D)
-ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]/ro/arbeit/qualifikation_api"#BW Cloud Server Andre für testzwecke, später von der gruppe arbeit
-
+#ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe61:30b1]/ro/arbeit/qualifikation_api"#BW Cloud Server Andre für testzwecke, später von der gruppe arbeit
+ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/21312-123123-dfasdasd1231-123123123"
 
 #A
-#def hole_ID_aus_URL(request):
-   # buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
+def hole_ID_aus_URL(request):
+    buerger_id = request.GET.get("buerger_id")# HIER wird sie aus der URL gelesen, es können so auch andere parameter ausgelesen werden
 
-    #if not buerger_id:
-      #  return HttpResponseBadRequest("Fehlende buerger_id")
+    if not buerger_id:
+        return HttpResponseBadRequest("Fehlende buerger_id")
     
-#A
+#A 
 def hole_buergerdaten(buerger_id: str): #dict wird erwartet
-    #payload = {"buerger_id": buerger_id}
-=======
-ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
->>>>>>> d0c3464e1dc147e489a4d74a3bbe0ea50c99ed7f
+    payload = {"buerger_id": buerger_id}
 
-def hole_beruf_von_arbeit(benutzer_id: str):
+    try:
+        response = requests.post(MELDEWESEN_API_URL, json=payload, timeout=5) #Wenn POST erwartet wird Test 
+        response = requests.get(MELDEWESEN_API_URL, params=payload, timeout=5) #Wwenn GET erwartet wird
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        return None
+
+#A
+# def hole_qualifikation_von_arbeit(benutzer_id: str):
+#     payload = {"id": benutzer_id}
+
+#     try:
+#         response = requests.post(ARBEIT_API_URL, json=payload, timeout=5)
+#         response.raise_for_status()
+#         daten = response.json()
+#         print(daten)
+#         return daten.get("beruf")
+#     except requests.RequestException:
+#         return []
+
+def hole_qualifikation_von_arbeit(benutzer_id: str):
     try:
         url = f"{ARBEIT_API_URL}{benutzer_id}"
         response = requests.get(url, timeout=5)
@@ -59,29 +77,12 @@ def hole_beruf_von_arbeit(benutzer_id: str):
 
         beruf = daten.get("beruf")
         if beruf:
-            return beruf
-        return None
-    except requests.RequestException:
-        return None
-
-<<<<<<< HEAD
-#A
-def hole_qualifikation_von_arbeit(benutzer_id: int):
-    payload = {"id": benutzer_id}
-
-    try:
-        response = requests.post(ARBEIT_API_URL, json=payload, timeout=5)
-        response.raise_for_status()
-        daten = response.json()
-        print(daten)
-        return daten.get("qualifikation", [])
+            return [beruf]   
+        return []
     except requests.RequestException:
         return []
 
-    
 
-=======
->>>>>>> d0c3464e1dc147e489a4d74a3bbe0ea50c99ed7f
 #Hilfsfunktionen
 #S
 def ladeJson(pfad):
@@ -92,21 +93,6 @@ def ladeJson(pfad):
     except FileNotFoundError:
         print(f"Datei nicht gefunden: {pfad}")
         return []
-    
-#A    
-def lade_buergerakte(buerger_id: str):
-    akten = ladeJson(buergerAkteJsonPfad)
-
-    for akte in akten:
-        if akte.get("buerger_id") == buerger_id:
-            return akte
-        
-    return {
-        "buerger_id": buerger_id,
-        "vorstrafen": [],
-        "bussgelder": []
-    }
-
     
 def xmlStrukturierenGesetze():
     parser = ET.XMLParser(remove_blank_text=True)
@@ -134,119 +120,10 @@ def test_views(request):
         return render(request, 'rechtApp/ztest.html')
 
 
-#Profilseite-HTML
+#Hauptseite-HTML
 #S
-def profilseite(request):
-    benutzername = request.session.get("benutzername")
-    if not benutzername:
-        return redirect("login")
-
-    try:
-        with open(benutzerJsonPfad, "r", encoding="utf-8") as f:
-            benutzer_liste = json.load(f)
-    except:
-        return HttpResponse("Fehler beim Laden der Benutzerdaten.")
-
-    benutzer_daten = None
-    for b in benutzer_liste:
-        if b["benutzername"] == benutzername:
-            benutzer_daten = b
-            break
-
-    if not benutzer_daten:
-        return HttpResponse("Benutzer konnte nicht gefunden werden.")
-
-    try:
-        with open(urteileJsonPfad, "r", encoding="utf-8") as f:
-            urteile_liste = json.load(f)
-    except:
-        return HttpResponse("Fehler beim Laden der Urteile.")
-
-    eigene_urteile = []
-    for u in urteile_liste:
-        if u["person"] == benutzername:
-            eigene_urteile.append(u)
-
-    try:
-        tree = ET.parse(gesetzeXmlPfad)
-        root = tree.getroot()
-    except:
-        return HttpResponse("Fehler beim Laden der Gesetze.")
-
-    gesetze_dict = {}
-    for g in root.findall("gesetz"):
-        gid = int(g.find("id").text)
-        gesetze_dict[gid] = {
-            "id": gid,
-            "titel": g.find("titel").text,
-            "beschreibung": g.find("beschreibung").text,
-            "bussgeld": int(g.find("bussgeld").text),
-            "strafe": int(g.find("strafe").text),
-        }
-
-    try:
-        with open(strafenJsonPfad, "r", encoding="utf-8") as f:
-            strafen_liste = json.load(f)
-    except:
-        return HttpResponse("Fehler beim Laden der Strafen.")
-
-    strafen_dict = {}
-    for s in strafen_liste:
-        strafen_dict[s["id"]] = s
-
-    try:
-        with open(bussgelderJsonPfad, "r", encoding="utf-8") as f:
-            bussgelder_liste = json.load(f)
-    except:
-        return HttpResponse("Fehler beim Laden der Bußgelder.")
-
-    bussgelder_dict = {}
-    for bg in bussgelder_liste:
-        bussgelder_dict[bg["id"]] = bg
-
-    urteile_komplett = []
-
-    for u in eigene_urteile:
-
-        gesetz = None
-        if u["gesetz_id"] in gesetze_dict:
-            gesetz = gesetze_dict[u["gesetz_id"]]
-
-        if u["bussgeld_id"]:
-            if u["bussgeld_id"] in bussgelder_dict:
-                bussgeld = bussgelder_dict[u["bussgeld_id"]]
-            else:
-                bussgeld = None
-        else:
-            bussgeld = None
-
-        if u["strafen_id"]:
-            if u["strafen_id"] in strafen_dict:
-                strafe = strafen_dict[u["strafen_id"]]
-            else:
-                strafe = None
-        else:
-            strafe = None
-
-        urteile_komplett.append({
-            "id": u["id"],
-            "richter": u["richter"],
-            "gesetz": gesetz,
-            "bussgeld": bussgeld,
-            "strafe": strafe
-        })
-
-    beruf = request.session.get("beruf", "Unbekannt")
-
-    return render(request, "rechtApp/profilseite.html", {
-        "benutzer": benutzer_daten,
-        "beruf": beruf,
-        "urteile": urteile_komplett,
-    })
-
-
-
-
+def hauptseite(request):
+    return render(request, 'rechtApp/hauptseite.html')
 
 
 # Strafen-HTML
@@ -258,9 +135,9 @@ def strafen(request):
 # Bußgelder-HTML
 # S und A
 def bussgelder(request):
-    beruf = request.session.get('beruf') 
+    qualifkation = request.session.get('qualifikation', []) 
     data = ladeJson(bussgelderJsonPfad)
-    if beruf != "Polizist":
+    if "Polizist" not in qualifkation:
         return HttpResponse("""
                         <script>
                             alert("Schleich di, du bist kein Polizist!");
@@ -272,9 +149,9 @@ def bussgelder(request):
 # Urteile-HTML
 #S und A
 def urteile(request):
-    beruf = request.session.get('beruf') 
+    qualifkation = request.session.get('qualifikation', []) 
     data = ladeJson(urteileJsonPfad)
-    if beruf != "Richter":
+    if "Richter" not in qualifkation:
         return HttpResponse("""
                         <script>
                             alert("Schleich di, du bist kein Richter!");
@@ -293,24 +170,13 @@ def ladeGesetze():
     root = tree.getroot()
     
     gesetze_liste = []
-    #A
     for gesetz in root.xpath('//gesetz'):
-        api_el = gesetz.find('api_relevant')
-        api_werte = [] #wenn es das el nicht geben soltle = leere liste
-        if api_el is not None:
-            api_werte = [
-                wert_el.text
-                for wert_el in api_el.findall('wert')
-                if wert_el.text
-            ]
-
         gesetze_liste.append({
             'id': gesetz.find('id').text,
             'titel': gesetz.find('titel').text,
             'beschreibung': gesetz.find('beschreibung').text,
             'strafe': gesetz.find('strafe').text,
             'bussgeld': gesetz.find('bussgeld').text,
-            'api_relevant': api_werte,
         })
 
     return gesetze_liste
@@ -370,25 +236,18 @@ def gesetzErlassen(request):
         return render(request, "rechtApp/gesetze.html", {
             "gesetze": gesetze_liste,
             "gesetzentwurf": gesetzentwurf_liste,
-            "beruf": request.session.get('beruf'),
+            "qualifikation": request.session.get('qualifikation', []),
         })
         
-    gesetze_liste = ladeGesetze()
-    gesetzentwurf_liste = ladeGesetzentwurf()
-    return render(request, "rechtApp/gesetze.html", {
-        "gesetze": gesetze_liste,
-        "gesetzentwurf": gesetzentwurf_liste,
-        "beruf": request.session.get('beruf'),
-    })
+    return render(request, "rechtApp/gesetze.html", {"gesetze": gesetze_liste})
 
 #M
 def gesetzFreigeben(request, gesetz_id):
     if request.method == "POST" and request.POST.get("zustimmung") == "ja":
         benutzer_id = request.session.get("benutzer_id")
-        beruf = request.session.get("beruf")
 
         # 1. Prüfen: ist der Benutzer eingeloggt und Legislative?
-        if not benutzer_id or beruf != "Legislative":
+        if not benutzer_id or not ist_legislative(benutzer_id):
             return HttpResponse("""
                 <script>
                     alert("Du bist nicht berechtigt, abzustimmen.");
@@ -489,13 +348,120 @@ def gesetzFreigeben(request, gesetz_id):
 def gesetze(request):
     gesetze_liste = ladeGesetze()
     gesetzentwurf_liste = ladeGesetzentwurf()
-    beruf = request.session.get('beruf')
+    qualifikation = request.session.get('qualifikation', [])
 
     return render(request, "rechtApp/gesetze.html", {
         "gesetze": gesetze_liste,
         "gesetzentwurf": gesetzentwurf_liste,
-        "beruf": beruf,
+        "qualifikation": qualifikation,
     })
+
+
+#Login-HTML
+#S und A
+#Login mit Quali von eigener benutzer.json
+# def login(request):
+#     if request.method == 'POST':
+#         benutzername = request.POST['benutzername']
+#         passwort = request.POST['passwort']
+
+#         benutzer_liste = ladeBenutzer()
+#         if not benutzer_liste:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Keine Benutzer vorhanden");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         gefundener_benutzer = None
+#         benutzername_existiert = False
+#         for benutzer in benutzer_liste:
+#             if benutzer['benutzername'] == benutzername:
+#                 benutzername_existiert = True
+#                 if benutzer['passwort'] == passwort:
+#                     gefundener_benutzer = benutzer
+#                     qualifikation = benutzer.get("qualifikation", [])
+#                     request.session['qualifikation'] = qualifikation
+#                     request.session['benutzer_id'] = benutzer['id']
+#                     print(request.session.get('qualifikation'))
+#                 break
+
+#         if not benutzername_existiert:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Benutzername existiert nicht");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         if gefundener_benutzer is None:
+#             return HttpResponse("""
+#                 <script>
+#                     alert("Falsches Passwort");
+#                     window.history.back();
+#                 </script>
+#             """)
+
+#         return redirect('hauptseite')
+
+#     return render(request, 'rechtApp/login.html')
+
+#A und S, quali wird über schnittstelle geholt
+def login(request):
+    if request.method == 'POST':
+        benutzername = request.POST['benutzername']
+        passwort = request.POST['passwort']
+
+        benutzer_liste = ladeBenutzer()
+        if not benutzer_liste:
+            return HttpResponse("""
+                <script>
+                    alert("Keine Benutzer vorhanden");
+                    window.history.back();
+                </script>
+            """)
+
+        gefundener_benutzer = None
+        benutzername_existiert = False
+
+        for benutzer in benutzer_liste:
+            if benutzer['benutzername'] == benutzername:
+                benutzername_existiert = True
+                if benutzer['passwort'] == passwort:
+                    gefundener_benutzer = benutzer
+
+                    # ID wird immer noch aus benutzer.json geholt
+                    benutzer_id = benutzer['id']
+                    print(benutzer_id)
+                    request.session['benutzer_id'] = benutzer_id
+
+                    # quali über schnittstelle
+                    qualifikation = hole_qualifikation_von_arbeit(benutzer_id)
+                    request.session['qualifikation'] = qualifikation
+
+                    print("Qualifikation aus Arbeit-API:", request.session.get('qualifikation'))
+                break
+
+        if not benutzername_existiert:
+            return HttpResponse("""
+                <script>
+                    alert("Benutzername existiert nicht");
+                    window.history.back();
+                </script>
+            """)
+
+        if gefundener_benutzer is None:
+            return HttpResponse("""
+                <script>
+                    alert("Falsches Passwort");
+                    window.history.back();
+                </script>
+            """)
+
+        return redirect('hauptseite')
+
+    return render(request, 'rechtApp/login.html')
 
 
 #Registrieren-HTML
@@ -561,104 +527,144 @@ def registrieren(request):
 
     return render(request, 'rechtApp/registrieren.html')
 
-#A und S, quali wird über schnittstelle geholt
-def login(request):
-    if request.method == 'POST':
-        benutzername = request.POST['benutzername']
-        passwort = request.POST['passwort']
-
-        benutzer_liste = ladeBenutzer()
-        if not benutzer_liste:
-            return HttpResponse("""
-                <script>
-                    alert("Keine Benutzer vorhanden");
-                    window.history.back();
-                </script>
-            """)
-
-        gefundener_benutzer = None
-        benutzername_existiert = False
-
-        for benutzer in benutzer_liste:
-            if benutzer['benutzername'] == benutzername:
-                benutzername_existiert = True
-                if benutzer['passwort'] == passwort:
-                    gefundener_benutzer = benutzer
-
-                    # ID wird immer noch aus benutzer.json geholt
-                    benutzer_id = benutzer['id']
-                    print(benutzer_id)
-                    request.session['benutzer_id'] = benutzer_id
-                    
-                    # benutzername in session speichern
-                    request.session['benutzername'] = benutzername
-
-                    # quali über schnittstelle
-                    beruf = hole_beruf_von_arbeit(benutzer_id)
-                    request.session['beruf'] = beruf
-
-                    print("Beruf aus Arbeit-API:", request.session.get('beruf'))
-                break
-
-        if not benutzername_existiert:
-            return HttpResponse("""
-                <script>
-                    alert("Benutzername existiert nicht");
-                    window.history.back();
-                </script>
-            """)
-
-        if gefundener_benutzer is None:
-            return HttpResponse("""
-                <script>
-                    alert("Falsches Passwort");
-                    window.history.back();
-                </script>
-            """)
-
-        return redirect('profilseite')
-
-    return render(request, 'rechtApp/login.html')
-
 def logout(request):
     return redirect('login')
 
-#A 
-def vorstrafen_api(request, buerger_id):
-    akten = ladeJson(buergerAkteJsonPfad)
+#A
+def ist_polizist(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
 
-    for akte in akten:
-        if akte.get("buerger_id") == buerger_id:
-            vorstrafen = akte.get("vorstrafen", [])
-            return JsonResponse({
-                "buerger_id": buerger_id,
-                "hat_vorstrafen": bool(vorstrafen),
-                "vorstrafen": vorstrafen
-            }, status=200)
-
-    # keine akte = keine vorstrafen
-    return JsonResponse({
-        "buerger_id": buerger_id,
-        "hat_vorstrafen": False,
-        "vorstrafen": []
-    }, status=200)
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Polizist" in benutzer.get("qualifikation", [])
+        ):
+            return True
+    return False
 
 #A
-def gesetz_api(request, gesetz_id):
-    gesetze = ladeGesetze()
+def ist_richter(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
 
-    for gesetz in gesetze:
-        if gesetz.get("id") == str(gesetz_id):
-            api_werte = gesetz.get("api_relevant", [])
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Richter" in benutzer.get("qualifikation", [])
+        ):
+            return True
+    return False
+
+#A
+def ist_legislative(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Legislative" in benutzer.get("qualifikation", [])
+        ):
+            return True
+    return False
+
+
+# statt "ist beruf" eventuell Liste mit Berechtigungen erstellen und abgleichen ob Person in Liste? von f
+
+def berechtigungen_abgleichen(id_benutzer):
+    try:
+        with open(benutzerJsonPfad, "r") as f:
+            benutzer_liste = json.load(f)
+    except FileNotFoundError:
+        return False
+    for benutzer in benutzer_liste:
+        if (
+            benutzer.get("id") == id_benutzer
+            and "Platzhalter" in "qualifikationsliste" #vielleicht verstehe ich auch gerade falsch wie es gedacht war, könnt mich da gerne aufklären; von f
+        ):
+            return True
+    return False
+
+
+#A nur für testzwecke, der teil (o.ä.) liegt später bei team arbeit
+@csrf_exempt
+@require_POST
+def qualifikation_api(request):
+    """
+    Erwartet POST mit JSON: {"id": 1}
+    Antwortet mit z.B.: {"id": 1, "qualifikation": ["Polizist"]}
+    """
+    try:
+        body = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "ungültiges JSON"}, status=400)
+
+    benutzer_id = body.get("id")
+    if benutzer_id is None:
+        return JsonResponse({"error": "ID fehlt"}, status=400)
+
+    daten = ladeJson(arbeitQualiJsonPfad)
+
+    for eintrag in daten:
+        if eintrag.get("id") == benutzer_id:
+            print(eintrag)
             return JsonResponse({
-                "gesetz_id": gesetz.get("id"),
-                "titel": gesetz.get("titel"),
-                "werte": api_werte,
-            }, status = 200)
+                "id": benutzer_id,
+                "qualifikation": eintrag.get("qualifikation", [])
+            })
 
+    return JsonResponse({"error": "Benutzer nicht gefunden"}, status=404)
+#<<<<<<< HEAD
+
+def backup_api(request):
+    pass
+#=======
+#weniger ist mehr
+# @csrf_exempt
+# @require_POST
+# def qualifikation_api(request):
+#     body = json.loads(request.body.decode("utf-8"))
+#     benutzer_id = body["id"]
+
+#     for eintrag in ladeJson(arbeitQualiJsonPfad):
+#         if eintrag.get("id") == benutzer_id:
+#             return JsonResponse({
+#                 "id": benutzer_id,
+#                 "qualifikation": eintrag.get("qualifikation", [])
+#             })
+
+#     return JsonResponse({
+#         "id": benutzer_id,
+#         "qualifikation": []
+#     })
+#>>>>>>> 96d7dbfc4ef3a4bf11fc193bd0b0c4fe87a09211
+
+#A 
+@csrf_exempt
+@require_POST
+def vorstrafen_api(request):
+    body = json.loads(request.body.decode("utf-8"))
+    benutzer_id = body["id"]
+
+    for eintrag in ladeJson(vorstrafenJsonPfad):
+        if eintrag.get("id") == benutzer_id:
+            return JsonResponse({
+                "id": benutzer_id,
+                "vorstrafen": eintrag.get("vorstrafen", False) #wenn er vostrafen eintrag nicht findet = false
+            })
+
+    #wenn keine id gefunden = keine vorstrafen
     return JsonResponse({
-        "fehler": "Gesetz nicht gefunden",
-        "gesetz_id": str(gesetz_id),
-    }, status=404)
-
-    
+        "id": benutzer_id,
+        "vorstrafen": False
+    })

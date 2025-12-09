@@ -16,7 +16,15 @@
             <div class="karteDivCLASS">
                 <p class="inhaltNummerDivCLASS">Art. {{ gesetz.id }}</p>
                 <p class="inhaltDivCLASS">Titel: {{ gesetz.titel }}</p>
-                <p class="inhaltDivCLASS">Beschreibung: {{ gesetz.beschreibung }}</p>
+                <p class="inhaltDivCLASS">
+                    Beschreibung: {{ gesetz.beschreibung }}
+                    {% if gesetz.api_relevant %}
+                        <br>
+                        {% for wert in gesetz.api_relevant %}
+                            {{ wert }}<br>
+                        {% endfor %}
+                    {% endif %}
+                </p>
                 <p class="inhaltDivCLASS">Strafe: {{ gesetz.strafe }} Jahre</p>
                 <p class="inhaltDivCLASS">Bußgeld: {{ gesetz.bussgeld }}€</p>
             </div>
@@ -26,7 +34,7 @@
         </div>
     </div>
 
-    {% if "Legislative" in qualifikation %}
+    {% if beruf == "Legislative" %}
     <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetz erlassen:</h2>
         <form method="POST" action="{% url 'gesetzErlassen' %}" class="formularDivCLASS">

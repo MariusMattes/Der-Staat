@@ -1,27 +1,27 @@
 [
     {
-        "id": 1,
+        "id": "richter2",
         "benutzername": "Sin",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
         "qualifikation": ["Richter"]
     },
     {
-        "id": 2,
+        "id": "legislative",
         "benutzername": "Nis",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
-        "qualifikation": ["Handwerker", "Legislative"]
+        "qualifikation": ["Legislative"]
     },
     {
-        "id": 3,
+        "id": "polizei1",
         "benutzername": "Hans",
         "email": "chronoszeitbuchung@gmail.com", 
         "passwort": "Sin",
         "qualifikation": ["Polizist"]
     },
     {
-        "id": 4,
+        "id": "legislative2",
         "benutzername": "Hans2",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
@@ -32,7 +32,7 @@
         "benutzername": "Hans3",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",
-        "qualifikation": ["Legislative", "Richter"] 
+        "qualifikation": ["aw"] 
     }
 
 ]

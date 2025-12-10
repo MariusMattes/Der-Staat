@@ -12,10 +12,10 @@
 
         <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetz erlassen:</h2>
-        <form> method="POST" <!--action=""--> </form> class="formularDivCLASS">
+        <form method="POST" class="formularDivCLASS">
             {% csrf_token %}
 <!---->
-            <label>ID der Person die angezeigt werden soll:</label>
+            <label>ID der Person, die angezeigt werden soll:</label>
             <input class="eingabeFeldCLASS" type="text" name="titel" required>
 
             <label>Begründung:</label>

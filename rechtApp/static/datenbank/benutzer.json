@@ -14,22 +14,14 @@
         "qualifikation": ["Legislative"]
     },
     {
-<<<<<<< HEAD
-        "id": "polizist1",
-=======
         "id": "polizei1",
->>>>>>> 4a87aea542cb4d6f8ca0c8955e2ded5b587f9c54
         "benutzername": "Hans",
         "email": "chronoszeitbuchung@gmail.com", 
         "passwort": "Sin",
         "qualifikation": ["Polizist"]
     },
     {
-<<<<<<< HEAD
-        "id": "legislative1",
-=======
         "id": "legislative3",
->>>>>>> 4a87aea542cb4d6f8ca0c8955e2ded5b587f9c54
         "benutzername": "Hans2",
         "email": "chronoszeitbuchung@gmail.com",
         "passwort": "Sin",

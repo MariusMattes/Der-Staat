@@ -31,6 +31,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #A
 #Bekannte Schnittstellen
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
+# Noch nicht bekannt. eventuell mit Andres Server testen MELDEWESEN_PERSONENSUCHE_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personensuche_api"
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
@@ -626,4 +627,73 @@ def gesetz_api(request, gesetz_id):
         "gesetz_id": str(gesetz_id),
     }, status=404)
 
-    
+#A
+def suche_buerger_id_beim_meldewesen(vorname: str, nachname: str, geburtsdatum: str):
+
+    payload = {
+        "vorname": vorname,
+        "nachname": nachname,
+        "geburtsdatum": geburtsdatum,  
+    }
+
+    try:
+        response = requests.post(MELDEWESEN_PERSONENSUCHE_URL, json=payload, timeout=5)
+
+        # falls meldewesen 404 zurückgibt -> keine Person
+        if response.status_code == 404:
+            return None
+
+        response.raise_for_status()
+        daten = response.json() #hier sollte ein json zurückkommen
+    except requests.RequestException:
+        return None
+
+    buerger_id = daten.get("buerger_id")
+
+    if buerger_id:
+        return buerger_id
+
+    return None
+
+#A
+def polizei_personensuche(request):
+    buerger_id = None
+    fehlermeldung = None
+
+    if request.method == "POST":
+        vorname = request.POST.get("vorname", "")
+        nachname = request.POST.get("nachname", "")
+        geburtsdatum = request.POST.get("geburtsdatum", "")
+
+        if vorname and nachname and geburtsdatum:
+            buerger_id = suche_buerger_id_beim_meldewesen(vorname, nachname, geburtsdatum)
+            if buerger_id is None:
+                fehlermeldung = "Keine Person gefunden."
+        else:
+            fehlermeldung = "Bitte alle Felder ausfüllen."
+
+    return render(request, "rechtApp/polizei_personensuche.html", {
+        "buerger_id": buerger_id,
+        "fehlermeldung": fehlermeldung,
+    })
+
+
+# So könnte die gegenstelle bei team meldewesen aussehen
+# @csrf_exempt
+# @require_POST
+# def personensuche_api(request):
+#     body = json.loads(request.body.decode("utf-8"))
+#     vorname = body["vorname"]
+#     nachname = body["nachname"]
+#     geburtsdatum = body["geburtsdatum"]
+
+#     for person in ladeJson(personenregisterJsonPfad): #hier euer entsprechendes register
+#         if (
+#             person.get("vorname") == vorname and
+#             person.get("nachname_geburt") == nachname and
+#             person.get("geburtsdatum") == geburtsdatum
+#         ):
+#             return JsonResponse({"buerger_id": person.get("buerger_id")}, status=200)
+
+#     return JsonResponse({"error": "keine_person_gefunden"}, status=404)
+

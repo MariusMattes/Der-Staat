@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Anzeige & Urteile</title>
+    <link rel="stylesheet" href="{% static 'css/recht.css' %}">
+</head>
+<body>
+
+{% include "rechtApp/navigationsleiste.html" %}
+
+<div class="hauptbereichDivCLASS">
+    <h2 class="UeberschriftCLASS">Bürger-ID finden</h2>
+    <form method="POST" class="formularDivCLASS">
+        {% csrf_token %}
+        <label>Vorname:</label>
+        <input class="eingabeFeldCLASS" type="text" name="vorname">
+
+        <label>Nachname:</label>
+        <input class="eingabeFeldCLASS" type="text" name="nachname">
+
+        <label>Geburtsdatum (TT.MM.JJJJ):</label>
+        <input class="eingabeFeldCLASS" type="text" name="geburtsdatum">
+
+        <button type="submit" class="buttonPrimarCLASS">Suchen</button>
+    </form>
+
+    {% if buerger_id %}
+        <div class="karteDivCLASS">
+            <p class="inhaltDivCLASS"><b>Bürger-ID gefunden:</b> {{ buerger_id }}</p>
+        </div>
+    {% elif buerger_id is not none %}
+        <div class="karteDivCLASS">
+            <p class="inhaltDivCLASS">Keine Übereinstimmung gefunden.</p>
+        </div>
+    {% endif %}
+</div>
+
+<div class="hauptbereichDivCLASS">
+    <h2 class="UeberschriftCLASS">Anzeige erstellen</h2>
+    <form method="POST" class="formularDivCLASS">
+        {% csrf_token %}
+        <label>Bürger-ID:</label>
+        <input class="eingabeFeldCLASS" type="text" name="anzeige_buerger_id" required>
+
+        <label>Vorname:</label>
+        <input class="eingabeFeldCLASS" type="text" name="vorname" required>
+
+        <label>Gesetz-ID (optional):</label>
+        <input class="eingabeFeldCLASS" type="text" name="gesetz_id">
+
+        <label>Gesetz-Titel (optional):</label>
+        <input class="eingabeFeldCLASS" type="text" name="gesetz_titel">
+
+        <label>Begründung (optional):</label>
+        <textarea class="eingabeFeldCLASS" name="begruendung"></textarea>
+
+        <button type="submit" class="buttonPrimarCLASS">Anzeige abschicken</button>
+    </form>
+</div>
+
+<div class="hauptbereichDivCLASS">
+    <h2 class="UeberschriftCLASS">Offene Anzeigen</h2>
+    <div class="gesamtDivCLASS">
+        {% if anzeigen %}
+            {% for anzeige in anzeigen %}
+                <div class="karteDivCLASS">
+                    <p class="inhaltDivCLASS"><b>Bürger-ID:</b> {{ anzeige.buerger_id }}</p>
+                    <p class="inhaltDivCLASS"><b>Vorname:</b> {{ anzeige.vorname }}</p>
+                    {% if anzeige.gesetz_id %}
+                        <p class="inhaltDivCLASS"><b>Gesetz-ID:</b> {{ anzeige.gesetz_id }}</p>
+                    {% endif %}
+                    {% if anzeige.gesetz_titel %}
+                        <p class="inhaltDivCLASS"><b>Gesetz-Titel:</b> {{ anzeige.gesetz_titel }}</p>
+                    {% endif %}
+                    {% if anzeige.begruendung %}
+                        <p class="inhaltDivCLASS"><b>Begründung:</b> {{ anzeige.begruendung }}</p>
+                    {% endif %}
+
+                    {% if beruf == "Richter" %}
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="anzeige_index" value="{{ forloop.counter0 }}">
+                            <button type="submit" name="action" value="zustimmen" class="buttonPrimarCLASS">Zustimmen</button>
+                            <button type="submit" name="action" value="ablehnen" class="buttonSekundaerCLASS">Ablehnen</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="keinInhaltCLASS">Keine offenen Anzeigen vorhanden.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% include "rechtApp/banner.html" %}
+
+</body>
+</html>

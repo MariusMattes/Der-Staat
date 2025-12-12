@@ -1,6 +1,0 @@
-[
-    {"id": 1, "gesetz_id": 1, "beschreibung": "Geschwindigkeitsüberschreitung", "betrag": 100},
-    {"id": 2, "gesetz_id": 2, "beschreibung": "Öffentliche Ruhestörung", "betrag": 50},
-    {"id": 3, "gesetz_id": 6, "beschreibung": "Fahren ohne Führerschein", "betrag": 500},
-    {"id": 4, "gesetz_id": 7, "beschreibung": "Illegale Müllentsorgung", "betrag": 200}
-]

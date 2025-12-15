@@ -1,7 +1,0 @@
-[
-  { "id": 1, "vorstrafen": true },
-  { "id": 2, "vorstrafen": false },
-  { "id": 3, "vorstrafen": false },
-  { "id": 4, "vorstrafen": true },
-  { "id": 5, "vorstrafen": false }
-]

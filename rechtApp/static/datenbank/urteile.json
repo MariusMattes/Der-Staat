@@ -1,7 +1,71 @@
 [
-    {"id": 1, "person": "Sin", "richter": "Richter Müller", "gesetz_id": 1, "bussgeld_id": 1, "strafen_id": null},
-    {"id": 2, "person": "Sin", "richter": "Richter Schmid", "gesetz_id": 3, "bussgeld_id": null, "strafen_id": 1},
-    {"id": 3, "person": "Sin", "richter": "Richter Müller", "gesetz_id": 8, "bussgeld_id": null, "strafen_id": 4},
-    {"id": 4, "person": "Hans2", "richter": "Richter Schmid", "gesetz_id": 6, "bussgeld_id": 3, "strafen_id": null}
-
+    {
+        "id": 1,
+        "person": "Sin",
+        "richter": "Müller",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": null
+    },
+    {
+        "id": 2,
+        "person": "Sin",
+        "richter": "Schmid",
+        "gesetz": "Mord verboten",
+        "bussgeld": null,
+        "strafe": 50
+    },
+    {
+        "id": 3,
+        "person": "Sin",
+        "richter": "Müller",
+        "gesetz": "Korruption verboten",
+        "bussgeld": null,
+        "strafe": 7
+    },
+    {
+        "id": 4,
+        "person": "Hans2",
+        "richter": "Schmid",
+        "gesetz": "Fahren ohne Führerschein verboten",
+        "bussgeld": 500,
+        "strafe": null
+    },
+    {
+        "id": 5,
+        "buerger_id": "4493ffb9-1513-42f9-b709-35ebdddc0296",
+        "vorname": "Simon",
+        "person": "Simon",
+        "richter": "Sin",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 6,
+        "buerger_id": "f2d45d59-e37e-43ec-ac3d-a62f4a1c47f4",
+        "person": "Snake",
+        "richter": "Sin",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": "100",
+        "strafe": "0"
+    },
+    {
+        "id": 7,
+        "buerger_id": "f2d45d59-e37e-43ec-ac3d-a62f4a1c47f4",
+        "person": "Snake",
+        "richter": "Sin",
+        "gesetz": "Öffentliche Ruhestörung verboten",
+        "bussgeld": 50,
+        "strafe": 0
+    },
+    {
+        "id": 8,
+        "buerger_id": "f2d45d59-e37e-43ec-ac3d-a62f4a1c47f4",
+        "person": "Snake",
+        "richter": "Sin",
+        "gesetz": "Diebstahl verboten",
+        "bussgeld": 0,
+        "strafe": 5
+    }
 ]

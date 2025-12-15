@@ -15,12 +15,27 @@
         <div class="gesamtDivCLASS">
             {% for urteil in urteile %}
             <div class="karteDivCLASS">
-                <p class="inhaltNummerDivCLASS">Urteil {{ forloop.counter }}</p>
+                <p class="inhaltNummerDivCLASS">Urteil {{ urteil.id }}</p>
                 <p class="inhaltDivCLASS">Person: {{ urteil.person }}</p>
                 <p class="inhaltDivCLASS">Richter: {{ urteil.richter }}</p>
-                <p class="inhaltNummerDivCLASS">Gesetz-ID: {{ urteil.gesetz_id }}</p>
-                <p class="inhaltNummerDivCLASS">Bußgeld-ID: {% if urteil.bussgeld_id %}{{ urteil.bussgeld_id }}{% else %}Kein Bußgeld{% endif %}</p>
-                <p class="inhaltNummerDivCLASS">Jahre-ID: {% if urteil.strafen_id %}{{ urteil.strafen_id }}{% else %}Keine Strafe{% endif %}</p>
+
+                {% if urteil.gesetz %}
+                    <p class="inhaltDivCLASS">Gesetz: {{ urteil.gesetz }}</p>
+                {% else %}
+                    <p class="inhaltDivCLASS">Gesetzdaten nicht verfügbar</p>
+                {% endif %}
+
+                {% if urteil.bussgeld %}
+                    <p class="inhaltDivCLASS">Bußgeld: {{ urteil.bussgeld }}€</p>
+                {% else %}
+                    <p class="inhaltDivCLASS">Kein Bußgeld</p>
+                {% endif %}
+
+                {% if urteil.strafe %}
+                    <p class="inhaltDivCLASS">Strafe in Jahren: {{ urteil.strafe }}</p>
+                {% else %}
+                    <p class="inhaltDivCLASS">Keine Strafe</p>
+                {% endif %}
             </div>
             {% empty %}
             <p class="keinInhaltCLASS">Keine Urteile vorhanden.</p>

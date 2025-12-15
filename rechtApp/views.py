@@ -32,6 +32,8 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #Bekannte Schnittstellen
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 # Noch nicht bekannt. eventuell mit Andres Server testen MELDEWESEN_PERSONENSUCHE_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/personensuche_api"
+# schnittstelle um alle mit beruf legislatiuve abzufragen http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/personenliste/legislative
+
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:

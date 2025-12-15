@@ -14,26 +14,24 @@
     <h2 class="UeberschriftCLASS">Bürger-ID finden</h2>
     <form method="POST" class="formularDivCLASS">
         {% csrf_token %}
+        <input type="hidden" name="action" value="suche_buerger">
+
         <label>Vorname:</label>
-        <input class="eingabeFeldCLASS" type="text" name="vorname">
+        <input class="eingabeFeldCLASS" type="text" name="vorname" required>
 
         <label>Nachname:</label>
-        <input class="eingabeFeldCLASS" type="text" name="nachname">
+        <input class="eingabeFeldCLASS" type="text" name="nachname" required>
 
-        <label>Geburtsdatum (TT.MM.JJJJ):</label>
-        <input class="eingabeFeldCLASS" type="text" name="geburtsdatum">
+        <label>Geburtsdatum:</label>
+        <input class="eingabeFeldCLASS" type="text" name="geburtsdatum" required>
 
         <button type="submit" class="buttonPrimarCLASS">Suchen</button>
     </form>
 
     {% if buerger_id %}
-        <div class="karteDivCLASS">
-            <p class="inhaltDivCLASS"><b>Bürger-ID gefunden:</b> {{ buerger_id }}</p>
-        </div>
+        <p><b>Gefundene Bürger-ID:</b> {{ buerger_id }}</p>
     {% elif buerger_id is not none %}
-        <div class="karteDivCLASS">
-            <p class="inhaltDivCLASS">Keine Übereinstimmung gefunden.</p>
-        </div>
+        <p>Keine Person gefunden.</p>
     {% endif %}
 </div>
 
@@ -41,19 +39,21 @@
     <h2 class="UeberschriftCLASS">Anzeige erstellen</h2>
     <form method="POST" class="formularDivCLASS">
         {% csrf_token %}
+        <input type="hidden" name="action" value="neue_anzeige">
+
         <label>Bürger-ID:</label>
         <input class="eingabeFeldCLASS" type="text" name="anzeige_buerger_id" required>
 
         <label>Vorname:</label>
         <input class="eingabeFeldCLASS" type="text" name="vorname" required>
 
-        <label>Gesetz-ID (optional):</label>
+        <label>Gesetz-ID:</label>
         <input class="eingabeFeldCLASS" type="text" name="gesetz_id">
 
-        <label>Gesetz-Titel (optional):</label>
+        <label>Gesetz-Titel:</label>
         <input class="eingabeFeldCLASS" type="text" name="gesetz_titel">
 
-        <label>Begründung (optional):</label>
+        <label>Begründung:</label>
         <textarea class="eingabeFeldCLASS" name="begruendung"></textarea>
 
         <button type="submit" class="buttonPrimarCLASS">Anzeige abschicken</button>
@@ -62,39 +62,33 @@
 
 <div class="hauptbereichDivCLASS">
     <h2 class="UeberschriftCLASS">Offene Anzeigen</h2>
-    <div class="gesamtDivCLASS">
-        {% if anzeigen %}
-            {% for anzeige in anzeigen %}
-                <div class="karteDivCLASS">
-                    <p class="inhaltDivCLASS"><b>Bürger-ID:</b> {{ anzeige.buerger_id }}</p>
-                    <p class="inhaltDivCLASS"><b>Vorname:</b> {{ anzeige.vorname }}</p>
-                    {% if anzeige.gesetz_id %}
-                        <p class="inhaltDivCLASS"><b>Gesetz-ID:</b> {{ anzeige.gesetz_id }}</p>
-                    {% endif %}
-                    {% if anzeige.gesetz_titel %}
-                        <p class="inhaltDivCLASS"><b>Gesetz-Titel:</b> {{ anzeige.gesetz_titel }}</p>
-                    {% endif %}
-                    {% if anzeige.begruendung %}
-                        <p class="inhaltDivCLASS"><b>Begründung:</b> {{ anzeige.begruendung }}</p>
-                    {% endif %}
 
-                    {% if beruf == "Richter" %}
-                        <form method="POST">
-                            {% csrf_token %}
-                            <input type="hidden" name="anzeige_index" value="{{ forloop.counter0 }}">
-                            <button type="submit" name="action" value="zustimmen" class="buttonPrimarCLASS">Zustimmen</button>
-                            <button type="submit" name="action" value="ablehnen" class="buttonSekundaerCLASS">Ablehnen</button>
-                        </form>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="keinInhaltCLASS">Keine offenen Anzeigen vorhanden.</p>
-        {% endif %}
-    </div>
+    {% for anzeige in anzeigen %}
+        <div class="karteDivCLASS">
+            <p><b>Bürger-ID:</b> {{ anzeige.buerger_id }}</p>
+            <p><b>Vorname:</b> {{ anzeige.vorname }}</p>
+
+            {% if beruf == "Richter" %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="zustimmen">
+                    <input type="hidden" name="anzeige_index" value="{{ forloop.counter0 }}">
+                    <button class="buttonPrimarCLASS">Zustimmen</button>
+                </form>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ablehnen">
+                    <input type="hidden" name="anzeige_index" value="{{ forloop.counter0 }}">
+                    <button class="buttonSekundaerCLASS">Ablehnen</button>
+                </form>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>Keine offenen Anzeigen.</p>
+    {% endfor %}
 </div>
 
 {% include "rechtApp/banner.html" %}
-
 </body>
 </html>

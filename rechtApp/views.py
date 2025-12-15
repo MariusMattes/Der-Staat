@@ -46,6 +46,26 @@ def hole_beruf_von_arbeit(benutzer_id: str):
     except requests.RequestException:
         return None
 
+def hole_buerger_id(vorname, nachname, geburtsdatum):
+    url = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche"
+
+    daten = {
+        "vorname": vorname,
+        "nachname": nachname,
+        "geburtsdatum": geburtsdatum
+    }
+
+    try:
+        response = requests.post(url, json=daten, timeout=5)
+
+        if response.status_code == 200:
+            return response.json().get("buerger_id")
+
+    except Exception as e:
+        print("Fehler bei Bürger-ID-Abfrage:", e)
+
+    return None
+
 #Hilfsfunktionen
 #S
 def ladeJson(pfad):
@@ -210,14 +230,14 @@ def profilseite(request):
 
 # Anzeigen-HTML
 #S
-buerger_liste = [
-    {
-        "buerger_id": "4493ffb9-1513-42f9-b709-35ebdddc0296",
-        "vorname": "Simon",
-        "nachname_geburt": "Maier",
-        "geburtsdatum": "10.10.2004"
-    },
-]
+#buerger_liste = [
+#    {
+#        "buerger_id": "4493ffb9-1513-42f9-b709-35ebdddc0296",
+#        "vorname": "Simon",
+#        "nachname_geburt": "Maier",
+#        "geburtsdatum": "10.10.2004"
+#    },
+#]
 
 @csrf_exempt
 def anzeigen(request):
@@ -241,8 +261,38 @@ def anzeigen(request):
     else:
         anzeigen_liste = []
 
+    buerger_id = None
+
     if request.method == "POST":
         action = request.POST.get("action")
+
+        if action == "suche_buerger":
+            vorname = request.POST.get("vorname", "").strip()
+            nachname = request.POST.get("nachname", "").strip()
+            geburtsdatum = request.POST.get("geburtsdatum", "").strip()
+
+            buerger_id = hole_buerger_id(vorname, nachname, geburtsdatum)
+
+            return render(request, "rechtApp/anzeigen.html", {
+                "anzeigen": anzeigen_liste,
+                "beruf": beruf,
+                "buerger_id": buerger_id
+            })
+
+        if action == "neue_anzeige":
+            anzeigen_liste.append({
+                "buerger_id": request.POST.get("anzeige_buerger_id").strip(),
+                "vorname": request.POST.get("vorname").strip(),
+                "gesetz_id": request.POST.get("gesetz_id") or None,
+                "gesetz_titel": request.POST.get("gesetz_titel") or None,
+                "begruendung": request.POST.get("begruendung") or None
+            })
+
+            with open(anzeigenJsonPfad, "w", encoding="utf-8") as f:
+                json.dump(anzeigen_liste, f, ensure_ascii=False, indent=4)
+
+            return redirect("anzeigen")
+
         if action in ["zustimmen", "ablehnen"]:
             anzeige_index = int(request.POST.get("anzeige_index", -1))
             richter = request.session.get("benutzername", "Unbekannt")
@@ -252,16 +302,10 @@ def anzeigen(request):
 
                 if action == "zustimmen":
                     gesetz_daten = None
-                    if anzeige.get("gesetz_id"):
-                        for g in gesetze:
-                            if str(g["id"]) == str(anzeige["gesetz_id"]):
-                                gesetz_daten = g
-                                break
-                    elif anzeige.get("gesetz_titel"):
-                        for g in gesetze:
-                            if g["titel"] == anzeige["gesetz_titel"]:
-                                gesetz_daten = g
-                                break
+                    for g in gesetze:
+                        if str(g.get("id")) == str(anzeige.get("gesetz_id")) or g.get("titel") == anzeige.get("gesetz_titel"):
+                            gesetz_daten = g
+                            break
 
                     if gesetz_daten:
                         if os.path.exists(urteileJsonPfad):
@@ -273,70 +317,50 @@ def anzeigen(request):
                         else:
                             urteile_liste = []
 
-                        neue_id = max([u["id"] for u in urteile_liste], default=0) + 1
+                        if urteile_liste:
+                            neue_id = urteile_liste[-1]["id"] + 1
+                        else:
+                            neue_id = 1
 
-                        neues_urteil = {
+                        urteile_liste.append({
                             "id": neue_id,
-                            "buerger_id": anzeige.get("buerger_id"),
-                            "person": anzeige.get("vorname"),
+                            "buerger_id": anzeige["buerger_id"],
+                            "person": anzeige["vorname"],
                             "richter": richter,
                             "gesetz": gesetz_daten["titel"],
-                            "bussgeld": int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else None,
-                            "strafe": int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else None
-                        }
-
-                        urteile_liste.append(neues_urteil)
+                            "bussgeld": int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0,
+                            "strafe": int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+                        })
 
                         with open(urteileJsonPfad, "w", encoding="utf-8") as f:
                             json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
 
-                elif action == "ablehnen":
+                else:
                     ablehnPfad = os.path.join(os.path.dirname(anzeigenJsonPfad), "anzeigeAbgelehnt.json")
                     if os.path.exists(ablehnPfad):
                         with open(ablehnPfad, "r", encoding="utf-8") as f:
                             try:
-                                abgelehnt_liste = json.load(f)
+                                abgelehnt = json.load(f)
                             except:
-                                abgelehnt_liste = []
+                                abgelehnt = []
                     else:
-                        abgelehnt_liste = []
+                        abgelehnt = []
 
                     anzeige["richter"] = richter
-                    abgelehnt_liste.append(anzeige)
+                    abgelehnt.append(anzeige)
 
                     with open(ablehnPfad, "w", encoding="utf-8") as f:
-                        json.dump(abgelehnt_liste, f, ensure_ascii=False, indent=4)
+                        json.dump(abgelehnt, f, ensure_ascii=False, indent=4)
 
                 with open(anzeigenJsonPfad, "w", encoding="utf-8") as f:
                     json.dump(anzeigen_liste, f, ensure_ascii=False, indent=4)
 
             return redirect("anzeigen")
 
-        elif request.POST.get("anzeige_buerger_id"):
-            anzeige_buerger_id = request.POST.get("anzeige_buerger_id").strip()
-            vorname = request.POST.get("vorname").strip()
-            gesetz_id = request.POST.get("gesetz_id").strip()
-            gesetz_titel = request.POST.get("gesetz_titel").strip()
-            begruendung = request.POST.get("begruendung").strip()
-
-            neue_anzeige = {
-                "buerger_id": anzeige_buerger_id,
-                "vorname": vorname,
-                "gesetz_id": gesetz_id if gesetz_id else None,
-                "gesetz_titel": gesetz_titel if gesetz_titel else None,
-                "begruendung": begruendung
-            }
-
-            anzeigen_liste.append(neue_anzeige)
-
-            with open(anzeigenJsonPfad, "w", encoding="utf-8") as f:
-                json.dump(anzeigen_liste, f, ensure_ascii=False, indent=4)
-
-            return redirect("anzeigen")
-
     return render(request, "rechtApp/anzeigen.html", {
         "anzeigen": anzeigen_liste,
-        "beruf": beruf
+        "beruf": beruf,
+        "buerger_id": None
     })
 
 

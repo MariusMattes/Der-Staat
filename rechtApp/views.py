@@ -31,6 +31,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #Bekannte Schnittstellen
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche/"
+BANK_API_URL = "n/A"
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
@@ -322,18 +323,43 @@ def anzeigen(request):
                         else:
                             neue_id = 1
 
+                        # urteile_liste.append({
+                        #     "id": neue_id,
+                        #     "buerger_id": anzeige["buerger_id"],
+                        #     "person": anzeige["vorname"],
+                        #     "richter": richter,
+                        #     "gesetz": gesetz_daten["titel"],
+                        #     "bussgeld": int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0,
+                        #     "strafe": int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+                        # })
+
+                        # with open(urteileJsonPfad, "w", encoding="utf-8") as f:
+                        #     json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
+                        bussgeld_betrag = int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0
+                        strafe_jahre = int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+
                         urteile_liste.append({
                             "id": neue_id,
                             "buerger_id": anzeige["buerger_id"],
                             "person": anzeige["vorname"],
                             "richter": richter,
                             "gesetz": gesetz_daten["titel"],
-                            "bussgeld": int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0,
-                            "strafe": int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+                            "bussgeld": bussgeld_betrag,
+                            "strafe": strafe_jahre
                         })
 
                         with open(urteileJsonPfad, "w", encoding="utf-8") as f:
                             json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
+
+                        #A
+                        if bussgeld_betrag > 0:
+                            sende_bussgeld_an_bank(
+                                buerger_id=anzeige["buerger_id"],
+                                betrag=bussgeld_betrag,
+                                gesetz_id=int(anzeige["gesetz_id"]) if anzeige.get("gesetz_id") else int(gesetz_daten["id"]),
+                                gesetz_titel=gesetz_daten["titel"],
+                            )
+                        #/A
 
                 else:
                     ablehnPfad = os.path.join(os.path.dirname(anzeigenJsonPfad), "anzeigeAbgelehnt.json")
@@ -820,23 +846,18 @@ def polizei_personensuche(request):
         "fehlermeldung": fehlermeldung,
     })
 
+#A
+def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_titel: str):
+    payload = {
+        "buerger_id": buerger_id,
+        "betrag": int(betrag),
+        "gesetz_id": int(gesetz_id),
+        "gesetz_titel": gesetz_titel,
+    }
+    try:
+        requests.post(BANK_API_URL, json=payload, timeout=5).raise_for_status()
+    except requests.RequestException:
+        print("Fehler Test Bank")
+        pass
 
-# So könnte die gegenstelle bei team meldewesen aussehen
-# @csrf_exempt
-# @require_POST
-# def personensuche_api(request):
-#     body = json.loads(request.body.decode("utf-8"))
-#     vorname = body["vorname"]
-#     nachname = body["nachname"]
-#     geburtsdatum = body["geburtsdatum"]
-
-#     for person in ladeJson(personenregisterJsonPfad): #hier euer entsprechendes register
-#         if (
-#             person.get("vorname") == vorname and
-#             person.get("nachname_geburt") == nachname and
-#             person.get("geburtsdatum") == geburtsdatum
-#         ):
-#             return JsonResponse({"buerger_id": person.get("buerger_id")}, status=200)
-
-#     return JsonResponse({"error": "keine_person_gefunden"}, status=404)
 

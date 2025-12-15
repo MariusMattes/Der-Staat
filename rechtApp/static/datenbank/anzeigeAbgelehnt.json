@@ -14,5 +14,13 @@
         "gesetz_titel": null,
         "begruendung": "y",
         "richter": "Sin"
+    },
+    {
+        "buerger_id": "4493ffb9-1513-42f9-b709-35ebdddc0296",
+        "vorname": "Simon",
+        "gesetz_id": "1",
+        "gesetz_titel": null,
+        "begruendung": "",
+        "richter": "Sin"
     }
 ]

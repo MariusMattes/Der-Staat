@@ -58,5 +58,14 @@
         "gesetz": "Öffentliche Ruhestörung verboten",
         "bussgeld": 50,
         "strafe": 0
+    },
+    {
+        "id": 8,
+        "buerger_id": "f2d45d59-e37e-43ec-ac3d-a62f4a1c47f4",
+        "person": "Snake",
+        "richter": "Sin",
+        "gesetz": "Diebstahl verboten",
+        "bussgeld": 0,
+        "strafe": 5
     }
 ]

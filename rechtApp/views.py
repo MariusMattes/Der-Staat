@@ -8,6 +8,8 @@ from lxml import etree as ET
 import requests
 from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
+from datetime import date
+
  
 #Allgemeiner Datenbankpfad
 #S
@@ -20,7 +22,6 @@ anzeigenJsonPfad = os.path.join(allgemeinerPfad, 'anzeigen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
-buergerAkteJsonPfad = os.path.join(allgemeinerPfad, 'recht_buergerakte.json')
 
 #Einzelne XML-Datei
 #S
@@ -79,19 +80,16 @@ def ladeJson(pfad):
         return []
     
 #A    
-def lade_buergerakte(buerger_id: str):
-    akten = ladeJson(buergerAkteJsonPfad)
+def lade_vorstrafen_daten():
+    daten = ladeJson(vorstrafenJsonPfad)
+    if not isinstance(daten, list):
+        return []
+    return daten
 
-    for akte in akten:
-        if akte.get("buerger_id") == buerger_id:
-            return akte
-        
-    return {
-        "buerger_id": buerger_id,
-        "vorstrafen": [],
-        "bussgelder": []
-    }
-
+#A
+def speichere_vorstrafen_daten(daten):
+    with open(vorstrafenJsonPfad, "w", encoding="utf-8") as f:
+        json.dump(daten, f, ensure_ascii=False, indent=4)
     
 def xmlStrukturierenGesetze():
     parser = ET.XMLParser(remove_blank_text=True)
@@ -100,7 +98,6 @@ def xmlStrukturierenGesetze():
 def xmlStrukturierenGesetzentwurf():
     parser = ET.XMLParser(remove_blank_text=True)
     return ET.parse(gesetzentwurfXmlPfad, parser)
-
 
 def ladeBenutzer():
     try:
@@ -117,6 +114,30 @@ def speicherBenutzer(daten):
 #S
 def test_views(request):
         return render(request, 'rechtApp/ztest.html')
+
+#A
+def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
+    daten = lade_vorstrafen_daten()
+
+    akte = None
+    for a in daten:
+        if str(a.get("buerger_id")) == str(buerger_id):
+            akte = a
+            break
+
+    if akte is None:
+        akte = {"buerger_id": str(buerger_id), "vorstrafen": []}
+        daten.append(akte)
+
+    if "vorstrafen" not in akte or not isinstance(akte["vorstrafen"], list):
+        akte["vorstrafen"] = []
+
+    akte["vorstrafen"].append({
+        "gesetz_id": int(gesetz_id),
+        "datum_urteil": datum_urteil
+    })
+
+    speichere_vorstrafen_daten(daten)
 
 
 #Profilseite-HTML
@@ -352,6 +373,12 @@ def anzeigen(request):
                             json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
 
                         #A
+                        if strafe_jahre > 0:
+                            datum = date.today().isoformat()  # "YYYY-MM-DD"
+                            gesetz_id = int(anzeige["gesetz_id"])
+                            print(f"Testzweck für speichern vorstrafen {gesetz_id}")
+                            fuege_vorstrafe_hinzu(buerger_id=anzeige["buerger_id"], gesetz_id=gesetz_id, datum_urteil=datum)
+                        
                         if bussgeld_betrag > 0:
                             sende_bussgeld_an_bank(
                                 buerger_id=anzeige["buerger_id"],
@@ -760,20 +787,19 @@ def logout(request):
 
 #A 
 def vorstrafen_api(request, buerger_id):
-    akten = ladeJson(buergerAkteJsonPfad)
+    daten = lade_vorstrafen_daten()
 
-    for akte in akten:
-        if akte.get("buerger_id") == buerger_id:
+    for akte in daten:
+        if str(akte.get("buerger_id")) == str(buerger_id):
             vorstrafen = akte.get("vorstrafen", [])
             return JsonResponse({
-                "buerger_id": buerger_id,
+                "buerger_id": str(buerger_id),
                 "hat_vorstrafen": bool(vorstrafen),
                 "vorstrafen": vorstrafen
             }, status=200)
 
-    # keine akte = keine vorstrafen
     return JsonResponse({
-        "buerger_id": buerger_id,
+        "buerger_id": str(buerger_id),
         "hat_vorstrafen": False,
         "vorstrafen": []
     }, status=200)

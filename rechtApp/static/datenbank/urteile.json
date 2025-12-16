@@ -139,5 +139,32 @@
         "gesetz": "Öffentliche Ruhestörung verboten",
         "bussgeld": 50,
         "strafe": 0
+    },
+    {
+        "id": 17,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Fahren ohne Führerschein verboten",
+        "bussgeld": 500,
+        "strafe": 0
+    },
+    {
+        "id": 18,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 19,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Mord verboten",
+        "bussgeld": 0,
+        "strafe": 50
     }
 ]

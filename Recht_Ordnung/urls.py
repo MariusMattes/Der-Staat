@@ -36,6 +36,7 @@ urlpatterns = [
     path("ro/gesetze/entwurf/<int:gesetz_id>", views.gesetzFreigeben, name="gesetzFreigeben"),
     path("ro/vorstrafen_api/<str:buerger_id>", views.vorstrafen_api, name="vorstrafen_api"),
     path("ro/gesetz_api/<int:gesetz_id>", views.gesetz_api, name="gesetz_api"),
+    path("backup", views.backup, name="backup"),
 ]
 
 """

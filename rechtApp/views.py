@@ -31,7 +31,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #Bekannte Schnittstellen
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche/"
-BANK_API_URL = "n/A"
+BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
@@ -796,7 +796,7 @@ def gesetz_api(request, gesetz_id):
         "gesetz_id": str(gesetz_id),
     }, status=404)
 
-#A
+#A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
 def suche_buerger_id_beim_meldewesen(vorname: str, nachname: str, geburtsdatum: str):
 
     payload = {
@@ -824,7 +824,7 @@ def suche_buerger_id_beim_meldewesen(vorname: str, nachname: str, geburtsdatum: 
 
     return None
 
-#A
+#A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
 def polizei_personensuche(request):
     buerger_id = None
     fehlermeldung = None
@@ -850,14 +850,16 @@ def polizei_personensuche(request):
 def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_titel: str):
     payload = {
         "buerger_id": buerger_id,
-        "betrag": int(betrag),
-        "gesetz_id": int(gesetz_id),
+        "betrag": str(int(betrag)),
+        "gesetz_id": str(int(gesetz_id)),
         "gesetz_titel": gesetz_titel,
     }
     try:
-        requests.post(BANK_API_URL, json=payload, timeout=5).raise_for_status()
-    except requests.RequestException:
-        print("Fehler Test Bank")
-        pass
+        response = requests.post(BANK_API_URL, data=payload, timeout=5)
+        response.raise_for_status()
+        print("BANK ok:", response.status_code, response.text)
+    except requests.RequestException as e:
+        print("Fehler Bank:", repr(e))
+
 
 

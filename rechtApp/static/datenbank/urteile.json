@@ -85,5 +85,59 @@
         "gesetz": "Geschwindigkeitsbegrenzung einhalten",
         "bussgeld": 100,
         "strafe": 0
+    },
+    {
+        "id": 11,
+        "buerger_id": "Werdashierliestistdoof",
+        "person": "Max",
+        "richter": "Hans3",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 12,
+        "buerger_id": "Werdashierliestistdoof",
+        "person": "Max",
+        "richter": "Hans3",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 13,
+        "buerger_id": "Werdashierliestistdoof",
+        "person": "Max",
+        "richter": "Hans3",
+        "gesetz": "Öffentliche Ruhestörung verboten",
+        "bussgeld": 50,
+        "strafe": 0
+    },
+    {
+        "id": 14,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Fahren ohne Führerschein verboten",
+        "bussgeld": 500,
+        "strafe": 0
+    },
+    {
+        "id": 15,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 16,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Öffentliche Ruhestörung verboten",
+        "bussgeld": 50,
+        "strafe": 0
     }
 ]

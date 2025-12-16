@@ -1,0 +1,9 @@
+[
+    {
+        "buerger_id": "TestID",
+        "vorname": "Max",
+        "gesetz_id": "6",
+        "gesetz_titel": null,
+        "begruendung": "Test BankAPI"
+    }
+]

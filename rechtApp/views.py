@@ -22,8 +22,7 @@ allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenba
 #Einzelne JSON-Dateien
 #S
 gesetzeJsonPfad = os.path.join(allgemeinerPfad, 'gesetze.json')
-bussgelderJsonPfad = os.path.join(allgemeinerPfad, 'bussgelder.json')
-strafenJsonPfad = os.path.join(allgemeinerPfad, 'strafen.json')
+anzeigenJsonPfad = os.path.join(allgemeinerPfad, 'anzeigen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
@@ -37,6 +36,8 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #A
 #Bekannte Schnittstellen
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
+Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche/"
+BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
@@ -52,6 +53,25 @@ def hole_beruf_von_arbeit(benutzer_id: str):
         return None
     except requests.RequestException:
         return None
+
+def hole_buerger_id(vorname, nachname, geburtsdatum):
+
+    daten = {
+        "vorname": vorname,
+        "nachname": nachname,
+        "geburtsdatum": geburtsdatum
+    }
+
+    try:
+        response = requests.post(Einwohnermeldeamt_API_URL, json=daten, timeout=5)
+
+        if response.status_code == 200:
+            return response.json().get("buerger_id")
+
+    except Exception as e:
+        print("Fehler bei Bürger-ID-Abfrage:", e)
+
+    return None
 
 #Hilfsfunktionen
 #S
@@ -119,12 +139,13 @@ def profilseite(request):
         return HttpResponse("Fehler beim Laden der Benutzerdaten.")
 
     benutzer_daten = None
-    for b in benutzer_liste:
-        if b["benutzername"] == benutzername:
-            benutzer_daten = b
+
+    for eintrag in benutzer_liste:
+        if eintrag["benutzername"] == benutzername:
+            benutzer_daten = eintrag
             break
 
-    if not benutzer_daten:
+    if benutzer_daten is None:
         return HttpResponse("Benutzer konnte nicht gefunden werden.")
 
     try:
@@ -134,9 +155,13 @@ def profilseite(request):
         return HttpResponse("Fehler beim Laden der Urteile.")
 
     eigene_urteile = []
-    for u in urteile_liste:
-        if u["person"] == benutzername:
-            eigene_urteile.append(u)
+
+    for urteil in urteile_liste:
+        if urteil["person"] == benutzername:
+            eigene_urteile.append(urteil)
+
+    if not os.path.exists(gesetzeXmlPfad):
+        return HttpResponse("Gesetze konnten nicht gefunden werden.")
 
     try:
         tree = ET.parse(gesetzeXmlPfad)
@@ -145,92 +170,237 @@ def profilseite(request):
         return HttpResponse("Fehler beim Laden der Gesetze.")
 
     gesetze_dict = {}
-    for g in root.findall("gesetz"):
-        gid = int(g.find("id").text)
-        gesetze_dict[gid] = {
-            "id": gid,
-            "titel": g.find("titel").text,
-            "beschreibung": g.find("beschreibung").text,
-            "bussgeld": int(g.find("bussgeld").text),
-            "strafe": int(g.find("strafe").text),
+
+    for gesetz in root.findall("gesetz"):
+
+        titel_el = gesetz.find("titel")
+        beschreibung_el = gesetz.find("beschreibung")
+        bussgeld_el = gesetz.find("bussgeld")
+        strafe_el = gesetz.find("strafe")
+
+        titel = ""
+        if titel_el is not None and titel_el.text:
+            titel = titel_el.text
+
+        beschreibung = ""
+        if beschreibung_el is not None and beschreibung_el.text:
+            beschreibung = beschreibung_el.text
+
+        bussgeld = 0
+        if bussgeld_el is not None and bussgeld_el.text:
+            bussgeld = int(bussgeld_el.text)
+
+        strafe = 0
+        if strafe_el is not None and strafe_el.text:
+            strafe = int(strafe_el.text)
+
+        gesetze_dict[titel] = {
+            "titel": titel,
+            "beschreibung": beschreibung,
+            "bussgeld": bussgeld,
+            "strafe": strafe
         }
-
-    try:
-        with open(strafenJsonPfad, "r", encoding="utf-8") as f:
-            strafen_liste = json.load(f)
-    except:
-        return HttpResponse("Fehler beim Laden der Strafen.")
-
-    strafen_dict = {}
-    for s in strafen_liste:
-        strafen_dict[s["id"]] = s
-
-    try:
-        with open(bussgelderJsonPfad, "r", encoding="utf-8") as f:
-            bussgelder_liste = json.load(f)
-    except:
-        return HttpResponse("Fehler beim Laden der Bußgelder.")
-
-    bussgelder_dict = {}
-    for bg in bussgelder_liste:
-        bussgelder_dict[bg["id"]] = bg
 
     urteile_komplett = []
 
-    for u in eigene_urteile:
+    for urteil in eigene_urteile:
 
-        gesetz = None
-        if u["gesetz_id"] in gesetze_dict:
-            gesetz = gesetze_dict[u["gesetz_id"]]
+        gesetz_name = urteil["gesetz"]
 
-        if u["bussgeld_id"]:
-            if u["bussgeld_id"] in bussgelder_dict:
-                bussgeld = bussgelder_dict[u["bussgeld_id"]]
-            else:
-                bussgeld = None
-        else:
-            bussgeld = None
+        gesetz_data = None
+        if gesetz_name in gesetze_dict:
+            gesetz_data = gesetze_dict[gesetz_name]
 
-        if u["strafen_id"]:
-            if u["strafen_id"] in strafen_dict:
-                strafe = strafen_dict[u["strafen_id"]]
-            else:
-                strafe = None
-        else:
-            strafe = None
+        eintrag = {
+            "id": urteil["id"],
+            "richter": urteil["richter"],
+            "gesetz": gesetz_data,
+            "bussgeld": urteil["bussgeld"],
+            "strafe": urteil["strafe"]
+        }
 
-        urteile_komplett.append({
-            "id": u["id"],
-            "richter": u["richter"],
-            "gesetz": gesetz,
-            "bussgeld": bussgeld,
-            "strafe": strafe
-        })
+        urteile_komplett.append(eintrag)
 
     beruf = request.session.get("beruf", "Unbekannt")
 
-    return render(request, "rechtApp/profilseite.html", {
-        "benutzer": benutzer_daten,
+    return render(
+        request,
+        "rechtApp/profilseite.html",
+        {
+            "benutzer": benutzer_daten,
+            "beruf": beruf,
+            "urteile": urteile_komplett
+        }
+    )
+
+
+
+# Anzeigen-HTML
+#S
+#buerger_liste = [
+#    {
+#        "buerger_id": "4493ffb9-1513-42f9-b709-35ebdddc0296",
+#        "vorname": "Simon",
+#        "nachname_geburt": "Maier",
+#        "geburtsdatum": "10.10.2004"
+#    },
+#]
+
+@csrf_exempt
+def anzeigen(request):
+    beruf = request.session.get("beruf")
+    if beruf not in ["Richter", "Polizist"]:
+        return HttpResponse("""
+            <script>
+                alert("Nur Richter und Polizisten dürfen diese Seite sehen.");
+                window.history.back();
+            </script>
+        """)
+
+    gesetze = ladeGesetze()
+
+    if os.path.exists(anzeigenJsonPfad):
+        with open(anzeigenJsonPfad, "r", encoding="utf-8") as f:
+            try:
+                anzeigen_liste = json.load(f)
+            except:
+                anzeigen_liste = []
+    else:
+        anzeigen_liste = []
+
+    buerger_id = None
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "suche_buerger":
+            vorname = request.POST.get("vorname", "").strip()
+            nachname = request.POST.get("nachname", "").strip()
+            geburtsdatum = request.POST.get("geburtsdatum", "").strip()
+
+            buerger_id = hole_buerger_id(vorname, nachname, geburtsdatum)
+
+            return render(request, "rechtApp/anzeigen.html", {
+                "anzeigen": anzeigen_liste,
+                "beruf": beruf,
+                "buerger_id": buerger_id
+            })
+
+        if action == "neue_anzeige":
+            anzeigen_liste.append({
+                "buerger_id": request.POST.get("anzeige_buerger_id").strip(),
+                "vorname": request.POST.get("vorname").strip(),
+                "gesetz_id": request.POST.get("gesetz_id") or None,
+                "gesetz_titel": request.POST.get("gesetz_titel") or None,
+                "begruendung": request.POST.get("begruendung") or None
+            })
+
+            with open(anzeigenJsonPfad, "w", encoding="utf-8") as f:
+                json.dump(anzeigen_liste, f, ensure_ascii=False, indent=4)
+
+            return redirect("anzeigen")
+
+        if action in ["zustimmen", "ablehnen"]:
+            anzeige_index = int(request.POST.get("anzeige_index", -1))
+            richter = request.session.get("benutzername", "Unbekannt")
+
+            if 0 <= anzeige_index < len(anzeigen_liste):
+                anzeige = anzeigen_liste.pop(anzeige_index)
+
+                if action == "zustimmen":
+                    gesetz_daten = None
+                    for g in gesetze:
+                        if str(g.get("id")) == str(anzeige.get("gesetz_id")) or g.get("titel") == anzeige.get("gesetz_titel"):
+                            gesetz_daten = g
+                            break
+
+                    if gesetz_daten:
+                        if os.path.exists(urteileJsonPfad):
+                            with open(urteileJsonPfad, "r", encoding="utf-8") as f:
+                                try:
+                                    urteile_liste = json.load(f)
+                                except:
+                                    urteile_liste = []
+                        else:
+                            urteile_liste = []
+
+                        if urteile_liste:
+                            neue_id = urteile_liste[-1]["id"] + 1
+                        else:
+                            neue_id = 1
+
+                        # urteile_liste.append({
+                        #     "id": neue_id,
+                        #     "buerger_id": anzeige["buerger_id"],
+                        #     "person": anzeige["vorname"],
+                        #     "richter": richter,
+                        #     "gesetz": gesetz_daten["titel"],
+                        #     "bussgeld": int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0,
+                        #     "strafe": int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+                        # })
+
+                        # with open(urteileJsonPfad, "w", encoding="utf-8") as f:
+                        #     json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
+                        bussgeld_betrag = int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0
+                        strafe_jahre = int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+
+                        urteile_liste.append({
+                            "id": neue_id,
+                            "buerger_id": anzeige["buerger_id"],
+                            "person": anzeige["vorname"],
+                            "richter": richter,
+                            "gesetz": gesetz_daten["titel"],
+                            "bussgeld": bussgeld_betrag,
+                            "strafe": strafe_jahre
+                        })
+
+                        with open(urteileJsonPfad, "w", encoding="utf-8") as f:
+                            json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
+
+                        #A
+                        if bussgeld_betrag > 0:
+                            sende_bussgeld_an_bank(
+                                buerger_id=anzeige["buerger_id"],
+                                betrag=bussgeld_betrag,
+                                gesetz_id=int(anzeige["gesetz_id"]) if anzeige.get("gesetz_id") else int(gesetz_daten["id"]),
+                                gesetz_titel=gesetz_daten["titel"],
+                            )
+                        #/A
+
+                else:
+                    ablehnPfad = os.path.join(os.path.dirname(anzeigenJsonPfad), "anzeigeAbgelehnt.json")
+                    if os.path.exists(ablehnPfad):
+                        with open(ablehnPfad, "r", encoding="utf-8") as f:
+                            try:
+                                abgelehnt = json.load(f)
+                            except:
+                                abgelehnt = []
+                    else:
+                        abgelehnt = []
+
+                    anzeige["richter"] = richter
+                    abgelehnt.append(anzeige)
+
+                    with open(ablehnPfad, "w", encoding="utf-8") as f:
+                        json.dump(abgelehnt, f, ensure_ascii=False, indent=4)
+
+                with open(anzeigenJsonPfad, "w", encoding="utf-8") as f:
+                    json.dump(anzeigen_liste, f, ensure_ascii=False, indent=4)
+
+            return redirect("anzeigen")
+
+    return render(request, "rechtApp/anzeigen.html", {
+        "anzeigen": anzeigen_liste,
         "beruf": beruf,
-        "urteile": urteile_komplett,
+        "buerger_id": None
     })
 
 
-
-
-
-
-# Strafen-HTML
-#S
-def strafen(request):
-    data = ladeJson(strafenJsonPfad) #Beschreibung sollte aus GesetzID geholt werden bei der strafen.json
-    return render(request, 'rechtApp/strafen.html', {'strafen': data})
 
 # Bußgelder-HTML
 # S und A
 def bussgelder(request):
     beruf = request.session.get('beruf') 
-    data = ladeJson(bussgelderJsonPfad)
     if beruf != "Polizist":
         return HttpResponse("""
                         <script>
@@ -238,7 +408,7 @@ def bussgelder(request):
                             window.history.back();
                         </script>
                         """)
-    return render(request, 'rechtApp/bussgelder.html', {'bussgelder': data})
+    return render(request, 'rechtApp/bussgelder.html')
 
 # Urteile-HTML
 #S und A
@@ -632,6 +802,7 @@ def gesetz_api(request, gesetz_id):
         "gesetz_id": str(gesetz_id),
     }, status=404)
 
+<<<<<<< HEAD
 BACKUP_ORDNER = {
     "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),
 }
@@ -678,3 +849,72 @@ def backup(request):
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
+=======
+#A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
+def suche_buerger_id_beim_meldewesen(vorname: str, nachname: str, geburtsdatum: str):
+
+    payload = {
+        "vorname": vorname,
+        "nachname": nachname,
+        "geburtsdatum": geburtsdatum,  
+    }
+
+    try:
+        response = requests.post(MELDEWESEN_PERSONENSUCHE_URL, json=payload, timeout=5)
+
+        # falls meldewesen 404 zurückgibt -> keine Person
+        if response.status_code == 404:
+            return None
+
+        response.raise_for_status()
+        daten = response.json() #hier sollte ein json zurückkommen
+    except requests.RequestException:
+        return None
+
+    buerger_id = daten.get("buerger_id")
+
+    if buerger_id:
+        return buerger_id
+
+    return None
+
+#A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
+def polizei_personensuche(request):
+    buerger_id = None
+    fehlermeldung = None
+
+    if request.method == "POST":
+        vorname = request.POST.get("vorname", "")
+        nachname = request.POST.get("nachname", "")
+        geburtsdatum = request.POST.get("geburtsdatum", "")
+
+        if vorname and nachname and geburtsdatum:
+            buerger_id = suche_buerger_id_beim_meldewesen(vorname, nachname, geburtsdatum)
+            if buerger_id is None:
+                fehlermeldung = "Keine Person gefunden."
+        else:
+            fehlermeldung = "Bitte alle Felder ausfüllen."
+
+    return render(request, "rechtApp/polizei_personensuche.html", {
+        "buerger_id": buerger_id,
+        "fehlermeldung": fehlermeldung,
+    })
+
+#A
+def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_titel: str):
+    payload = {
+        "buerger_id": buerger_id,
+        "betrag": str(int(betrag)),
+        "gesetz_id": str(int(gesetz_id)),
+        "gesetz_titel": gesetz_titel,
+    }
+    try:
+        response = requests.post(BANK_API_URL, data=payload, timeout=5)
+        response.raise_for_status()
+        print("BANK ok:", response.status_code, response.text)
+    except requests.RequestException as e:
+        print("Fehler Bank:", repr(e))
+
+
+
+>>>>>>> 22a8cb4cdc06716fb227f7f491731cd9db732c3b

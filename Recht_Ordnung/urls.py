@@ -28,7 +28,7 @@ urlpatterns = [
     path('ro/registrieren', views.registrieren, name='registrieren'),
     path('ro/test', views.test_views, name="test"), 
     path('ro/profilseite', views.profilseite, name='profilseite'),
-    path('ro/strafen', views.strafen, name='strafen'),
+    path('ro/anzeigen', views.anzeigen, name='strafen'),
     path('ro/bussgelder', views.bussgelder, name='bussgelder'),
     path('ro/urteile', views.urteile, name='urteile'),
     path('ro/gesetze', views.gesetze, name='gesetze'),
@@ -36,7 +36,11 @@ urlpatterns = [
     path("ro/gesetze/entwurf/<int:gesetz_id>", views.gesetzFreigeben, name="gesetzFreigeben"),
     path("ro/vorstrafen_api/<str:buerger_id>", views.vorstrafen_api, name="vorstrafen_api"),
     path("ro/gesetz_api/<int:gesetz_id>", views.gesetz_api, name="gesetz_api"),
+<<<<<<< HEAD
     path("backup", views.backup, name="backup"),
+=======
+    path('ro/anzeigen', views.anzeigen, name='anzeigen'),
+>>>>>>> 22a8cb4cdc06716fb227f7f491731cd9db732c3b
 ]
 
 """

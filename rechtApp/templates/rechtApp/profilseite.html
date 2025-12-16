@@ -19,10 +19,8 @@
             <div class="inhaltNummerDivCLASS">Persönliche Daten</div>
 
             <div class="inhaltDivCLASS"><b>Benutzername:</b> {{ benutzer.benutzername }}</div>
-            <!--<div class="inhaltDivCLASS"><b>Email:</b> {{ benutzer.email }}</div>-->
             <div class="inhaltDivCLASS"><b>Passwort:</b> {{ benutzer.passwort }}</div>
-            <!--<div class="inhaltDivCLASS"><b>Beruf (aus API):</b> {{ beruf }}</div>-->
-            <div class="inhaltDivCLASS"><b>Qualifikationen:</b> {{ benutzer.qualifikation|join:", " }}</div>
+            <div class="inhaltDivCLASS"><b>Beruf (aus API):</b> {{ beruf }}</div>
         </div>
 
         <div class="karteDivCLASS">
@@ -33,25 +31,26 @@
                     <div class="karteDivCLASS" style="width:90%;">
 
                         <div class="inhaltDivCLASS">
-                            <b>Richter:</b> {{ u.richter }}
+                            Richter: {{ u.richter }}
                         </div>
 
                         <div class="inhaltDivCLASS">
-                            <b>Gesetz:</b> {{ u.gesetz.titel }}
+                            Gesetz: {{ u.gesetz.titel }}
                         </div>
+
                         <div class="inhaltDivCLASS">
                             {{ u.gesetz.beschreibung }}
                         </div>
 
                         {% if u.bussgeld %}
                             <div class="inhaltDivCLASS">
-                                <b>Bußgeld:</b> {{ u.bussgeld.betrag }}€
+                                Bußgeld: {{ u.bussgeld }}€
                             </div>
                         {% endif %}
 
                         {% if u.strafe %}
                             <div class="inhaltDivCLASS">
-                                <b>Strafe:</b> {{ u.strafe.jahre }} Jahre
+                                Strafe in Jahren: {{ u.strafe }}
                             </div>
                         {% endif %}
 

@@ -8,9 +8,15 @@ from lxml import etree as ET
 import requests
 from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
+from flask import Flask, send_file, request, jsonify
+from pathlib import Path
+from datetime import datetime
+import zipfile
+import io
+import os
 from datetime import date
 
- 
+
 #Allgemeiner Datenbankpfad
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
@@ -822,6 +828,54 @@ def gesetz_api(request, gesetz_id):
         "gesetz_id": str(gesetz_id),
     }, status=404)
 
+BACKUP_ORDNER = {
+    "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),
+}
+
+def erstelle_zip_backup(dateipfad: Path) -> tuple[io.BytesIO, str]:
+    if not dateipfad.exists() or not dateipfad.is_dir():
+        raise FileNotFoundError(f"folgender Ordner existiert nicht: {dateipfad}")
+
+    mem = io.BytesIO()
+    timestamp = datetime.now().strftime("%Y_%m_%d")
+    zip_dateiname = f"backup_{dateipfad.name}_{timestamp}.zip"
+
+    with zipfile.ZipFile(mem, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(dateipfad):
+            root_path = Path(root)
+            for file in files:
+                file_path = root_path / file
+                arcname = file_path.relative_to(dateipfad)
+                zf.write(file_path, arcname)
+
+    mem.seek(0)
+    return mem, zip_dateiname
+
+@csrf_exempt  # okay fürs Testen, später lieber Token Auth
+def backup(request):
+    # Pi ruft /backup?backup=static auf, bei anderen Gruppen anderen Dateipfad
+    schluessel = request.GET.get("backup")
+    if not schluessel:
+        return JsonResponse({"status": "error", "message": "Parameter 'backup' fehlt"}, status=400)
+
+    dateipfad = BACKUP_ORDNER.get(schluessel)
+    if not dateipfad:
+        return JsonResponse({
+            "status": "error",
+            "message": f"Unbekannter Ordner-Key '{schluessel}'. Erlaubt: {list(BACKUP_ORDNER.keys())}"
+        }, status=400)
+
+    try:
+        mem, zip_dateiname = erstelle_zip_backup(dateipfad)
+
+        response = HttpResponse(mem.getvalue(), content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="{zip_dateiname}"'
+        return response
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    
+    
 #A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
 def suche_buerger_id_beim_meldewesen(vorname: str, nachname: str, geburtsdatum: str):
 

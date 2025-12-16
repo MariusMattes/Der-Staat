@@ -802,7 +802,6 @@ def gesetz_api(request, gesetz_id):
         "gesetz_id": str(gesetz_id),
     }, status=404)
 
-<<<<<<< HEAD
 BACKUP_ORDNER = {
     "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),
 }
@@ -849,7 +848,8 @@ def backup(request):
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
-=======
+    
+    
 #A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
 def suche_buerger_id_beim_meldewesen(vorname: str, nachname: str, geburtsdatum: str):
 
@@ -917,4 +917,3 @@ def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_
 
 
 
->>>>>>> 22a8cb4cdc06716fb227f7f491731cd9db732c3b

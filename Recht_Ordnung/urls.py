@@ -36,11 +36,9 @@ urlpatterns = [
     path("ro/gesetze/entwurf/<int:gesetz_id>", views.gesetzFreigeben, name="gesetzFreigeben"),
     path("ro/vorstrafen_api/<str:buerger_id>", views.vorstrafen_api, name="vorstrafen_api"),
     path("ro/gesetz_api/<int:gesetz_id>", views.gesetz_api, name="gesetz_api"),
-<<<<<<< HEAD
     path("backup", views.backup, name="backup"),
-=======
     path('ro/anzeigen', views.anzeigen, name='anzeigen'),
->>>>>>> 22a8cb4cdc06716fb227f7f491731cd9db732c3b
+
 ]
 
 """

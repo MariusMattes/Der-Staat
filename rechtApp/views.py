@@ -76,7 +76,7 @@ def ladeJson(pfad):
     except FileNotFoundError:
         print(f"Datei nicht gefunden: {pfad}")
         return []
-    
+     
 #A    
 def lade_buergerakte(buerger_id: str):
     akten = ladeJson(buergerAkteJsonPfad)

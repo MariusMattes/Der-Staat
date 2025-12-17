@@ -38,7 +38,6 @@ urlpatterns = [
     path("ro/gesetz_api/<int:gesetz_id>", views.gesetz_api, name="gesetz_api"),
     path("backup", views.backup, name="backup"),
     path('ro/anzeigen', views.anzeigen, name='anzeigen'),
-
 ]
 
 """

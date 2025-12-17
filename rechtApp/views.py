@@ -298,7 +298,7 @@ def anzeigen(request):
             vorname = request.POST.get("vorname", "").strip()
             nachname = request.POST.get("nachname", "").strip()
             geburtsdatum = request.POST.get("geburtsdatum", "").strip()
-
+            print
             buerger_id = hole_buerger_id(vorname, nachname, geburtsdatum)
 
             return render(request, "rechtApp/anzeigen.html", {
@@ -874,57 +874,6 @@ def backup(request):
 
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
-    
-    
-#A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
-def suche_buerger_id_beim_meldewesen(vorname: str, nachname: str, geburtsdatum: str):
-
-    payload = {
-        "vorname": vorname,
-        "nachname": nachname,
-        "geburtsdatum": geburtsdatum,  
-    }
-
-    try:
-        response = requests.post(MELDEWESEN_PERSONENSUCHE_URL, json=payload, timeout=5)
-
-        # falls meldewesen 404 zurückgibt -> keine Person
-        if response.status_code == 404:
-            return None
-
-        response.raise_for_status()
-        daten = response.json() #hier sollte ein json zurückkommen
-    except requests.RequestException:
-        return None
-
-    buerger_id = daten.get("buerger_id")
-
-    if buerger_id:
-        return buerger_id
-
-    return None
-
-#A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
-def polizei_personensuche(request):
-    buerger_id = None
-    fehlermeldung = None
-
-    if request.method == "POST":
-        vorname = request.POST.get("vorname", "")
-        nachname = request.POST.get("nachname", "")
-        geburtsdatum = request.POST.get("geburtsdatum", "")
-
-        if vorname and nachname and geburtsdatum:
-            buerger_id = suche_buerger_id_beim_meldewesen(vorname, nachname, geburtsdatum)
-            if buerger_id is None:
-                fehlermeldung = "Keine Person gefunden."
-        else:
-            fehlermeldung = "Bitte alle Felder ausfüllen."
-
-    return render(request, "rechtApp/polizei_personensuche.html", {
-        "buerger_id": buerger_id,
-        "fehlermeldung": fehlermeldung,
-    })
 
 #A
 def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_titel: str):

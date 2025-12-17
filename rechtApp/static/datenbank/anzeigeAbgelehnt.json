@@ -22,5 +22,13 @@
         "gesetz_titel": null,
         "begruendung": "",
         "richter": "Sin"
+    },
+    {
+        "buerger_id": "www",
+        "vorname": "Simon",
+        "gesetz_id": "1",
+        "gesetz_titel": null,
+        "begruendung": "der wars",
+        "richter": "Sin"
     }
 ]

@@ -67,5 +67,104 @@
         "gesetz": "Diebstahl verboten",
         "bussgeld": 0,
         "strafe": 5
+    },
+    {
+        "id": 9,
+        "buerger_id": "f2d45d59-e37e-43ec-ac3d-a62f4a1c47f4",
+        "person": "Snake",
+        "richter": "Hans3",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 10,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Hans3",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 11,
+        "buerger_id": "Werdashierliestistdoof",
+        "person": "Max",
+        "richter": "Hans3",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 12,
+        "buerger_id": "Werdashierliestistdoof",
+        "person": "Max",
+        "richter": "Hans3",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 13,
+        "buerger_id": "Werdashierliestistdoof",
+        "person": "Max",
+        "richter": "Hans3",
+        "gesetz": "Öffentliche Ruhestörung verboten",
+        "bussgeld": 50,
+        "strafe": 0
+    },
+    {
+        "id": 14,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Fahren ohne Führerschein verboten",
+        "bussgeld": 500,
+        "strafe": 0
+    },
+    {
+        "id": 15,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 16,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Öffentliche Ruhestörung verboten",
+        "bussgeld": 50,
+        "strafe": 0
+    },
+    {
+        "id": 17,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Fahren ohne Führerschein verboten",
+        "bussgeld": 500,
+        "strafe": 0
+    },
+    {
+        "id": 18,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
+    },
+    {
+        "id": 19,
+        "buerger_id": "TestID",
+        "person": "Max",
+        "richter": "Richter",
+        "gesetz": "Mord verboten",
+        "bussgeld": 0,
+        "strafe": 50
     }
 ]

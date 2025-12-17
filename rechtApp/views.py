@@ -8,7 +8,15 @@ from lxml import etree as ET
 import requests
 from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
- 
+from flask import Flask, send_file, request, jsonify
+from pathlib import Path
+from datetime import datetime
+import zipfile
+import io
+import os
+from datetime import date
+
+
 #Allgemeiner Datenbankpfad
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
@@ -20,7 +28,6 @@ anzeigenJsonPfad = os.path.join(allgemeinerPfad, 'anzeigen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
 vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
-buergerAkteJsonPfad = os.path.join(allgemeinerPfad, 'recht_buergerakte.json')
 
 #Einzelne XML-Datei
 #S
@@ -31,6 +38,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #Bekannte Schnittstellen
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche/"
+BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
@@ -78,19 +86,16 @@ def ladeJson(pfad):
         return []
      
 #A    
-def lade_buergerakte(buerger_id: str):
-    akten = ladeJson(buergerAkteJsonPfad)
+def lade_vorstrafen_daten():
+    daten = ladeJson(vorstrafenJsonPfad)
+    if not isinstance(daten, list):
+        return []
+    return daten
 
-    for akte in akten:
-        if akte.get("buerger_id") == buerger_id:
-            return akte
-        
-    return {
-        "buerger_id": buerger_id,
-        "vorstrafen": [],
-        "bussgelder": []
-    }
-
+#A
+def speichere_vorstrafen_daten(daten):
+    with open(vorstrafenJsonPfad, "w", encoding="utf-8") as f:
+        json.dump(daten, f, ensure_ascii=False, indent=4)
     
 def xmlStrukturierenGesetze():
     parser = ET.XMLParser(remove_blank_text=True)
@@ -99,7 +104,6 @@ def xmlStrukturierenGesetze():
 def xmlStrukturierenGesetzentwurf():
     parser = ET.XMLParser(remove_blank_text=True)
     return ET.parse(gesetzentwurfXmlPfad, parser)
-
 
 def ladeBenutzer():
     try:
@@ -116,6 +120,30 @@ def speicherBenutzer(daten):
 #S
 def test_views(request):
         return render(request, 'rechtApp/ztest.html')
+
+#A
+def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
+    daten = lade_vorstrafen_daten()
+
+    akte = None
+    for a in daten:
+        if str(a.get("buerger_id")) == str(buerger_id):
+            akte = a
+            break
+
+    if akte is None:
+        akte = {"buerger_id": str(buerger_id), "vorstrafen": []}
+        daten.append(akte)
+
+    if "vorstrafen" not in akte or not isinstance(akte["vorstrafen"], list):
+        akte["vorstrafen"] = []
+
+    akte["vorstrafen"].append({
+        "gesetz_id": int(gesetz_id),
+        "datum_urteil": datum_urteil
+    })
+
+    speichere_vorstrafen_daten(daten)
 
 
 #Profilseite-HTML
@@ -322,18 +350,49 @@ def anzeigen(request):
                         else:
                             neue_id = 1
 
+                        # urteile_liste.append({
+                        #     "id": neue_id,
+                        #     "buerger_id": anzeige["buerger_id"],
+                        #     "person": anzeige["vorname"],
+                        #     "richter": richter,
+                        #     "gesetz": gesetz_daten["titel"],
+                        #     "bussgeld": int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0,
+                        #     "strafe": int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+                        # })
+
+                        # with open(urteileJsonPfad, "w", encoding="utf-8") as f:
+                        #     json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
+                        bussgeld_betrag = int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0
+                        strafe_jahre = int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+
                         urteile_liste.append({
                             "id": neue_id,
                             "buerger_id": anzeige["buerger_id"],
                             "person": anzeige["vorname"],
                             "richter": richter,
                             "gesetz": gesetz_daten["titel"],
-                            "bussgeld": int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0,
-                            "strafe": int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
+                            "bussgeld": bussgeld_betrag,
+                            "strafe": strafe_jahre
                         })
 
                         with open(urteileJsonPfad, "w", encoding="utf-8") as f:
                             json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
+
+                        #A
+                        if strafe_jahre > 0:
+                            datum = date.today().isoformat()  # "YYYY-MM-DD"
+                            gesetz_id = int(anzeige["gesetz_id"])
+                            print(f"Testzweck für speichern vorstrafen {gesetz_id}")
+                            fuege_vorstrafe_hinzu(buerger_id=anzeige["buerger_id"], gesetz_id=gesetz_id, datum_urteil=datum)
+                        
+                        if bussgeld_betrag > 0:
+                            sende_bussgeld_an_bank(
+                                buerger_id=anzeige["buerger_id"],
+                                betrag=bussgeld_betrag,
+                                gesetz_id=int(anzeige["gesetz_id"]) if anzeige.get("gesetz_id") else int(gesetz_daten["id"]),
+                                gesetz_titel=gesetz_daten["titel"],
+                            )
+                        #/A
 
                 else:
                     ablehnPfad = os.path.join(os.path.dirname(anzeigenJsonPfad), "anzeigeAbgelehnt.json")
@@ -734,20 +793,19 @@ def logout(request):
 
 #A 
 def vorstrafen_api(request, buerger_id):
-    akten = ladeJson(buergerAkteJsonPfad)
+    daten = lade_vorstrafen_daten()
 
-    for akte in akten:
-        if akte.get("buerger_id") == buerger_id:
+    for akte in daten:
+        if str(akte.get("buerger_id")) == str(buerger_id):
             vorstrafen = akte.get("vorstrafen", [])
             return JsonResponse({
-                "buerger_id": buerger_id,
+                "buerger_id": str(buerger_id),
                 "hat_vorstrafen": bool(vorstrafen),
                 "vorstrafen": vorstrafen
             }, status=200)
 
-    # keine akte = keine vorstrafen
     return JsonResponse({
-        "buerger_id": buerger_id,
+        "buerger_id": str(buerger_id),
         "hat_vorstrafen": False,
         "vorstrafen": []
     }, status=200)
@@ -770,4 +828,118 @@ def gesetz_api(request, gesetz_id):
         "gesetz_id": str(gesetz_id),
     }, status=404)
 
+BACKUP_ORDNER = {
+    "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),
+}
+
+def erstelle_zip_backup(dateipfad: Path) -> tuple[io.BytesIO, str]:
+    if not dateipfad.exists() or not dateipfad.is_dir():
+        raise FileNotFoundError(f"folgender Ordner existiert nicht: {dateipfad}")
+
+    mem = io.BytesIO()
+    timestamp = datetime.now().strftime("%Y_%m_%d")
+    zip_dateiname = f"backup_{dateipfad.name}_{timestamp}.zip"
+
+    with zipfile.ZipFile(mem, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(dateipfad):
+            root_path = Path(root)
+            for file in files:
+                file_path = root_path / file
+                arcname = file_path.relative_to(dateipfad)
+                zf.write(file_path, arcname)
+
+    mem.seek(0)
+    return mem, zip_dateiname
+
+@csrf_exempt  # okay fürs Testen, später lieber Token Auth
+def backup(request):
+    # Pi ruft /backup?backup=static auf, bei anderen Gruppen anderen Dateipfad
+    schluessel = request.GET.get("backup")
+    if not schluessel:
+        return JsonResponse({"status": "error", "message": "Parameter 'backup' fehlt"}, status=400)
+
+    dateipfad = BACKUP_ORDNER.get(schluessel)
+    if not dateipfad:
+        return JsonResponse({
+            "status": "error",
+            "message": f"Unbekannter Ordner-Key '{schluessel}'. Erlaubt: {list(BACKUP_ORDNER.keys())}"
+        }, status=400)
+
+    try:
+        mem, zip_dateiname = erstelle_zip_backup(dateipfad)
+
+        response = HttpResponse(mem.getvalue(), content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="{zip_dateiname}"'
+        return response
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
     
+    
+#A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
+def suche_buerger_id_beim_meldewesen(vorname: str, nachname: str, geburtsdatum: str):
+
+    payload = {
+        "vorname": vorname,
+        "nachname": nachname,
+        "geburtsdatum": geburtsdatum,  
+    }
+
+    try:
+        response = requests.post(MELDEWESEN_PERSONENSUCHE_URL, json=payload, timeout=5)
+
+        # falls meldewesen 404 zurückgibt -> keine Person
+        if response.status_code == 404:
+            return None
+
+        response.raise_for_status()
+        daten = response.json() #hier sollte ein json zurückkommen
+    except requests.RequestException:
+        return None
+
+    buerger_id = daten.get("buerger_id")
+
+    if buerger_id:
+        return buerger_id
+
+    return None
+
+#A frage an Sinan, macht dies funktion überhaupt noch etwas, oder kann die gelöschtg werden?
+def polizei_personensuche(request):
+    buerger_id = None
+    fehlermeldung = None
+
+    if request.method == "POST":
+        vorname = request.POST.get("vorname", "")
+        nachname = request.POST.get("nachname", "")
+        geburtsdatum = request.POST.get("geburtsdatum", "")
+
+        if vorname and nachname and geburtsdatum:
+            buerger_id = suche_buerger_id_beim_meldewesen(vorname, nachname, geburtsdatum)
+            if buerger_id is None:
+                fehlermeldung = "Keine Person gefunden."
+        else:
+            fehlermeldung = "Bitte alle Felder ausfüllen."
+
+    return render(request, "rechtApp/polizei_personensuche.html", {
+        "buerger_id": buerger_id,
+        "fehlermeldung": fehlermeldung,
+    })
+
+#A
+def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_titel: str):
+    payload = {
+        "buerger_id": buerger_id,
+        "betrag": str(int(betrag)),
+        "gesetz_id": str(int(gesetz_id)),
+        "gesetz_titel": gesetz_titel,
+    }
+    try:
+        response = requests.post(BANK_API_URL, data=payload, timeout=5)
+        response.raise_for_status()
+        print("BANK ok:", response.status_code, response.text)
+    except requests.RequestException as e:
+        print("Fehler Bank:", repr(e))
+
+
+

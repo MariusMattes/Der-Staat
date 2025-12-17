@@ -65,7 +65,7 @@ def hole_buerger_id(vorname, nachname, geburtsdatum):
 
     try:
         response = requests.post(Einwohnermeldeamt_API_URL, json=daten, timeout=5)
-
+        print("Antwort Einwohnermeldeamt:", response)
         if response.status_code == 200:
             return response.json().get("buerger_id")
 

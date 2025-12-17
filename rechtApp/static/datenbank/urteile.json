@@ -166,5 +166,23 @@
         "gesetz": "Mord verboten",
         "bussgeld": 0,
         "strafe": 50
+    },
+    {
+        "id": 20,
+        "buerger_id": "ww",
+        "person": "Hans2",
+        "richter": "Sin",
+        "gesetz": "Mord verboten",
+        "bussgeld": 0,
+        "strafe": 50
+    },
+    {
+        "id": 21,
+        "buerger_id": "wwwww",
+        "person": "Hans2",
+        "richter": "Sin",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
+        "strafe": 0
     }
 ]

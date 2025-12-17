@@ -16,5 +16,14 @@
                 "datum_urteil": "2025-12-16"
             }
         ]
+    },
+    {
+        "buerger_id": "ww",
+        "vorstrafen": [
+            {
+                "gesetz_id": 3,
+                "datum_urteil": "2025-12-17"
+            }
+        ]
     }
 ]

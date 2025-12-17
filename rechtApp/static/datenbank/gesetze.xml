@@ -75,4 +75,24 @@
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
   </gesetz>
+  <gesetz>
+    <id>11</id>
+    <titel>Kindergeld</titel>
+    <beschreibung>Pro Kind stehen pro Monat für 25 Jahre den Eltern folgender Betrag zur Verfügung:</beschreibung>
+    <api_relevant>
+      <wert>500</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
+  </gesetz>
+    <gesetz>
+    <id>12</id>
+    <titel>Elterngeld</titel>
+    <beschreibung>Pro Kind stehen pro Monat für 25 Jahre den Eltern folgender Betrag zur Verfügung:</beschreibung>
+    <api_relevant>
+      <wert>500</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
+  </gesetz>
 </gesetze>

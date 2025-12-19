@@ -37,7 +37,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #A
 #Bekannte Schnittstellen
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
-Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche/"
+Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche"
 BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
 
 def hole_beruf_von_arbeit(benutzer_id: str):
@@ -762,10 +762,11 @@ def login(request):
                     request.session['benutzername'] = benutzername
 
                     # quali über schnittstelle
-                    beruf = hole_beruf_von_arbeit(benutzer_id)
+                    beruf = hole_beruf_von_arbeit(benutzer_id)               
                     request.session['beruf'] = beruf
 
                     print("Beruf aus Arbeit-API:", request.session.get('beruf'))
+
                 break
 
         if not benutzername_existiert:

@@ -8,13 +8,10 @@ from lxml import etree as ET
 import requests
 from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
-from flask import Flask, send_file, request, jsonify
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, date
 import zipfile
 import io
-import os
-from datetime import date
 
 
 #Allgemeiner Datenbankpfad
@@ -830,19 +827,19 @@ def gesetz_api(request, gesetz_id):
     }, status=404)
 
 BACKUP_ORDNER = {
-    "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),
+    "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),              # Dateipfad für Backup angeben
 }
 
 def erstelle_zip_backup(dateipfad: Path) -> tuple[io.BytesIO, str]:
-    if not dateipfad.exists() or not dateipfad.is_dir():
+    if not dateipfad.exists() or not dateipfad.is_dir():                                # Dateipfad Check
         raise FileNotFoundError(f"folgender Ordner existiert nicht: {dateipfad}")
 
-    mem = io.BytesIO()
+    mem = io.BytesIO()                                                                  # Zip wird in Ram gespeichert/erstellt
     timestamp = datetime.now().strftime("%Y_%m_%d")
     zip_dateiname = f"backup_{dateipfad.name}_{timestamp}.zip"
 
     with zipfile.ZipFile(mem, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for root, dirs, files in os.walk(dateipfad):
+        for root, dirs, files in os.walk(dateipfad):                                    # Angegebener Dateipfad wird kontrolliert und durchlaufen
             root_path = Path(root)
             for file in files:
                 file_path = root_path / file
@@ -850,11 +847,11 @@ def erstelle_zip_backup(dateipfad: Path) -> tuple[io.BytesIO, str]:
                 zf.write(file_path, arcname)
 
     mem.seek(0)
-    return mem, zip_dateiname
+    return mem, zip_dateiname                                                           # Zip als Antwort der Funktion zurückgegeben
 
-@csrf_exempt  # okay fürs Testen, später lieber Token Auth
+@csrf_exempt                                                                            # okay fürs Testen, später falls möglich Token Auth
 def backup(request):
-    # Pi ruft /backup?backup=static auf, bei anderen Gruppen anderen Dateipfad
+                                                                                        # Pi ruft /backup?backup=static auf Kann lokal getestet werden mit "http://127.0.0.1:8000/backup?backup=static"
     schluessel = request.GET.get("backup")
     if not schluessel:
         return JsonResponse({"status": "error", "message": "Parameter 'backup' fehlt"}, status=400)
@@ -870,7 +867,7 @@ def backup(request):
         mem, zip_dateiname = erstelle_zip_backup(dateipfad)
 
         response = HttpResponse(mem.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{zip_dateiname}"'
+        response["Content-Disposition"] = f'attachment; filename="{zip_dateiname}"'     # Datei wird als Download gesendet/vom "Requester" runtergeladen
         return response
 
     except Exception as e:

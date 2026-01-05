@@ -900,18 +900,21 @@ def gesetz_api(request, gesetz_id):
     gesetze = ladeGesetze()
 
     for gesetz in gesetze:
-        if gesetz.get("id") == str(gesetz_id):
-            api_werte = gesetz.get("api_relevant", [])
+        if gesetz["id"] == str(gesetz_id):
             return JsonResponse({
-                "gesetz_id": gesetz.get("id"),
-                "titel": gesetz.get("titel"),
-                "werte": api_werte,
-            }, status = 200)
+                "id": gesetz["id"],
+                "titel": gesetz["titel"],
+                "beschreibung": gesetz["beschreibung"],
+                "api_relevant": gesetz["api_relevant"],
+                "bussgeld": gesetz["bussgeld"],
+                "strafe": gesetz["strafe"],
+            }, status=200)
 
     return JsonResponse({
         "fehler": "Gesetz nicht gefunden",
         "gesetz_id": str(gesetz_id),
     }, status=404)
+
 
 BACKUP_ORDNER = {
     "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),              # Dateipfad für Backup angeben

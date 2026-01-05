@@ -16,7 +16,7 @@ from urllib.parse import unquote #für meldewesenlogin
 from .jwt_tooling import decode_jwt # für meldewesenlogin #WICHTIG! pip install PyJWT NICHT JWT
 
 from.jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("TEST-BUERGER-123") #für testzwecke
+token = create_jwt("polizist1") #für testzwecke
 print(token) #für testzwecke
 
 #Allgemeiner Datenbankpfad

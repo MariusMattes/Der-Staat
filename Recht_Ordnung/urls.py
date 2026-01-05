@@ -23,7 +23,7 @@ from rechtApp import views
 #name="test" = interner name
 
 urlpatterns = [
-    path('ro/login', views.jwt_login, name='login'),
+    path("ro/jwt-login", views.jwt_login, name="jwt_login"),
     path('ro/logout', views.logout, name='logout'),
     path('ro/registrieren', views.registrieren, name='registrieren'),
     path('ro/test', views.test_views, name="test"), 

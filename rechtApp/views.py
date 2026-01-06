@@ -9,7 +9,7 @@ import requests
 from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
 from pathlib import Path
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import zipfile
 import io
 from urllib.parse import unquote #für meldewesenlogin
@@ -435,6 +435,10 @@ def anzeigen(request):
                                 datum_urteil=datum
                             )
 
+                            sende_haftstatus_an_meldewesen(
+                                buerger_id=anzeige["buerger_id"],
+                                haft_status=True
+                            )
 
                         if bussgeld_betrag > 0:
                             sende_bussgeld_an_bank(
@@ -920,6 +924,20 @@ def gesetz_api(request, gesetz_id):
         "fehler": "Gesetz nicht gefunden",
         "gesetz_id": str(gesetz_id),
     }, status=404)
+
+#A
+def sende_haftstatus_an_meldewesen(buerger_id: str, haft_status: bool):
+    payload = {
+        "buerger_id": buerger_id,
+        "haft_status": haft_status
+    }
+
+    try:
+        response = requests.post(HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT, json=payload, timeout=5)
+        response.raise_for_status()
+        print("MELDEWESEN ok:", response.status_code, response.text)
+    except requests.RequestException as e:
+        print("Fehler Meldewesen:", repr(e))
 
 
 #F

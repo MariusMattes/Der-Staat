@@ -15,6 +15,9 @@ import io
 from urllib.parse import unquote #für meldewesenlogin
 from .jwt_tooling import decode_jwt # für meldewesenlogin #WICHTIG! pip install PyJWT NICHT JWT
 
+import logging #logbuch für fehlersuche
+logger = logging.getLogger(__name__)
+
 from.jwt_tooling import create_jwt #für testzwecke
 token = create_jwt("polizist1") #für testzwecke
 print(token) #für testzwecke
@@ -851,29 +854,29 @@ def registrieren(request):
 #A
 def jwt_login(request):
     token = request.GET.get("token")
+    logger.warning("JWT_LOGIN: raw token = %s", token)
+
     if not token:
-        return HttpResponse("Kein Token übergeben.", status=400)
-    
-    #nur für mich, testen ob token korrekt decoded wird oder nicht
-    print("RAW token:", token)
-    print("UNQUOTED token:", unquote(token))
+        logger.warning("JWT_LOGIN: kein Token übergeben")
+        return HttpResponse("Kein Token", status=400)
 
     try:
-        daten = decode_jwt(unquote(token)) #noch unklar wie genau diese daten aussehen
-    except Exception:
-        return HttpResponse("Ungültiges oder abgelaufenes Token.", status=401) # soweit ich weiss gilt das token nur 5min → siehe gruppe meldewesen
+        daten = decode_jwt(token)
+        logger.warning("JWT_LOGIN: decoded payload = %s", daten)
+    except Exception as e:
+        logger.error("JWT_LOGIN: decode fehlgeschlagen: %s", e)
+        return HttpResponse("Ungültiges Token", status=401)
 
-    buerger_id = daten.get("user_id") 
-    if not buerger_id:
-        return HttpResponse("Token enthält keine Bürger-ID.", status=400)
-    
-    request.session["user_id"] = str(buerger_id) #ab hier wieder ganz normal die ID in unserer session
-    print("JWT buerger_id:", buerger_id)
+    buerger_id = daten.get("user_id")
+    logger.warning("JWT_LOGIN: buerger_id = %s", buerger_id)
 
-    beruf = hole_beruf_von_arbeit(str(buerger_id))
-    request.session["beruf"] = beruf
+    request.session["user_id"] = buerger_id
+    request.session.modified = True
+    logger.warning("JWT_LOGIN: Session gesetzt")
 
     return redirect("profilseite")
+
+
 
 #TODO Logout sollte wieder zurück zum Meldewesen führen
 def logout(request):

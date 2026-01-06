@@ -875,6 +875,7 @@ def jwt_login(request):
 
     return redirect("profilseite")
 
+#TODO Logout sollte wieder zurück zum Meldewesen führen
 def logout(request):
     return redirect('login')
 

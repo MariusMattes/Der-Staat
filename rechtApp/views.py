@@ -41,6 +41,8 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche"
 BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
+HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
+
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
@@ -481,7 +483,7 @@ def anzeigen(request):
 
 
 # Bußgelder-HTML
-# S und A
+# S
 def bussgelder(request):
     beruf = request.session.get('beruf') 
     if beruf != "Polizist":
@@ -494,7 +496,7 @@ def bussgelder(request):
     return render(request, 'rechtApp/bussgelder.html')
 
 # Urteile-HTML
-#S und A
+#S
 def urteile(request):
     beruf = request.session.get('beruf') 
     data = ladeJson(urteileJsonPfad)
@@ -916,6 +918,7 @@ def gesetz_api(request, gesetz_id):
     }, status=404)
 
 
+#F
 BACKUP_ORDNER = {
     "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),              # Dateipfad für Backup angeben
 }
@@ -939,6 +942,7 @@ def erstelle_zip_backup(dateipfad: Path) -> tuple[io.BytesIO, str]:
     mem.seek(0)
     return mem, zip_dateiname                                                           # Zip als Antwort der Funktion zurückgegeben
 
+#F
 @csrf_exempt                                                                            # okay fürs Testen, später falls möglich Token Auth
 def backup(request):
                                                                                         # Pi ruft /backup?backup=static auf Kann lokal getestet werden mit "http://127.0.0.1:8000/backup?backup=static"

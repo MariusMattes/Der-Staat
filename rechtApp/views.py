@@ -884,7 +884,7 @@ def jwt_login(request):
 
 #TODO Logout sollte wieder zurück zum Meldewesen führen
 def logout(request):
-    return redirect('login')
+    return redirect('http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/mainpage')
 
 #A 
 def vorstrafen_api(request, buerger_id):

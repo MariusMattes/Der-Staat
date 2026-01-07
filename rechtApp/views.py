@@ -20,7 +20,7 @@ import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
 
 from.jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("polizist1") #für testzwecke
+token = create_jwt("92b8bc8d-6572-4bd0-a505-34fed49de186") #für testzwecke
 print(token) #für testzwecke
 #http://127.0.0.1:8000/ro/jwt-login?token=
 
@@ -64,6 +64,23 @@ def hole_beruf_von_arbeit(benutzer_id: str):
         return None
     except requests.RequestException:
         return None
+
+def hole_buerger_daten(buerger_id):
+
+    daten = {
+        "buerger_id": buerger_id
+    }
+
+    try:
+        response = requests.post(Einwohnermeldeamt_API_URL, json=daten, timeout=5)
+        print("Antwort Einwohnermeldeamt (Person):", response)
+        if response.status_code == 200:
+            return response.json()
+
+    except Exception as e:
+        print("Fehler bei Bürgerdaten-Abfrage:", e)
+
+    return None
 
 def hole_buerger_id(vorname, nachname, geburtsdatum):
 
@@ -197,6 +214,12 @@ def profilseite(request):
     # if benutzer_daten is None:
     #     return HttpResponse("Benutzer konnte nicht gefunden werden.")
 
+        #---
+        #benutzer = hole_buerger_daten(buerger_id)
+
+        #if not benutzer:
+        #    return HttpResponse("Bürgerdaten konnten nicht geladen werden", status=500)
+        #----
     # ==============================
     # Urteile laden (unverändert)
     # ==============================
@@ -278,6 +301,7 @@ def profilseite(request):
             # ==============================
 
             # NEU
+            #"benutzer": benutzer,
             "buerger_id": buerger_id,
             "beruf": beruf,
             "urteile": urteile_komplett
@@ -495,7 +519,6 @@ def anzeigen(request):
         "beruf": beruf,
         "buerger_id": None
     })
-
 
 
 

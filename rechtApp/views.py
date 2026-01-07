@@ -14,6 +14,10 @@ import zipfile
 import io
 from urllib.parse import unquote #für meldewesenlogin
 from .jwt_tooling import decode_jwt # für meldewesenlogin #WICHTIG! pip install PyJWT NICHT JWT
+import matplotlib
+matplotlib.use("Agg")  # zwingend für Django
+import matplotlib.pyplot as plt
+import pandas as pd
 
 import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__)
@@ -1029,5 +1033,37 @@ def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_
     except requests.RequestException as e:
         print("Fehler Bank:", repr(e))
 
+def anzeigen_diagramm(request):
+    if not os.path.exists(anzeigenJsonPfad):
+        return HttpResponse("Keine Anzeigen vorhanden", status=404)
+
+    with open(anzeigenJsonPfad, "r", encoding="utf-8") as f:
+        daten = json.load(f)
+
+    if not daten:
+        return HttpResponse("Keine Daten", status=404)
+
+    df = pd.DataFrame(daten)
+    counts = df["gesetz_id"].value_counts().sort_index()
+
+    fig, ax = plt.subplots()
+    counts.plot(
+        kind="bar",
+        ax=ax,
+        title="Anzahl der Anzeigen pro Gesetz",
+        xlabel="Gesetz ID",
+        ylabel="Anzahl Anzeigen",
+    )
+
+    plt.tight_layout()
+
+    response = HttpResponse(content_type="image/png")
+    fig.savefig(response, format="png")
+    plt.close(fig)
+
+    return response
+
+def diagramm_seite(request):
+    return render(request, "rechtApp/diagramm.html")
 
 #Test12

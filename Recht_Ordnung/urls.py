@@ -38,6 +38,9 @@ urlpatterns = [
     path("ro/gesetz_api/<int:gesetz_id>", views.gesetz_api, name="gesetz_api"),
     path("backup", views.backup, name="backup"),
     path('ro/anzeigen', views.anzeigen, name='anzeigen'),
+    path("ro/diagramm/anzeigen.png", views.anzeigen_diagramm, name="anzeigen_diagramm"),
+    path("ro/diagramm", views.diagramm_seite, name="diagramm_seite"),
+
 ]
 
 """

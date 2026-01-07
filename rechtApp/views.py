@@ -877,6 +877,9 @@ def jwt_login(request):
     request.session["user_id"] = buerger_id
     request.session.modified = True
     logger.warning("JWT_LOGIN: Session gesetzt")
+    
+    beruf = hole_beruf_von_arbeit(str(buerger_id))
+    request.session["beruf"] = beruf
 
     return redirect("profilseite")
 

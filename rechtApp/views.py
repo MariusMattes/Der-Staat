@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime, date, timedelta
 import zipfile
 import io
+import math
 from urllib.parse import unquote #für meldewesenlogin
 from .jwt_tooling import decode_jwt # für meldewesenlogin #WICHTIG! pip install PyJWT NICHT JWT
 import matplotlib
@@ -20,11 +21,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 import logging #logbuch für fehlersuche
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) 
 
 from.jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("polizist1") #für testzwecke
+token = create_jwt("92b8bc8d-6572-4bd0-a505-34fed49de186") #für testzwecke
 print(token) #für testzwecke
+#http://127.0.0.1:8000/ro/jwt-login?token=
 
 #Allgemeiner Datenbankpfad
 #S
@@ -51,25 +53,7 @@ BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMel
 HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
 ARBEIT_LEGISLATIVE_API = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/personenliste/legislative"
 
-def hole_buerger_daten(buerger_id):
-    """
-    Holt Bürgerdaten aus dem Meldewesen anhand der buerger_id
-    Rückgabe: dict oder None
-    """
-    try:
-        with open("meldewesen_buerger.json", "r", encoding="utf-8") as f:
-            daten = json.load(f)
-
-        for person in daten:
-            if str(person.get("buerger_id")) == str(buerger_id):
-                return person
-
-    except Exception as e:
-        print("Fehler beim Laden der Bürgerdaten:", e)
-
-    return None
-
-
+#A
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
         url = f"{ARBEIT_API_URL}{benutzer_id}"
@@ -84,6 +68,23 @@ def hole_beruf_von_arbeit(benutzer_id: str):
         return None
     except requests.RequestException:
         return None
+
+def hole_buerger_daten(buerger_id):
+
+    daten = {
+        "buerger_id": buerger_id
+    }
+
+    try:
+        response = requests.post(Einwohnermeldeamt_API_URL, json=daten, timeout=5)
+        print("Antwort Einwohnermeldeamt (Person):", response)
+        if response.status_code == 200:
+            return response.json()
+
+    except Exception as e:
+        print("Fehler bei Bürgerdaten-Abfrage:", e)
+
+    return None
 
 def hole_buerger_id(vorname, nachname, geburtsdatum):
 
@@ -103,6 +104,13 @@ def hole_buerger_id(vorname, nachname, geburtsdatum):
         print("Fehler bei Bürger-ID-Abfrage:", e)
 
     return None
+
+#A
+def hole_anzahl_legislative():
+    response = requests.get(ARBEIT_LEGISLATIVE_API, timeout=5)
+    response.raise_for_status()
+    daten = response.json()
+    return len(daten.get("personen", []))
 
 #Hilfsfunktionen
 #S
@@ -210,13 +218,12 @@ def profilseite(request):
     # if benutzer_daten is None:
     #     return HttpResponse("Benutzer konnte nicht gefunden werden.")
 
-    buerger = hole_buerger_daten(buerger_id)
-    if not buerger:
-        return HttpResponse("Bürgerdaten konnten nicht geladen werden.", status=500)
+        #---
+        #benutzer = hole_buerger_daten(buerger_id)
 
-    vorname = buerger.get("vorname", "Unbekannt")
-    nachname = buerger.get("nachname_neu") or buerger.get("nachname_geburt", "")
-
+        #if not benutzer:
+        #    return HttpResponse("Bürgerdaten konnten nicht geladen werden", status=500)
+        #----
     # ==============================
     # Urteile laden (unverändert)
     # ==============================
@@ -292,11 +299,16 @@ def profilseite(request):
         request,
         "rechtApp/profilseite.html",
         {
+            # ==============================
+            # ALT: lokaler Benutzer
+            # "benutzer": benutzer_daten,
+            # ==============================
+
+            # NEU
+            #"benutzer": benutzer,
             "buerger_id": buerger_id,
-            "vorname": vorname,
-            "nachname": nachname,
             "beruf": beruf,
-            "urteile": urteile_komplett,
+            "urteile": urteile_komplett
         }
     )
 
@@ -514,7 +526,6 @@ def anzeigen(request):
 
 
 
-
 # Bußgelder-HTML
 # S
 def bussgelder(request):
@@ -696,8 +707,13 @@ def gesetzFreigeben(request, gesetz_id):
                 neue_zustimmung = aktuelle_zustimmung + 1
                 zustimmung_el.text = str(neue_zustimmung)
 
-                # 7. Wenn mindestens 3 Stimmen → in gesetze.xml übernehmen
-                if neue_zustimmung >= 3:
+                #A
+                anzahl_legislative = hole_anzahl_legislative()
+                print(anzahl_legislative)
+                benoetigte_stimmen = math.ceil(anzahl_legislative * 0.5) #ceiling = rundet Zahl auf
+
+                if neue_zustimmung >= benoetigte_stimmen:
+                #/A
                     # Normale Gesetze laden
                     try:
                         tree_gesetze = xmlStrukturierenGesetze()

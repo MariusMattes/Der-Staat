@@ -30,5 +30,21 @@
         "gesetz_titel": null,
         "begruendung": "der wars",
         "richter": "Sin"
+    },
+    {
+        "buerger_id": "4493ffb9-1513-42f9-b709-35ebdddc0296",
+        "vorname": "Simon",
+        "gesetz_id": "1",
+        "gesetz_titel": null,
+        "begruendung": "Wurde beobachtet",
+        "richter": "Sin"
+    },
+    {
+        "buerger_id": "ww",
+        "vorname": "Max",
+        "gesetz_id": "3",
+        "gesetz_titel": null,
+        "begruendung": "wurde gesehen",
+        "richter": "Sin"
     }
 ]

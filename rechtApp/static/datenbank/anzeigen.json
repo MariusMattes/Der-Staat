@@ -1,16 +1,9 @@
 [
     {
-        "buerger_id": "4493ffb9-1513-42f9-b709-35ebdddc0296",
-        "vorname": "Simon",
+        "buerger_id": "18790d52-080e-4764-bc4c-3597b2705572",
+        "vorname": "Kind13",
         "gesetz_id": "1",
         "gesetz_titel": null,
-        "begruendung": "Wurde beobachtet"
-    },
-    {
-        "buerger_id": "ww",
-        "vorname": "Max",
-        "gesetz_id": "3",
-        "gesetz_titel": null,
-        "begruendung": "wurde gesehen"
+        "begruendung": "War viel zu schnell unterwegs"
     }
 ]

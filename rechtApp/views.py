@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime, date, timedelta
 import zipfile
 import io
+import math
 from urllib.parse import unquote #für meldewesenlogin
 from .jwt_tooling import decode_jwt # für meldewesenlogin #WICHTIG! pip install PyJWT NICHT JWT
 
@@ -48,7 +49,7 @@ BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMel
 HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
 ARBEIT_LEGISLATIVE_API = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/personenliste/legislative"
 
-
+#A
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
         url = f"{ARBEIT_API_URL}{benutzer_id}"
@@ -82,6 +83,13 @@ def hole_buerger_id(vorname, nachname, geburtsdatum):
         print("Fehler bei Bürger-ID-Abfrage:", e)
 
     return None
+
+#A
+def hole_anzahl_legislative():
+    response = requests.get(ARBEIT_LEGISLATIVE_API, timeout=5)
+    response.raise_for_status()
+    daten = response.json()
+    return len(daten.get("personen", []))
 
 #Hilfsfunktionen
 #S
@@ -672,8 +680,13 @@ def gesetzFreigeben(request, gesetz_id):
                 neue_zustimmung = aktuelle_zustimmung + 1
                 zustimmung_el.text = str(neue_zustimmung)
 
-                # 7. Wenn mindestens 3 Stimmen → in gesetze.xml übernehmen
-                if neue_zustimmung >= 3:
+                #A
+                anzahl_legislative = hole_anzahl_legislative()
+                print(anzahl_legislative)
+                benoetigte_stimmen = math.ceil(anzahl_legislative * 0.5) #ceiling = rundet Zahl auf
+
+                if neue_zustimmung >= benoetigte_stimmen:
+                #/A
                     # Normale Gesetze laden
                     try:
                         tree_gesetze = xmlStrukturierenGesetze()

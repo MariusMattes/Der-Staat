@@ -9,18 +9,11 @@ import requests
 from django.views.decorators.csrf import csrf_exempt #für testzwecke
 from django.views.decorators.http import require_POST #für testzwecke
 from pathlib import Path
-from datetime import datetime, date, timedelta
 import zipfile
 import io
 from urllib.parse import unquote #für meldewesenlogin
-from .jwt_tooling import decode_jwt # für meldewesenlogin #WICHTIG! pip install PyJWT NICHT JWT
+from .jwt_tooling import decode_jwt # für meldewesenlogin
 
-import logging #logbuch für fehlersuche
-logger = logging.getLogger(__name__)
-
-from.jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("polizist1") #für testzwecke
-print(token) #für testzwecke
 
 #Allgemeiner Datenbankpfad
 #S
@@ -44,8 +37,6 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche"
 BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
-HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
-
 
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
@@ -156,40 +147,26 @@ def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
 #Profilseite-HTML
 #S
 def profilseite(request):
+    benutzername = request.session.get("benutzername")
+    if not benutzername:
+        return redirect("login")
 
-    # ==============================
-    # NEU: Bürger-ID aus JWT-Session (Meldewesen)
-    # ==============================
-    buerger_id = request.session.get("user_id")
-    if not buerger_id:
-        return HttpResponse("Nicht eingeloggt.", status=401)
+    try:
+        with open(benutzerJsonPfad, "r", encoding="utf-8") as f:
+            benutzer_liste = json.load(f)
+    except:
+        return HttpResponse("Fehler beim Laden der Benutzerdaten.")
 
-    # ==============================
-    # ALT: Lokaler Benutzername aus eigener Benutzerverwaltung
-    # → obsolet, da Login künftig über Meldewesen/JWT erfolgt
-    # ==============================
-    # benutzername = request.session.get("benutzername")
-    # if not benutzername:
-    #     return redirect("login")
+    benutzer_daten = None
 
-    # try:
-    #     with open(benutzerJsonPfad, "r", encoding="utf-8") as f:
-    #         benutzer_liste = json.load(f)
-    # except:
-    #     return HttpResponse("Fehler beim Laden der Benutzerdaten.")
+    for eintrag in benutzer_liste:
+        if eintrag["benutzername"] == benutzername:
+            benutzer_daten = eintrag
+            break
 
-    # benutzer_daten = None
-    # for eintrag in benutzer_liste:
-    #     if eintrag["benutzername"] == benutzername:
-    #         benutzer_daten = eintrag
-    #         break
+    if benutzer_daten is None:
+        return HttpResponse("Benutzer konnte nicht gefunden werden.")
 
-    # if benutzer_daten is None:
-    #     return HttpResponse("Benutzer konnte nicht gefunden werden.")
-
-    # ==============================
-    # Urteile laden (unverändert)
-    # ==============================
     try:
         with open(urteileJsonPfad, "r", encoding="utf-8") as f:
             urteile_liste = json.load(f)
@@ -198,19 +175,8 @@ def profilseite(request):
 
     eigene_urteile = []
 
-    # ==============================
-    # ALT: Filter nach benutzername
-    # → obsolet
-    # ==============================
-    # for urteil in urteile_liste:
-    #     if urteil["person"] == benutzername:
-    #         eigene_urteile.append(urteil)
-
-    # ==============================
-    # NEU: Filter nach buerger_id
-    # ==============================
     for urteil in urteile_liste:
-        if str(urteil.get("buerger_id")) == str(buerger_id):
+        if urteil["person"] == benutzername:
             eigene_urteile.append(urteil)
 
     if not os.path.exists(gesetzeXmlPfad):
@@ -225,15 +191,27 @@ def profilseite(request):
     gesetze_dict = {}
 
     for gesetz in root.findall("gesetz"):
+
         titel_el = gesetz.find("titel")
         beschreibung_el = gesetz.find("beschreibung")
         bussgeld_el = gesetz.find("bussgeld")
         strafe_el = gesetz.find("strafe")
 
-        titel = titel_el.text if titel_el is not None else ""
-        beschreibung = beschreibung_el.text if beschreibung_el is not None else ""
-        bussgeld = int(bussgeld_el.text) if bussgeld_el is not None and bussgeld_el.text else 0
-        strafe = int(strafe_el.text) if strafe_el is not None and strafe_el.text else 0
+        titel = ""
+        if titel_el is not None and titel_el.text:
+            titel = titel_el.text
+
+        beschreibung = ""
+        if beschreibung_el is not None and beschreibung_el.text:
+            beschreibung = beschreibung_el.text
+
+        bussgeld = 0
+        if bussgeld_el is not None and bussgeld_el.text:
+            bussgeld = int(bussgeld_el.text)
+
+        strafe = 0
+        if strafe_el is not None and strafe_el.text:
+            strafe = int(strafe_el.text)
 
         gesetze_dict[titel] = {
             "titel": titel,
@@ -245,16 +223,22 @@ def profilseite(request):
     urteile_komplett = []
 
     for urteil in eigene_urteile:
-        gesetz_name = urteil["gesetz"]
-        gesetz_data = gesetze_dict.get(gesetz_name)
 
-        urteile_komplett.append({
+        gesetz_name = urteil["gesetz"]
+
+        gesetz_data = None
+        if gesetz_name in gesetze_dict:
+            gesetz_data = gesetze_dict[gesetz_name]
+
+        eintrag = {
             "id": urteil["id"],
             "richter": urteil["richter"],
             "gesetz": gesetz_data,
             "bussgeld": urteil["bussgeld"],
             "strafe": urteil["strafe"]
-        })
+        }
+
+        urteile_komplett.append(eintrag)
 
     beruf = request.session.get("beruf", "Unbekannt")
 
@@ -262,18 +246,11 @@ def profilseite(request):
         request,
         "rechtApp/profilseite.html",
         {
-            # ==============================
-            # ALT: lokaler Benutzer
-            # "benutzer": benutzer_daten,
-            # ==============================
-
-            # NEU
-            "buerger_id": buerger_id,
+            "benutzer": benutzer_daten,
             "beruf": beruf,
             "urteile": urteile_komplett
         }
     )
-
 
 
 
@@ -288,7 +265,6 @@ def profilseite(request):
 #    },
 #]
 
-#S
 @csrf_exempt
 def anzeigen(request):
     beruf = request.session.get("beruf")
@@ -316,14 +292,11 @@ def anzeigen(request):
     if request.method == "POST":
         action = request.POST.get("action")
 
-        # ==========================================
-        # Bürger-Suche über Meldewesen (unverändert)
-        # ==========================================
         if action == "suche_buerger":
             vorname = request.POST.get("vorname", "").strip()
             nachname = request.POST.get("nachname", "").strip()
             geburtsdatum = request.POST.get("geburtsdatum", "").strip()
-
+            print
             buerger_id = hole_buerger_id(vorname, nachname, geburtsdatum)
 
             return render(request, "rechtApp/anzeigen.html", {
@@ -332,9 +305,6 @@ def anzeigen(request):
                 "buerger_id": buerger_id
             })
 
-        # ==========================================
-        # Neue Anzeige anlegen (unverändert)
-        # ==========================================
         if action == "neue_anzeige":
             anzeigen_liste.append({
                 "buerger_id": request.POST.get("anzeige_buerger_id").strip(),
@@ -349,22 +319,9 @@ def anzeigen(request):
 
             return redirect("anzeigen")
 
-        # ==========================================
-        # Anzeige entscheiden
-        # ==========================================
         if action in ["zustimmen", "ablehnen"]:
             anzeige_index = int(request.POST.get("anzeige_index", -1))
-
-            # --------------------------------------------------
-            # ALT: Richter über lokalen Benutzernamen
-            # → obsolet, da Authentifizierung künftig über JWT
-            # --------------------------------------------------
-            # richter = request.session.get("benutzername", "Unbekannt")
-
-            # --------------------------------------------------
-            # NEU: Richter = Bürger-ID aus JWT-Session
-            # --------------------------------------------------
-            richter = request.session.get("user_id")
+            richter = request.session.get("benutzername", "Unbekannt")
 
             if 0 <= anzeige_index < len(anzeigen_liste):
                 anzeige = anzeigen_liste.pop(anzeige_index)
@@ -372,10 +329,7 @@ def anzeigen(request):
                 if action == "zustimmen":
                     gesetz_daten = None
                     for g in gesetze:
-                        if (
-                            str(g.get("id")) == str(anzeige.get("gesetz_id"))
-                            or g.get("titel") == anzeige.get("gesetz_titel")
-                        ):
+                        if str(g.get("id")) == str(anzeige.get("gesetz_id")) or g.get("titel") == anzeige.get("gesetz_titel"):
                             gesetz_daten = g
                             break
 
@@ -394,10 +348,6 @@ def anzeigen(request):
                         else:
                             neue_id = 1
 
-                        # --------------------------------------------------
-                        # ALT: Urteil mit person = Vorname
-                        # → obsolet, da Identifikation jetzt über buerger_id
-                        # --------------------------------------------------
                         # urteile_liste.append({
                         #     "id": neue_id,
                         #     "buerger_id": anzeige["buerger_id"],
@@ -408,15 +358,15 @@ def anzeigen(request):
                         #     "strafe": int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
                         # })
 
+                        # with open(urteileJsonPfad, "w", encoding="utf-8") as f:
+                        #     json.dump(urteile_liste, f, ensure_ascii=False, indent=4)
                         bussgeld_betrag = int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0
                         strafe_jahre = int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
 
-                        # --------------------------------------------------
-                        # NEU: Urteil eindeutig über buerger_id
-                        # --------------------------------------------------
                         urteile_liste.append({
                             "id": neue_id,
                             "buerger_id": anzeige["buerger_id"],
+                            "person": anzeige["vorname"],
                             "richter": richter,
                             "gesetz": gesetz_daten["titel"],
                             "bussgeld": bussgeld_betrag,
@@ -428,38 +378,22 @@ def anzeigen(request):
 
                         #A
                         if strafe_jahre > 0:
-                            datum = date.today().isoformat()
-                            fuege_vorstrafe_hinzu(
-                                buerger_id=anzeige["buerger_id"],
-                                gesetz_id=int(anzeige["gesetz_id"]),
-                                datum_urteil=datum
-                            )
-
-                            sende_haftstatus_an_meldewesen(
-                                buerger_id=anzeige["buerger_id"],
-                                haft_status=True
-                            )
-
+                            datum = date.today().isoformat()  # "YYYY-MM-DD"
+                            gesetz_id = int(anzeige["gesetz_id"])
+                            print(f"Testzweck für speichern vorstrafen {gesetz_id}")
+                            fuege_vorstrafe_hinzu(buerger_id=anzeige["buerger_id"], gesetz_id=gesetz_id, datum_urteil=datum)
+                        
                         if bussgeld_betrag > 0:
                             sende_bussgeld_an_bank(
                                 buerger_id=anzeige["buerger_id"],
                                 betrag=bussgeld_betrag,
-                                gesetz_id=int(anzeige["gesetz_id"])
-                                if anzeige.get("gesetz_id")
-                                else int(gesetz_daten["id"]),
+                                gesetz_id=int(anzeige["gesetz_id"]) if anzeige.get("gesetz_id") else int(gesetz_daten["id"]),
                                 gesetz_titel=gesetz_daten["titel"],
                             )
                         #/A
 
                 else:
-                    # ==========================================
-                    # Anzeige abgelehnt (unverändert)
-                    # ==========================================
-                    ablehnPfad = os.path.join(
-                        os.path.dirname(anzeigenJsonPfad),
-                        "anzeigeAbgelehnt.json"
-                    )
-
+                    ablehnPfad = os.path.join(os.path.dirname(anzeigenJsonPfad), "anzeigeAbgelehnt.json")
                     if os.path.exists(ablehnPfad):
                         with open(ablehnPfad, "r", encoding="utf-8") as f:
                             try:
@@ -488,9 +422,8 @@ def anzeigen(request):
 
 
 
-
 # Bußgelder-HTML
-# S
+# S und A
 def bussgelder(request):
     beruf = request.session.get('beruf') 
     if beruf != "Polizist":
@@ -503,7 +436,7 @@ def bussgelder(request):
     return render(request, 'rechtApp/bussgelder.html')
 
 # Urteile-HTML
-#S
+#S und A
 def urteile(request):
     beruf = request.session.get('beruf') 
     data = ladeJson(urteileJsonPfad)
@@ -858,33 +791,28 @@ def registrieren(request):
 #A
 def jwt_login(request):
     token = request.GET.get("token")
-    logger.warning("JWT_LOGIN: raw token = %s", token)
-
     if not token:
-        logger.warning("JWT_LOGIN: kein Token übergeben")
-        return HttpResponse("Kein Token", status=400)
+        return HttpResponse("Kein Token übergeben.", status=400)
 
     try:
-        daten = decode_jwt(token)
-        logger.warning("JWT_LOGIN: decoded payload = %s", daten)
-    except Exception as e:
-        logger.error("JWT_LOGIN: decode fehlgeschlagen: %s", e)
-        return HttpResponse("Ungültiges Token", status=401)
+        daten = decode_jwt(unquote(token)) #noch unklar wie genau diese daten aussehen
+    except Exception:
+        return HttpResponse("Ungültiges oder abgelaufenes Token.", status=401) # soweit ich weiss gilt das token nur 5min → siehe gruppe meldewesen
 
-    buerger_id = daten.get("user_id")
-    logger.warning("JWT_LOGIN: buerger_id = %s", buerger_id)
+    buerger_id = daten.get("user_id") 
+    if not buerger_id:
+        return HttpResponse("Token enthält keine Bürger-ID.", status=400)
 
-    request.session["user_id"] = buerger_id
-    request.session.modified = True
-    logger.warning("JWT_LOGIN: Session gesetzt")
+    
+    request.session["user_id"] = str(buerger_id) #ab hier wieder ganz normal die ID in unserer session
+
+    beruf = hole_beruf_von_arbeit(str(buerger_id))
+    request.session["beruf"] = beruf
 
     return redirect("profilseite")
 
-
-
-#TODO Logout sollte wieder zurück zum Meldewesen führen
 def logout(request):
-    return redirect('http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/mainpage')
+    return redirect('login')
 
 #A 
 def vorstrafen_api(request, buerger_id):
@@ -910,37 +838,19 @@ def gesetz_api(request, gesetz_id):
     gesetze = ladeGesetze()
 
     for gesetz in gesetze:
-        if gesetz["id"] == str(gesetz_id):
+        if gesetz.get("id") == str(gesetz_id):
+            api_werte = gesetz.get("api_relevant", [])
             return JsonResponse({
-                "id": gesetz["id"],
-                "titel": gesetz["titel"],
-                "beschreibung": gesetz["beschreibung"],
-                "api_relevant": gesetz["api_relevant"],
-                "bussgeld": gesetz["bussgeld"],
-                "strafe": gesetz["strafe"],
-            }, status=200)
+                "gesetz_id": gesetz.get("id"),
+                "titel": gesetz.get("titel"),
+                "werte": api_werte,
+            }, status = 200)
 
     return JsonResponse({
         "fehler": "Gesetz nicht gefunden",
         "gesetz_id": str(gesetz_id),
     }, status=404)
 
-#A
-def sende_haftstatus_an_meldewesen(buerger_id: str, haft_status: bool):
-    payload = {
-        "buerger_id": buerger_id,
-        "haft_status": haft_status
-    }
-
-    try:
-        response = requests.post(HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT, json=payload, timeout=5)
-        response.raise_for_status()
-        print("MELDEWESEN ok:", response.status_code, response.text)
-    except requests.RequestException as e:
-        print("Fehler Meldewesen:", repr(e))
-
-
-#F
 BACKUP_ORDNER = {
     "static": (Path(settings.BASE_DIR) / "rechtApp" / "static").resolve(),              # Dateipfad für Backup angeben
 }
@@ -964,7 +874,6 @@ def erstelle_zip_backup(dateipfad: Path) -> tuple[io.BytesIO, str]:
     mem.seek(0)
     return mem, zip_dateiname                                                           # Zip als Antwort der Funktion zurückgegeben
 
-#F
 @csrf_exempt                                                                            # okay fürs Testen, später falls möglich Token Auth
 def backup(request):
                                                                                         # Pi ruft /backup?backup=static auf Kann lokal getestet werden mit "http://127.0.0.1:8000/backup?backup=static"
@@ -1005,4 +914,4 @@ def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_
         print("Fehler Bank:", repr(e))
 
 
-#Test12
+#Test1

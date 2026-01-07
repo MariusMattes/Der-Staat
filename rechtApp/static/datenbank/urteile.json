@@ -184,5 +184,14 @@
         "gesetz": "Geschwindigkeitsbegrenzung einhalten",
         "bussgeld": 100,
         "strafe": 0
+    },
+    {
+        "id": 22,
+        "buerger_id": "18790d52-080e-4764-bc4c-3597b2705572",
+        "person": "Mayx",
+        "richter": "Richter",
+        "gesetz": "Öffentliche Ruhestörung verboten",
+        "bussgeld": 50,
+        "strafe": 0
     }
 ]

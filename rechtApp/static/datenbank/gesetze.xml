@@ -88,7 +88,7 @@
     <gesetz>
     <id>12</id>
     <titel>Elterngeld</titel>
-    <beschreibung>Pro Kind stehen pro Monat für 25 Jahre den Eltern folgender Betrag zur Verfügung:</beschreibung>
+    <beschreibung>Für die Dauer von 25 Jahren steht jedem Bürger pro Kind monatlich folgender Betrag zur Verfügung:</beschreibung>
     <api_relevant>
       <wert>500</wert>
     </api_relevant>

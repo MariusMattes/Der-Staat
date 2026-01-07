@@ -45,25 +45,6 @@ ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche"
 BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
 HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
-ARBEIT_LEGISLATIVE_API = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/personenliste/legislative"
-
-def hole_buerger_daten(buerger_id):
-    """
-    Holt Bürgerdaten aus dem Meldewesen anhand der buerger_id
-    Rückgabe: dict oder None
-    """
-    try:
-        with open("meldewesen_buerger.json", "r", encoding="utf-8") as f:
-            daten = json.load(f)
-
-        for person in daten:
-            if str(person.get("buerger_id")) == str(buerger_id):
-                return person
-
-    except Exception as e:
-        print("Fehler beim Laden der Bürgerdaten:", e)
-
-    return None
 
 
 def hole_beruf_von_arbeit(benutzer_id: str):
@@ -206,13 +187,6 @@ def profilseite(request):
     # if benutzer_daten is None:
     #     return HttpResponse("Benutzer konnte nicht gefunden werden.")
 
-    buerger = hole_buerger_daten(buerger_id)
-    if not buerger:
-        return HttpResponse("Bürgerdaten konnten nicht geladen werden.", status=500)
-
-    vorname = buerger.get("vorname", "Unbekannt")
-    nachname = buerger.get("nachname_neu") or buerger.get("nachname_geburt", "")
-
     # ==============================
     # Urteile laden (unverändert)
     # ==============================
@@ -288,11 +262,15 @@ def profilseite(request):
         request,
         "rechtApp/profilseite.html",
         {
+            # ==============================
+            # ALT: lokaler Benutzer
+            # "benutzer": benutzer_daten,
+            # ==============================
+
+            # NEU
             "buerger_id": buerger_id,
-            "vorname": vorname,
-            "nachname": nachname,
             "beruf": beruf,
-            "urteile": urteile_komplett,
+            "urteile": urteile_komplett
         }
     )
 
@@ -1030,4 +1008,4 @@ def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_
         print("Fehler Bank:", repr(e))
 
 
-#Test123
+#Test12

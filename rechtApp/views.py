@@ -23,7 +23,7 @@ import pandas as pd
 import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
 
-from.jwt_tooling import create_jwt #für testzwecke
+from .jwt_tooling import create_jwt #für testzwecke
 token = create_jwt("92b8bc8d-6572-4bd0-a505-34fed49de186") #für testzwecke
 print(token) #für testzwecke
 #http://127.0.0.1:8000/ro/jwt-login?token=
@@ -470,7 +470,8 @@ def anzeigen(request):
                             fuege_vorstrafe_hinzu(
                                 buerger_id=anzeige["buerger_id"],
                                 gesetz_id=int(anzeige["gesetz_id"]),
-                                datum_urteil=datum
+                                datum_urteil=datum,
+                                strafe_jahre=strafe_jahre
                             )
 
                             sende_haftstatus_an_meldewesen(
@@ -949,6 +950,31 @@ def vorstrafen_api(request, buerger_id):
         "hat_vorstrafen": False,
         "vorstrafen": []
     }, status=200)
+
+#A
+def pruefe_abgelaufene_strafen():
+    heute = date.today()
+    aktive_vorstrafen = []
+    haft_noch_aktiv = {}
+
+    for vorstrafe in lade_vorstrafen_daten():
+        buerger_id = vorstrafe["buerger_id"]
+
+        ende = (
+            datetime.fromisoformat(vorstrafe["datum_urteil"]).date()
+            + timedelta(days=365 * int(vorstrafe["strafe_jahre"]))
+        )
+
+        if heute < ende:
+            aktive_vorstrafen.append(vorstrafe)
+            haft_noch_aktiv[buerger_id] = True
+        else: #kein vorstrafe
+            haft_noch_aktiv.setdefault(buerger_id, False) #nur wenn nicht bereits ein wert vorhanden ist
+
+    for buerger_id, noch_haft in haft_noch_aktiv.items():
+        if not noch_haft:
+            sende_haftstatus_an_meldewesen(buerger_id, False)
+
 
 #A
 def gesetz_api(request, gesetz_id):

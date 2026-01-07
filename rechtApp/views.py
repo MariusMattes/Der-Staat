@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 from.jwt_tooling import create_jwt #für testzwecke
 token = create_jwt("polizist1") #für testzwecke
 print(token) #für testzwecke
+#http://127.0.0.1:8000/ro/jwt-login?token=
 
 #Allgemeiner Datenbankpfad
 #S

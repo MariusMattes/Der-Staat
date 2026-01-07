@@ -11,16 +11,30 @@
 {% include "rechtApp/navigationsleiste.html" %}
 
 <div class="hauptbereichDivCLASS">
-    <h2 class="UeberschriftCLASS">Profil von {{ benutzer.benutzername }}</h2>
+    <h2 class="UeberschriftCLASS">
+        Profil von {{ vorname }} {{ nachname }}
+    </h2>
 
     <div class="gesamtDivCLASS">
 
         <div class="karteDivCLASS">
             <div class="inhaltNummerDivCLASS">Persönliche Daten</div>
 
-            <div class="inhaltDivCLASS"><b>Benutzername:</b> {{ benutzer.benutzername }}</div>
-            <div class="inhaltDivCLASS"><b>Passwort:</b> {{ benutzer.passwort }}</div>
-            <div class="inhaltDivCLASS"><b>Beruf (aus API):</b> {{ beruf }}</div>
+            <div class="inhaltDivCLASS">
+                <b>Bürger-ID:</b> {{ buerger_id }}
+            </div>
+
+            <div class="inhaltDivCLASS">
+                <b>Vorname:</b> {{ vorname }}
+            </div>
+
+            <div class="inhaltDivCLASS">
+                <b>Nachname:</b> {{ nachname }}
+            </div>
+
+            <div class="inhaltDivCLASS">
+                <b>Beruf (aus API):</b> {{ beruf }}
+            </div>
         </div>
 
         <div class="karteDivCLASS">
@@ -31,33 +45,37 @@
                     <div class="karteDivCLASS" style="width:90%;">
 
                         <div class="inhaltDivCLASS">
-                            Richter: {{ u.richter }}
+                            <b>Richter:</b> {{ u.richter }}
                         </div>
 
-                        <div class="inhaltDivCLASS">
-                            Gesetz: {{ u.gesetz.titel }}
-                        </div>
+                        {% if u.gesetz %}
+                            <div class="inhaltDivCLASS">
+                                <b>Gesetz:</b> {{ u.gesetz.titel }}
+                            </div>
 
-                        <div class="inhaltDivCLASS">
-                            {{ u.gesetz.beschreibung }}
-                        </div>
+                            <div class="inhaltDivCLASS">
+                                {{ u.gesetz.beschreibung }}
+                            </div>
+                        {% endif %}
 
                         {% if u.bussgeld %}
                             <div class="inhaltDivCLASS">
-                                Bußgeld: {{ u.bussgeld }}€
+                                <b>Bußgeld:</b> {{ u.bussgeld }} €
                             </div>
                         {% endif %}
 
                         {% if u.strafe %}
                             <div class="inhaltDivCLASS">
-                                Strafe in Jahren: {{ u.strafe }}
+                                <b>Strafe (Jahre):</b> {{ u.strafe }}
                             </div>
                         {% endif %}
 
                     </div>
                 {% endfor %}
             {% else %}
-                <div class="keinInhaltCLASS">Keine Urteile vorhanden</div>
+                <div class="keinInhaltCLASS">
+                    Keine Urteile vorhanden
+                </div>
             {% endif %}
         </div>
 

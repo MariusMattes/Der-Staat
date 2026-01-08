@@ -12,14 +12,19 @@ from pathlib import Path
 from datetime import datetime, date, timedelta
 import zipfile
 import io
+import math
 from urllib.parse import unquote #für meldewesenlogin
 from .jwt_tooling import decode_jwt # für meldewesenlogin #WICHTIG! pip install PyJWT NICHT JWT
+import matplotlib
+matplotlib.use("Agg")  # zwingend für Django
+import matplotlib.pyplot as plt
+import pandas as pd
 
 import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
 
-from.jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("92b8bc8d-6572-4bd0-a505-34fed49de186") #für testzwecke
+from .jwt_tooling import create_jwt #für testzwecke
+token = create_jwt("richter1") #für testzwecke
 print(token) #für testzwecke
 #http://127.0.0.1:8000/ro/jwt-login?token=
 
@@ -45,9 +50,10 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche"
 BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
-HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
+HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
 ARBEIT_LEGISLATIVE_API = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/personenliste/legislative"
 
+#A
 def hole_beruf_von_arbeit(benutzer_id: str):
     try:
         url = f"{ARBEIT_API_URL}{benutzer_id}"
@@ -99,6 +105,13 @@ def hole_buerger_id(vorname, nachname, geburtsdatum):
 
     return None
 
+#A
+def hole_anzahl_legislative():
+    response = requests.get(ARBEIT_LEGISLATIVE_API, timeout=5)
+    response.raise_for_status()
+    daten = response.json()
+    return len(daten.get("personen", []))
+
 #Hilfsfunktionen
 #S
 def ladeJson(pfad):
@@ -147,7 +160,7 @@ def test_views(request):
         return render(request, 'rechtApp/ztest.html')
 
 #A
-def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
+def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str, strafe_jahre):
     daten = lade_vorstrafen_daten()
 
     akte = None
@@ -165,7 +178,8 @@ def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
 
     akte["vorstrafen"].append({
         "gesetz_id": int(gesetz_id),
-        "datum_urteil": datum_urteil
+        "datum_urteil": datum_urteil,
+        "strafe_jahre": strafe_jahre
     })
 
     speichere_vorstrafen_daten(daten)
@@ -457,7 +471,8 @@ def anzeigen(request):
                             fuege_vorstrafe_hinzu(
                                 buerger_id=anzeige["buerger_id"],
                                 gesetz_id=int(anzeige["gesetz_id"]),
-                                datum_urteil=datum
+                                datum_urteil=datum,
+                                strafe_jahre=strafe_jahre
                             )
 
                             sende_haftstatus_an_meldewesen(
@@ -641,9 +656,10 @@ def gesetzErlassen(request):
 #M
 def gesetzFreigeben(request, gesetz_id):
     if request.method == "POST" and request.POST.get("zustimmung") == "ja":
-        benutzer_id = request.session.get("benutzer_id")
+        benutzer_id = request.session.get("user_id")
         beruf = request.session.get("beruf")
-
+        print(benutzer_id)
+        print(beruf)
         # 1. Prüfen: ist der Benutzer eingeloggt und Legislative?
         if not benutzer_id or beruf != "Legislative":
             return HttpResponse("""
@@ -694,8 +710,13 @@ def gesetzFreigeben(request, gesetz_id):
                 neue_zustimmung = aktuelle_zustimmung + 1
                 zustimmung_el.text = str(neue_zustimmung)
 
-                # 7. Wenn mindestens 3 Stimmen → in gesetze.xml übernehmen
-                if neue_zustimmung >= 3:
+                #A
+                anzahl_legislative = hole_anzahl_legislative()
+                print(f"hallo {anzahl_legislative}")
+                benoetigte_stimmen = math.ceil(anzahl_legislative * 0.5) #ceiling = rundet Zahl auf
+
+                if neue_zustimmung >= benoetigte_stimmen:
+                #/A
                     # Normale Gesetze laden
                     try:
                         tree_gesetze = xmlStrukturierenGesetze()
@@ -933,6 +954,31 @@ def vorstrafen_api(request, buerger_id):
     }, status=200)
 
 #A
+def pruefe_abgelaufene_strafen():
+    heute = date.today()
+    aktive_vorstrafen = []
+    haft_noch_aktiv = {}
+
+    for vorstrafe in lade_vorstrafen_daten():
+        buerger_id = vorstrafe["buerger_id"]
+
+        ende = (
+            datetime.fromisoformat(vorstrafe["datum_urteil"]).date()
+            + timedelta(days=365 * int(vorstrafe["strafe_jahre"]))
+        )
+
+        if heute < ende:
+            aktive_vorstrafen.append(vorstrafe)
+            haft_noch_aktiv[buerger_id] = True
+        else: #kein vorstrafe
+            haft_noch_aktiv.setdefault(buerger_id, False) #nur wenn nicht bereits ein wert vorhanden ist
+
+    for buerger_id, noch_haft in haft_noch_aktiv.items():
+        if not noch_haft:
+            sende_haftstatus_an_meldewesen(buerger_id, False)
+
+
+#A
 def gesetz_api(request, gesetz_id):
     gesetze = ladeGesetze()
 
@@ -1031,5 +1077,37 @@ def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_
     except requests.RequestException as e:
         print("Fehler Bank:", repr(e))
 
+def anzeigen_diagramm(request):
+    if not os.path.exists(anzeigenJsonPfad):
+        return HttpResponse("Keine Anzeigen vorhanden", status=404)
+
+    with open(anzeigenJsonPfad, "r", encoding="utf-8") as f:
+        daten = json.load(f)
+
+    if not daten:
+        return HttpResponse("Keine Daten", status=404)
+
+    df = pd.DataFrame(daten)
+    counts = df["gesetz_id"].value_counts().sort_index()
+
+    fig, ax = plt.subplots()
+    counts.plot(
+        kind="bar",
+        ax=ax,
+        title="Anzahl der Anzeigen pro Gesetz",
+        xlabel="Gesetz ID",
+        ylabel="Anzahl Anzeigen",
+    )
+
+    plt.tight_layout()
+
+    response = HttpResponse(content_type="image/png")
+    fig.savefig(response, format="png")
+    plt.close(fig)
+
+    return response
+
+def diagramm_seite(request):
+    return render(request, "rechtApp/diagramm.html")
 
 #Test12

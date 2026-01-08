@@ -193,5 +193,29 @@
         "gesetz": "Öffentliche Ruhestörung verboten",
         "bussgeld": 50,
         "strafe": 0
+    },
+    {
+        "id": 23,
+        "buerger_id": "92b8bc8d-6572-4bd0-a505-34fed49de186",
+        "richter": "richter1",
+        "gesetz": "Arbeiten verboten",
+        "bussgeld": 0,
+        "strafe": 1
+    },
+    {
+        "id": 24,
+        "buerger_id": "92b8bc8d-6572-4bd0-a505-34fed49de186",
+        "richter": "richter1",
+        "gesetz": "Arbeiten verboten",
+        "bussgeld": 0,
+        "strafe": 1
+    },
+    {
+        "id": 25,
+        "buerger_id": "92b8bc8d-6572-4bd0-a505-34fed49de186",
+        "richter": "richter1",
+        "gesetz": "Arbeiten verboten",
+        "bussgeld": 0,
+        "strafe": 1
     }
 ]

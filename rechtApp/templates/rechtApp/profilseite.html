@@ -1,5 +1,5 @@
 {% load static %}
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -11,15 +11,15 @@
 {% include "rechtApp/navigationsleiste.html" %}
 
 <div class="hauptbereichDivCLASS">
-    <h2 class="UeberschriftCLASS">Profil von {{ benutzer.benutzername }}</h2>
+    <h2 class="UeberschriftCLASS">Profil von {{ vorname }} {{ nachname }}</h2>
 
     <div class="gesamtDivCLASS">
 
         <div class="karteDivCLASS">
             <div class="inhaltNummerDivCLASS">Persönliche Daten</div>
 
-            <div class="inhaltDivCLASS"><b>Benutzername:</b> {{ benutzer.benutzername }}</div>
-            <div class="inhaltDivCLASS"><b>Passwort:</b> {{ benutzer.passwort }}</div>
+            <div class="inhaltDivCLASS"><b>Vorname:</b> {{ vorname }}</div>
+            <div class="inhaltDivCLASS"><b>Nachname:</b> {{ nachname }}</div>
             <div class="inhaltDivCLASS"><b>Beruf (aus API):</b> {{ beruf }}</div>
         </div>
 

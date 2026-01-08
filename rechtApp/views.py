@@ -49,37 +49,54 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 #Bekannte Schnittstellen
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche"
+Globale_Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/person/"
 BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
-HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
+HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
 ARBEIT_LEGISLATIVE_API = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/personenliste/legislative"
 
 #A
-def hole_beruf_von_arbeit(benutzer_id: str):
+# def hole_beruf_von_arbeit(user_id: str):
+#     try:
+#         url = f"{ARBEIT_API_URL}{user_id}"
+#         response = requests.get(url, timeout=5)
+#         response.raise_for_status()
+#         daten = response.json() # antwort sieht so aus : {"beruf": "Richter"}
+#         print(daten)  
+
+#         beruf = daten.get("beruf")
+#         if beruf:
+#             return beruf
+#         return None
+#     except requests.RequestException:
+#         return beruf
+
+def hole_beruf_von_arbeit(user_id: str):
     try:
-        url = f"{ARBEIT_API_URL}{benutzer_id}"
+        url = f"{ARBEIT_API_URL}{user_id}"
         response = requests.get(url, timeout=5)
         response.raise_for_status()
-        daten = response.json() # antwort sieht so aus : {"beruf": "Richter"}
-        print(daten)  
 
-        beruf = daten.get("beruf")
-        if beruf:
-            return beruf
+        daten = response.json()
+        print("Arbeits-API Antwort:", daten)
+
+        return daten.get("beruf")
+
+    except requests.RequestException as e:
+        logger.error("Arbeits-API Fehler: %s", e)
         return None
-    except requests.RequestException:
-        return None
 
-def hole_buerger_daten(buerger_id):
 
-    daten = {
-        "buerger_id": buerger_id
-    }
-
+def hole_buerger_daten(user_id):
     try:
-        response = requests.post(Einwohnermeldeamt_API_URL, json=daten, timeout=5)
-        print("Antwort Einwohnermeldeamt (Person):", response)
+        response = requests.get(
+            f"{Globale_Einwohnermeldeamt_API_URL}{user_id}",
+            timeout=5
+        )
+
         if response.status_code == 200:
             return response.json()
+
+        print("Meldewesen-Fehler:", response.status_code, response.text)
 
     except Exception as e:
         print("Fehler bei Bürgerdaten-Abfrage:", e)
@@ -178,7 +195,7 @@ def test_views(request):
         return render(request, 'rechtApp/ztest.html')
 
 #A
-def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
+def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str, strafe_jahre):
     daten = lade_vorstrafen_daten()
 
     akte = None
@@ -196,7 +213,8 @@ def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
 
     akte["vorstrafen"].append({
         "gesetz_id": int(gesetz_id),
-        "datum_urteil": datum_urteil
+        "datum_urteil": datum_urteil,
+        "strafe_jahre": strafe_jahre
     })
 
     speichere_vorstrafen_daten(daten)
@@ -209,8 +227,8 @@ def profilseite(request):
     # ==============================
     # NEU: Bürger-ID aus JWT-Session (Meldewesen)
     # ==============================
-    buerger_id = request.session.get("user_id")
-    if not buerger_id:
+    user_id = request.session.get("user_id")
+    if not user_id:
         return HttpResponse("Nicht eingeloggt.", status=401)
 
     # ==============================
@@ -236,12 +254,12 @@ def profilseite(request):
     # if benutzer_daten is None:
     #     return HttpResponse("Benutzer konnte nicht gefunden werden.")
 
-        #---
-        #benutzer = hole_buerger_daten(buerger_id)
+    benutzer = hole_buerger_daten(user_id)
+    if not benutzer:
+        return HttpResponse("Bürgerdaten konnten nicht geladen werden.", status=500)
 
-        #if not benutzer:
-        #    return HttpResponse("Bürgerdaten konnten nicht geladen werden", status=500)
-        #----
+    vorname = benutzer.get("vorname", "")
+    nachname = benutzer.get("nachname_neu") or benutzer.get("nachname_geburt", "")
     # ==============================
     # Urteile laden (unverändert)
     # ==============================
@@ -265,7 +283,7 @@ def profilseite(request):
     # NEU: Filter nach buerger_id
     # ==============================
     for urteil in urteile_liste:
-        if str(urteil.get("buerger_id")) == str(buerger_id):
+        if str(urteil.get("buerger_id")) == str(user_id):
             eigene_urteile.append(urteil)
 
     if not os.path.exists(gesetzeXmlPfad):
@@ -311,8 +329,9 @@ def profilseite(request):
             "strafe": urteil["strafe"]
         })
 
-    beruf = request.session.get("beruf", "Unbekannt")
-
+    #beruf = request.session.get("beruf", "Unbekannt")
+    beruf = hole_beruf_von_arbeit(user_id) or "Unbekannt"
+    
     return render(
         request,
         "rechtApp/profilseite.html",
@@ -323,8 +342,9 @@ def profilseite(request):
             # ==============================
 
             # NEU
-            #"benutzer": benutzer,
-            "buerger_id": buerger_id,
+            "vorname": vorname,
+            "nachname": nachname,
+            "user_id": user_id,
             "beruf": beruf,
             "urteile": urteile_komplett
         }
@@ -673,9 +693,10 @@ def gesetzErlassen(request):
 #M
 def gesetzFreigeben(request, gesetz_id):
     if request.method == "POST" and request.POST.get("zustimmung") == "ja":
-        benutzer_id = request.session.get("benutzer_id")
+        benutzer_id = request.session.get("user_id")
         beruf = request.session.get("beruf")
-
+        print(benutzer_id)
+        print(beruf)
         # 1. Prüfen: ist der Benutzer eingeloggt und Legislative?
         if not benutzer_id or beruf != "Legislative":
             return HttpResponse("""
@@ -728,7 +749,7 @@ def gesetzFreigeben(request, gesetz_id):
 
                 #A
                 anzahl_legislative = hole_anzahl_legislative()
-                print(anzahl_legislative)
+                print(f"hallo {anzahl_legislative}")
                 benoetigte_stimmen = math.ceil(anzahl_legislative * 0.5) #ceiling = rundet Zahl auf
 
                 if neue_zustimmung >= benoetigte_stimmen:

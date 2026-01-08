@@ -993,26 +993,30 @@ def vorstrafen_api(request, buerger_id):
 #A
 def pruefe_abgelaufene_strafen():
     heute = date.today()
-    aktive_vorstrafen = []
-    haft_noch_aktiv = {}
+    haftstatus_pro_buerger = {}
 
-    for vorstrafe in lade_vorstrafen_daten():
-        buerger_id = vorstrafe["buerger_id"]
+    for akte in lade_vorstrafen_daten():
+        buerger_id = akte["buerger_id"]
+        haftstatus_pro_buerger[buerger_id] = False
 
-        ende = (
-            datetime.fromisoformat(vorstrafe["datum_urteil"]).date()
-            + timedelta(days=365 * int(vorstrafe["strafe_jahre"]))
-        )
+        for vorstrafe in akte.get("vorstrafen", []):
+            datum_urteil = datetime.fromisoformat(vorstrafe["datum_urteil"]).date()
+            strafe_jahre = int(vorstrafe.get("strafe_jahre", 0))
+            ende = datum_urteil + timedelta(days=365 * strafe_jahre)
 
-        if heute < ende:
-            aktive_vorstrafen.append(vorstrafe)
-            haft_noch_aktiv[buerger_id] = True
-        else: #kein vorstrafe
-            haft_noch_aktiv.setdefault(buerger_id, False) #nur wenn nicht bereits ein wert vorhanden ist
+            if heute < ende:
+                haftstatus_pro_buerger[buerger_id] = True
 
-    for buerger_id, noch_haft in haft_noch_aktiv.items():
-        if not noch_haft:
-            sende_haftstatus_an_meldewesen(buerger_id, False)
+    # Ergebnis auswerten
+    for buerger_id in haftstatus_pro_buerger:
+        haftstatus_aktiv = haftstatus_pro_buerger[buerger_id] #hatfstatus aktiv ist wert des schlüssels buerger_id (False/True)
+
+        if haftstatus_aktiv is False:
+            sende_haftstatus_an_meldewesen(
+                buerger_id=buerger_id,
+                haft_status=False
+            )
+
 
 #A
 def pruefe_verjaehrung_vorstrafen():

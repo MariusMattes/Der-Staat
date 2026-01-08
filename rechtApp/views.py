@@ -660,7 +660,7 @@ def gesetzFreigeben(request, gesetz_id):
         beruf = request.session.get("beruf")
 
         # 1. Prüfen: ist der Benutzer eingeloggt und Legislative?
-        if not benutzer_id or beruf != "Legislative":
+        if not benutzer_id or beruf != "legislative":
             return HttpResponse("""
                 <script>
                     alert("Du bist nicht berechtigt, abzustimmen.");
@@ -711,7 +711,7 @@ def gesetzFreigeben(request, gesetz_id):
 
                 #A
                 anzahl_legislative = hole_anzahl_legislative()
-                print(anzahl_legislative)
+                print(f"hallo {anzahl_legislative}")
                 benoetigte_stimmen = math.ceil(anzahl_legislative * 0.5) #ceiling = rundet Zahl auf
 
                 if neue_zustimmung >= benoetigte_stimmen:

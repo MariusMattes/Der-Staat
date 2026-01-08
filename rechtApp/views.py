@@ -24,7 +24,7 @@ import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
 
 from .jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("92b8bc8d-6572-4bd0-a505-34fed49de186") #für testzwecke
+token = create_jwt("richter1") #für testzwecke
 print(token) #für testzwecke
 #http://127.0.0.1:8000/ro/jwt-login?token=
 
@@ -111,6 +111,24 @@ def hole_anzahl_legislative():
     response.raise_for_status()
     daten = response.json()
     return len(daten.get("personen", []))
+
+#A
+def hole_api_relevant_werte(gesetz_id: int):
+    werte = []
+    tree = xmlStrukturierenGesetze()
+    root = tree.getroot()
+
+    for gesetz in root.findall("gesetz"):
+        if gesetz.find("id").text == str(gesetz_id):
+            api = gesetz.find("api_relevant")
+            if api is not None:
+                for wert in api.findall("wert"):
+                    werte.append(wert.text)
+            break
+
+    return werte
+
+
 
 #Hilfsfunktionen
 #S
@@ -975,6 +993,40 @@ def pruefe_abgelaufene_strafen():
         if not noch_haft:
             sende_haftstatus_an_meldewesen(buerger_id, False)
 
+#A
+def pruefe_verjaehrung_vorstrafen():
+    heute = date.today()
+
+    verjaehrung_werte = hole_api_relevant_werte(13)
+    verjaehrung_jahre = int(verjaehrung_werte[0]) if verjaehrung_werte else 0
+
+    daten = lade_vorstrafen_daten()
+    neue_daten = []
+
+    for eintrag in daten:
+        buerger_id = eintrag["buerger_id"]
+        nicht_verjaehrte_vorstrafen = []
+
+        for vorstrafe in eintrag["vorstrafen"]:
+            datum_urteil = datetime.fromisoformat(vorstrafe["datum_urteil"]).date()
+            strafe_jahre = int(vorstrafe.get("strafe_jahre", 0))
+
+            loeschdatum = (
+                datum_urteil
+                + timedelta(days=365 * strafe_jahre)
+                + timedelta(days=365 * verjaehrung_jahre)
+            )
+
+            if heute < loeschdatum:
+                nicht_verjaehrte_vorstrafen.append(vorstrafe)
+
+        if nicht_verjaehrte_vorstrafen:
+            neue_daten.append({
+                "buerger_id": buerger_id,
+                "vorstrafen": nicht_verjaehrte_vorstrafen
+            })
+
+    speichere_vorstrafen_daten(neue_daten)
 
 #A
 def gesetz_api(request, gesetz_id):
@@ -1075,6 +1127,10 @@ def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_
     except requests.RequestException as e:
         print("Fehler Bank:", repr(e))
 
+
+
+
+#M
 def anzeigen_diagramm(request):
     if not os.path.exists(anzeigenJsonPfad):
         return HttpResponse("Keine Anzeigen vorhanden", status=404)

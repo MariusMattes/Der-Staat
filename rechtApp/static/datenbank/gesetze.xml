@@ -78,7 +78,7 @@
   <gesetz>
     <id>11</id>
     <titel>Kindergeld</titel>
-    <beschreibung>Pro Kind stehen pro Monat für 25 Jahre den Eltern folgender Betrag zur Verfügung:</beschreibung>
+    <beschreibung>Pro Kind steht den Eltern für die Dauer von 25 Jahren monatlich folgender Betrag zur Verfügung:</beschreibung>
     <api_relevant>
       <wert>450</wert>
     </api_relevant>
@@ -88,11 +88,21 @@
     <gesetz>
     <id>12</id>
     <titel>Elterngeld</titel>
-    <beschreibung>Für die Dauer von einem Jahren steht jedem Bürger bei Geburt eins Kind monatlich folgender Betrag zur Verfügung:</beschreibung>
+    <beschreibung>Für die Dauer von einem Jahren steht jedem Bürger bei Geburt eines Kind monatlich folgender Betrag zur Verfügung:</beschreibung>
     <api_relevant>
       <wert>500</wert>
     </api_relevant>
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
   </gesetz>
+  <gesetz>
+    <id>13</id>
+    <titel>Verjährung von Vorstrafen</titel>
+    <beschreibung>Vorstrafen verjähren nach folgender Anzahl an Jahren:</beschreibung>
+    <api_relevant>
+      <wert>7</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
+  </gesetz>  
 </gesetze>

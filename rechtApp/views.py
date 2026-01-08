@@ -1007,7 +1007,6 @@ def pruefe_abgelaufene_strafen():
             if heute < ende:
                 haftstatus_pro_buerger[buerger_id] = True
 
-    # Ergebnis auswerten
     for buerger_id in haftstatus_pro_buerger:
         haftstatus_aktiv = haftstatus_pro_buerger[buerger_id] #hatfstatus aktiv ist wert des schlüssels buerger_id (False/True)
 

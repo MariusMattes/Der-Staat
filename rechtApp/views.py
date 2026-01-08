@@ -24,7 +24,7 @@ import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
 
 from .jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("92b8bc8d-6572-4bd0-a505-34fed49de186") #für testzwecke
+token = create_jwt("richter1") #für testzwecke
 print(token) #für testzwecke
 #http://127.0.0.1:8000/ro/jwt-login?token=
 
@@ -50,7 +50,7 @@ gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
 ARBEIT_API_URL = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/buerger/beruf/"
 Einwohnermeldeamt_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/personensuche"
 BANK_API_URL = "http://[2001:7c0:2320:2:f816:3eff:fe82:34b2]:8000/bank/strafeMelden"
-HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
+HAFTSTATUS_SETZEN_EINWOHNERMELDEAMT = "http://[2001:7c0:2320:2:f816:3eff:fef8:f5b9]:8000/einwohnermeldeamt/api/recht-ordnung/haftstatus"
 ARBEIT_LEGISLATIVE_API = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/personenliste/legislative"
 
 #A
@@ -160,7 +160,7 @@ def test_views(request):
         return render(request, 'rechtApp/ztest.html')
 
 #A
-def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
+def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str, strafe_jahre):
     daten = lade_vorstrafen_daten()
 
     akte = None
@@ -178,7 +178,8 @@ def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str):
 
     akte["vorstrafen"].append({
         "gesetz_id": int(gesetz_id),
-        "datum_urteil": datum_urteil
+        "datum_urteil": datum_urteil,
+        "strafe_jahre": strafe_jahre
     })
 
     speichere_vorstrafen_daten(daten)

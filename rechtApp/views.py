@@ -656,11 +656,12 @@ def gesetzErlassen(request):
 #M
 def gesetzFreigeben(request, gesetz_id):
     if request.method == "POST" and request.POST.get("zustimmung") == "ja":
-        benutzer_id = request.session.get("benutzer_id")
+        benutzer_id = request.session.get("user_id")
         beruf = request.session.get("beruf")
-
+        print(benutzer_id)
+        print(beruf)
         # 1. Prüfen: ist der Benutzer eingeloggt und Legislative?
-        if not benutzer_id or beruf != "legislative":
+        if not benutzer_id or beruf != "Legislative":
             return HttpResponse("""
                 <script>
                     alert("Du bist nicht berechtigt, abzustimmen.");

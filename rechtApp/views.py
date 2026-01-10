@@ -405,7 +405,8 @@ def anzeigen(request):
             return render(request, "rechtApp/anzeigen.html", {
                 "anzeigen": anzeigen_liste,
                 "beruf": beruf,
-                "buerger_id": buerger_id
+                "buerger_id": buerger_id,
+                "gesetze": gesetze
             })
 
         # ==========================================
@@ -560,7 +561,8 @@ def anzeigen(request):
     return render(request, "rechtApp/anzeigen.html", {
         "anzeigen": anzeigen_liste,
         "beruf": beruf,
-        "buerger_id": None
+        "buerger_id": None,
+        "gesetze": gesetze,
     })
 
 

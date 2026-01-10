@@ -49,9 +49,25 @@
         <label>Vorname:</label>
         <input class="eingabeFeldCLASS" type="text" name="vorname" required>
 
-        <label>Gesetz-ID:</label>
-        <input class="eingabeFeldCLASS" type="text" name="gesetz_id">
+        <!-- A -->
+        <label>Gesetz:</label>
+        <select class="eingabeFeldCLASS" name="gesetz_id" id="gesetz_select" required>
+            <option value="">-- Gesetz auswählen --</option>
+            {% for gesetz in gesetze %}
+                <option value="{{ gesetz.id }}" data-titel="{{ gesetz.titel }}">
+                    {{ gesetz.id }}
+                </option>
+            {% endfor %}
+        </select>
+        <label>Gesetz-Titel:</label>
+        <input class="eingabeFeldCLASS"type="text"id="gesetz_titel_anzeige"readonly>
+        <input type="hidden" name="gesetz_titel" id="gesetz_titel_hidden">
 
+        <!-- /A -->
+    
+    
+
+        
         <!--<label>Gesetz-Titel:</label>
         <input class="eingabeFeldCLASS" type="text" name="gesetz_titel">
         -->
@@ -95,5 +111,16 @@
 </div>
 
 {% include "rechtApp/banner.html" %}
+<!-- A -->
+<script>
+document.getElementById("gesetz_select").addEventListener("change", function () {
+    const selectedOption = this.options[this.selectedIndex];
+    const titel = selectedOption.getAttribute("data-titel") || "";
+
+    document.getElementById("gesetz_titel_anzeige").value = titel;
+    document.getElementById("gesetz_titel_hidden").value = titel;
+});
+</script>
+<!-- /A -->
 </body>
 </html>

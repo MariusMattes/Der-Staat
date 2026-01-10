@@ -105,4 +105,23 @@
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
   </gesetz>  
+  <gesetz>
+    <id>14</id>
+    <titel>Vermögenssteuer</titel>
+    <beschreibung>Die Vermögensteuer ist wöchentlich vom jeweiligen Vermögen zu entrichten und beträgt in Prozent:</beschreibung>
+    <api_relevant>
+      <wert>2</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
+  </gesetz> 
+    <gesetz>
+    <id>15</id>
+    <titel>Lohnsteuer</titel>
+    <beschreibung>Die Lohnsteuer ist vom Einkommen zu entrichten und beträgt in Prozent:</beschreibung>
+    <api_relevant>
+      <wert>20</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe> 
 </gesetze>

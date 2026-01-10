@@ -24,9 +24,9 @@ import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
 
 from .jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("richter1") #für testzwecke
+token = create_jwt("7f77bad6-58e5-4e6c-b19f-ad007e437ddc") #für testzwecke
 print(token) #für testzwecke
-#http://127.0.0.1:8000/ro/jwt-login?token=
+#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiN2Y3N2JhZDYtNThlNS00ZTZjLWIxOWYtYWQwMDdlNDM3ZGRjIiwiaWF0IjoxNzY4MDgwNjY0LCJleHAiOjE3NjgwODA5NjR9.TiTlPVEVcESs2--g3DAczTO-NanI6uPDLagh_gKpONQ
 
 #Allgemeiner Datenbankpfad
 #S

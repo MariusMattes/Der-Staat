@@ -113,13 +113,17 @@
 {% include "rechtApp/banner.html" %}
 <!-- A -->
 <script>
-document.getElementById("gesetz_select").addEventListener("change", function () {
-    const selectedOption = this.options[this.selectedIndex]; //this = gesetz_select elemnt
-    const titel = selectedOption.getAttribute("data-titel");
+const gesetzSelectElement = document.getElementById("gesetz_select");
+gesetzSelectElement.addEventListener("change", function () {
+    const ausgewaehlterIndex = gesetzSelectElement.selectedIndex;
+    const ausgewaehlteOption = gesetzSelectElement.options[ausgewaehlterIndex];
+    const gesetzTitel = ausgewaehlteOption.getAttribute("data-titel");
 
-    document.getElementById("gesetz_titel_anzeige").value = titel;
-    document.getElementById("gesetz_titel_hidden").value = titel;
+    document.getElementById("gesetz_titel_anzeige").value = gesetzTitel;
+    document.getElementById("gesetz_titel_hidden").value = gesetzTitel;
 });
+</script>
+
 </script>
 <!-- /A -->
 </body>

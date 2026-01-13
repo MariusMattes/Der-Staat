@@ -11,20 +11,25 @@
 {% include "rechtApp/navigationsleiste.html" %}
 
 <div class="hauptbereichDivCLASS">
-    <h2 class="UeberschriftCLASS">Bürger-ID finden</h2>
+    <h2 class="UeberschriftCLASS">Bürger suchen</h2>
     <form method="POST" class="formularDivCLASS">
         {% csrf_token %}
         <input type="hidden" name="action" value="suche_buerger">
 
-        <label>Vorname:</label> 
-        <input class="eingabeFeldCLASS" type="text" name="vorname" required>
+        <label>Bürger-ID:</label>
+        <input class="eingabeFeldCLASS" type="text" name="buerger_id">
+
+        <p><b>oder</b></p>
+
+        <label>Vorname:</label>
+        <input class="eingabeFeldCLASS" type="text" name="vorname">
 
         <label>Nachname:</label>
-        <input class="eingabeFeldCLASS" type="text" name="nachname" required>
+        <input class="eingabeFeldCLASS" type="text" name="nachname">
 
         <label>Geburtsdatum:</label>
-        <input class="eingabeFeldCLASS" type="text" name="geburtsdatum" required>
-        
+        <input class="eingabeFeldCLASS" type="text" name="geburtsdatum">
+
         <button type="submit" class="buttonPrimarCLASS">Suchen</button>
     </form>
 
@@ -33,6 +38,13 @@
     {% elif buerger_id is not none %}
         <p>Keine Person gefunden.</p>
     {% endif %}
+    {% if buerger %}
+    <p><b>Vorname:</b> {{ buerger.vorname }}</p>
+    <p><b>Nachname:</b> {{ buerger.nachname_geburt }}</p>
+    <p><b>Geburtsdatum:</b> {{ buerger.geburtsdatum }}</p>
+    {% endif %}
+
+
 </div>
 
 {% if beruf == "Polizist" %}
@@ -45,12 +57,24 @@
         <label>Bürger-ID:</label>
         <input class="eingabeFeldCLASS" type="text" name="anzeige_buerger_id" required>
 
-        <label>Vorname:</label>
-        <input class="eingabeFeldCLASS" type="text" name="vorname" required>
+        <!-- A -->
+        <label>Gesetz:</label>
+        <select class="eingabeFeldCLASS" name="gesetz_id" id="gesetz_select" required>
+            <option value="">-- Gesetz auswählen --</option>
+            {% for gesetz in gesetze %}
+                <option value="{{ gesetz.id }}" data-titel="{{ gesetz.titel }}">
+                    {{ gesetz.id }}
+                </option>
+            {% endfor %}
+        </select>
+        <label>Gesetz-Titel:</label>
+        <input class="eingabeFeldCLASS"type="text"id="gesetz_titel_anzeige"readonly>
+        <input type="hidden" name="gesetz_titel" id="gesetz_titel_hidden">
+        <!-- /A -->
+    
+    
 
-        <label>Gesetz-ID:</label>
-        <input class="eingabeFeldCLASS" type="text" name="gesetz_id">
-
+        
         <!--<label>Gesetz-Titel:</label>
         <input class="eingabeFeldCLASS" type="text" name="gesetz_titel">
         -->
@@ -68,7 +92,6 @@
     {% for anzeige in anzeigen %}
         <div class="karteDivCLASS">
             <p><b>Bürger-ID:</b> {{ anzeige.buerger_id }}</p>
-            <p><b>Vorname:</b> {{ anzeige.vorname }}</p>
             <p><b>Gesetz-ID:</b> {{ anzeige.gesetz_id }}</p>
             <p><b>Begründung:</b> {{ anzeige.begruendung }}</p>
 
@@ -94,5 +117,18 @@
 </div>
 
 {% include "rechtApp/banner.html" %}
+<!-- A -->
+<script>
+const gesetzSelectElement = document.getElementById("gesetz_select");
+gesetzSelectElement.addEventListener("change", function () {
+    const ausgewaehlterIndex = gesetzSelectElement.selectedIndex;
+    const ausgewaehlteOption = gesetzSelectElement.options[ausgewaehlterIndex];
+    const gesetzTitel = ausgewaehlteOption.getAttribute("data-titel");
+
+    document.getElementById("gesetz_titel_anzeige").value = gesetzTitel;
+    document.getElementById("gesetz_titel_hidden").value = gesetzTitel;
+});
+</script>
+<!-- /A -->
 </body>
 </html>

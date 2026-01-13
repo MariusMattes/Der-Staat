@@ -16,7 +16,7 @@
             {% for urteil in urteile %}
             <div class="karteDivCLASS">
                 <p class="inhaltNummerDivCLASS">Urteil {{ urteil.id }}</p>
-                <p class="inhaltDivCLASS">Person: {{ urteil.person }}</p>
+                <p class="inhaltDivCLASS">Person: {{ urteil.person }} {{ urteil.buerger_id }}</p> <!--A-->
                 <p class="inhaltDivCLASS">Richter: {{ urteil.richter }}</p>
 
                 {% if urteil.gesetz %}

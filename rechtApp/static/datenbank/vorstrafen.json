@@ -4,7 +4,8 @@
         "vorstrafen": [
             {
                 "gesetz_id": 3,
-                "datum_urteil": "2023-05-10"
+                "datum_urteil": "2023-05-10",
+                "strafe_jahre": 50
             }
         ]
     },
@@ -13,7 +14,8 @@
         "vorstrafen": [
             {
                 "gesetz_id": 3,
-                "datum_urteil": "2025-12-16"
+                "datum_urteil": "2025-12-16",
+                "strafe_jahre": 50
             }
         ]
     },
@@ -22,7 +24,38 @@
         "vorstrafen": [
             {
                 "gesetz_id": 3,
-                "datum_urteil": "2025-12-17"
+                "datum_urteil": "2025-12-17",
+                "strafe_jahre": 50
+            }
+        ]
+    },
+    {
+        "buerger_id": "8e3a914c-d999-46cf-aa8b-a36c2272b9c7",
+        "vorstrafen": [
+            {
+                "gesetz_id": 9,
+                "datum_urteil": "2025-12-17",
+                "strafe_jahre": 1
+            }
+        ]
+    },
+    {
+        "buerger_id": "92b8bc8d-6572-4bd0-a505-34fed49de186",
+        "vorstrafen": [
+            {
+                "gesetz_id": 9,
+                "datum_urteil": "2024-01-08",
+                "strafe_jahre": 1
+            }
+        ]
+    },
+    {
+        "buerger_id": "18790d52-080e-4764-bc4c-3597b2705572",
+        "vorstrafen": [
+            {
+                "gesetz_id": 5,
+                "datum_urteil": "2026-01-13",
+                "strafe_jahre": 10
             }
         ]
     }

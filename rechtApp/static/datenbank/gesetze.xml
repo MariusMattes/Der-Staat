@@ -3,23 +3,23 @@
   <gesetz>
     <id>1</id>
     <titel>Geschwindigkeitsbegrenzung einhalten</titel>
-    <beschreibung>Man darf nicht schneller als die erlaubte Geschwindigkeit fahren.</beschreibung>
-    <bussgeld>100</bussgeld>
+    <beschreibung>Man darf wirklich wirklich wirklich nicht schneller als die erlaubte Geschwindigkeit fahren. </beschreibung>
+    <bussgeld>1000</bussgeld>
     <strafe>0</strafe>
   </gesetz>
   <gesetz>
     <id>2</id>
     <titel>Öffentliche Ruhestörung verboten</titel>
     <beschreibung>Man darf die Öffentlichkeit nicht stören.</beschreibung>
-    <bussgeld>50</bussgeld>
-    <strafe>0</strafe>
+    <bussgeld>0</bussgeld>
+    <strafe>100</strafe>
   </gesetz>
   <gesetz>
     <id>3</id>
     <titel>Mord verboten</titel>
-    <beschreibung>Es ist verboten, eine andere Person vorsätzlich zu töten.</beschreibung>
+    <beschreibung>Es ist wirklich verboten, eine andere Person vorsätzlich zu töten.</beschreibung>
     <bussgeld>0</bussgeld>
-    <strafe>50</strafe>
+    <strafe>45</strafe>
   </gesetz>
   <gesetz>
     <id>4</id>
@@ -78,21 +78,58 @@
   <gesetz>
     <id>11</id>
     <titel>Kindergeld</titel>
-    <beschreibung>Pro Kind stehen pro Monat für 25 Jahre den Eltern folgender Betrag zur Verfügung:</beschreibung>
+    <beschreibung>Pro Kind steht den Eltern für die Dauer von 25 Jahren monatlich folgender Betrag zur Verfügung:</beschreibung>
+    <api_relevant>
+      <wert>450</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
+  </gesetz>
+  <gesetz>
+    <id>12</id>
+    <titel>Elterngeld</titel>
+    <beschreibung>Für die Dauer von einem Jahren steht jedem Bürger bei Geburt eines Kind monatlich folgender Betrag zur Verfügung:</beschreibung>
     <api_relevant>
       <wert>500</wert>
     </api_relevant>
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
   </gesetz>
-    <gesetz>
-    <id>12</id>
-    <titel>Elterngeld</titel>
-    <beschreibung>Pro Kind stehen pro Monat für 25 Jahre den Eltern folgender Betrag zur Verfügung:</beschreibung>
+  <gesetz>
+    <id>13</id>
+    <titel>Verjährung von Vorstrafen</titel>
+    <beschreibung>Vorstrafen verjähren nach folgender Anzahl an Jahren:</beschreibung>
     <api_relevant>
-      <wert>500</wert>
+      <wert>7</wert>
     </api_relevant>
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
+  </gesetz>
+  <gesetz>
+    <id>14</id>
+    <titel>Vermögenssteuer</titel>
+    <beschreibung>Die Vermögensteuer ist wöchentlich vom jeweiligen Vermögen zu entrichten und beträgt in Prozent:</beschreibung>
+    <api_relevant>
+      <wert>2</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
+  </gesetz>
+  <gesetz>
+    <id>15</id>
+    <titel>Lohnsteuer</titel>
+    <beschreibung>Die Lohnsteuer ist vom Einkommen zu entrichten und beträgt in Prozent:</beschreibung>
+    <api_relevant>
+      <wert>20</wert>
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
+  </gesetz>
+  <gesetz>
+    <id>16</id>
+    <titel>André einknasten</titel>
+    <beschreibung>André muss grundsätzlich in den knast</beschreibung>
+    <bussgeld>1000</bussgeld>
+    <strafe>1</strafe>
   </gesetz>
 </gesetze>

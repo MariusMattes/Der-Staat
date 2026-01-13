@@ -33,11 +33,18 @@ urlpatterns = [
     path('ro/urteile', views.urteile, name='urteile'),
     path('ro/gesetze', views.gesetze, name='gesetze'),
     path("ro/gesetze/erstellen", views.gesetzErlassen, name="gesetzErlassen"),
+    path("ro/gesetze/bearbeiten", views.gesetzBearbeiten, name="gesetzBearbeiten"),
+    path("ro/gesetze/reform/<int:reform_id>", views.gesetzReformFreigeben, name="gesetzReformFreigeben"),
     path("ro/gesetze/entwurf/<int:gesetz_id>", views.gesetzFreigeben, name="gesetzFreigeben"),
     path("ro/vorstrafen_api/<str:buerger_id>", views.vorstrafen_api, name="vorstrafen_api"),
     path("ro/gesetz_api/<int:gesetz_id>", views.gesetz_api, name="gesetz_api"),
     path("backup", views.backup, name="backup"),
     path('ro/anzeigen', views.anzeigen, name='anzeigen'),
+    path("ro/diagramm/anzeigen.png", views.anzeigen_diagramm, name="anzeigen_diagramm"),
+    path("ro/diagramm", views.diagramm_seite, name="diagramm_seite"),
+    path('ro/statistik', views.statistik, name='statistik'),
+    path("ro/diagramm/urteile.png", views.diagramm_urteile, name = "diagramm_urteile"),
+    path("ro/opendata/urteile.csv", views.urteile_als_csv_download, name="urteile_als_csv_download")
 ]
 
 """

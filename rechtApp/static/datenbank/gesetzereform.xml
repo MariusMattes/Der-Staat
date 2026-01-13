@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<gesetzreformen>
+  <reform>
+    <id>1</id>
+    <original_id>14</original_id>
+    <titel>Vermögenssteuer</titel>
+    <beschreibung>Die Vermögensteuer ist wöchentlich vom jeweiligen Vermögen zu entrichten und beträgt in Prozent:</beschreibung>
+    <strafe>0</strafe>
+    <bussgeld>0</bussgeld>
+    <zustimmung>0</zustimmung>
+    <abgestimmt_ids></abgestimmt_ids>
+    <api_relevant>
+      <wert>3</wert>
+    </api_relevant>
+  </reform>
+</gesetzreformen>

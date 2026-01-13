@@ -5,14 +5,14 @@
         "richter": "Müller",
         "gesetz": "Geschwindigkeitsbegrenzung einhalten",
         "bussgeld": 100,
-        "strafe": null
+        "strafe": 0
     },
     {
         "id": 2,
         "person": "Sin",
         "richter": "Schmid",
         "gesetz": "Mord verboten",
-        "bussgeld": null,
+        "bussgeld": 0,
         "strafe": 50
     },
     {
@@ -20,7 +20,7 @@
         "person": "Sin",
         "richter": "Müller",
         "gesetz": "Korruption verboten",
-        "bussgeld": null,
+        "bussgeld": 0,
         "strafe": 7
     },
     {
@@ -29,7 +29,7 @@
         "richter": "Schmid",
         "gesetz": "Fahren ohne Führerschein verboten",
         "bussgeld": 500,
-        "strafe": null
+        "strafe": 0
     },
     {
         "id": 5,
@@ -47,8 +47,8 @@
         "person": "Snake",
         "richter": "Sin",
         "gesetz": "Geschwindigkeitsbegrenzung einhalten",
-        "bussgeld": "100",
-        "strafe": "0"
+        "bussgeld": 0,
+        "strafe": 0
     },
     {
         "id": 7,
@@ -192,6 +192,46 @@
         "richter": "Richter",
         "gesetz": "Öffentliche Ruhestörung verboten",
         "bussgeld": 50,
+        "strafe": 0
+    },
+    {
+        "id": 23,
+        "buerger_id": "92b8bc8d-6572-4bd0-a505-34fed49de186",
+        "richter": "richter1",
+        "gesetz": "Arbeiten verboten",
+        "bussgeld": 0,
+        "strafe": 1
+    },
+    {
+        "id": 24,
+        "buerger_id": "92b8bc8d-6572-4bd0-a505-34fed49de186",
+        "richter": "richter1",
+        "gesetz": "Arbeiten verboten",
+        "bussgeld": 0,
+        "strafe": 1
+    },
+    {
+        "id": 25,
+        "buerger_id": "92b8bc8d-6572-4bd0-a505-34fed49de186",
+        "richter": "richter1",
+        "gesetz": "Arbeiten verboten",
+        "bussgeld": 0,
+        "strafe": 1
+    },
+    {
+        "id": 26,
+        "buerger_id": "18790d52-080e-4764-bc4c-3597b2705572",
+        "richter": "67b7b148-2c38-4b5d-826b-978b7644a79d",
+        "gesetz": "Drogenhandel verboten",
+        "bussgeld": 0,
+        "strafe": 10
+    },
+    {
+        "id": 27,
+        "buerger_id": "18790d52-080e-4764-bc4c-3597b2705572",
+        "richter": "67b7b148-2c38-4b5d-826b-978b7644a79d",
+        "gesetz": "Geschwindigkeitsbegrenzung einhalten",
+        "bussgeld": 100,
         "strafe": 0
     }
 ]

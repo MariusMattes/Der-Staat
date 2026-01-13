@@ -1178,6 +1178,8 @@ def anzeigen_diagramm(request):
         ylabel="Anzahl Anzeigen",
     )
 
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=20, ha="right")
+
     plt.tight_layout()
 
     response = HttpResponse(content_type="image/png")
@@ -1222,6 +1224,8 @@ def diagramm_urteile(request):
         title = "Urteile mit Bußgeld im Vergleich zu Urteile mit Strafe",
         ylabel= "Anzahl Urteile",
     )
+
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=20, ha="right")
 
     plt.tight_layout()
 

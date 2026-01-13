@@ -47,5 +47,11 @@
         "gesetz_id": "5",
         "gesetz_titel": null,
         "begruendung": "War viel zu schnell unterwegs"
+    },
+    {
+        "buerger_id": "7f77bad6-58e5-4e6c-b19f-ad007e437ddc",
+        "gesetz_id": "2",
+        "gesetz_titel": "Öffentliche Ruhestörung verboten",
+        "begruendung": "Einfach aus Prinzip"
     }
 ]

@@ -36,6 +36,30 @@
 
     {% if beruf == "Legislative" %}
     <div class="hauptbereichDivCLASS">
+        <h2 class="UeberschriftCLASS">Gesetz bearbeiten:</h2>
+        <form method="POST" action="{% url 'gesetzBearbeiten' %}" class="formularDivCLASS">
+            {% csrf_token %}
+
+            <label>Titel:</label>
+            <input class="eingabeFeldCLASS" type="text" name="titel" required>
+
+            <label>Beschreibung:</label>
+            <textarea class="eingabeFeldCLASS" name="beschreibung" required></textarea>
+
+            <label>Bußgeld:</label>
+            <input class="eingabeFeldCLASS" type="number" name="bussgeld" value="0" min="0" required>
+
+            <label>Strafe:</label>
+            <input class="eingabeFeldCLASS" type="number" name="strafe" value="0" min="0" required>
+
+            <button type="submit" class="buttonPrimarCLASS">Gesetz speichern</button>
+        </form>
+    </div>
+    {% endif %}
+
+    
+    {% if beruf == "Legislative" %}
+    <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetz erlassen:</h2>
         <form method="POST" action="{% url 'gesetzErlassen' %}" class="formularDivCLASS">
             {% csrf_token %}
@@ -47,15 +71,15 @@
             <textarea class="eingabeFeldCLASS" name="beschreibung" required></textarea>
 
             <label>Bußgeld:</label>
-            <input class="eingabeFeldCLASS" type="number" name="bussgeld" value="0" required>
+            <input class="eingabeFeldCLASS" type="number" name="bussgeld" value="0" min="0" required>
 
             <label>Strafe:</label>
-            <input class="eingabeFeldCLASS" type="number" name="strafe" value="0" required>
+            <input class="eingabeFeldCLASS" type="number" name="strafe" value="0" min="0" required>
 
             <button type="submit" class="buttonPrimarCLASS">Gesetz speichern</button>
         </form>
     </div>
-     <div class="hauptbereichDivCLASS">
+    <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetzentwurf</h2>
         <div class="gesamtDivCLASS">
             {% for gesetz in gesetzentwurf %}
@@ -79,7 +103,34 @@
             {% endfor %}
         </div>
     </div>
+    <div class="hauptbereichDivCLASS">
+        <h2 class="UeberschriftCLASS">Gesetz reformieren</h2>
+        <div class="gesamtDivCLASS">
+            {% for reform in gesetzreformen %}
+            <div class="karteDivCLASS">
+
+                <p class="inhaltNummerDivCLASS">Reform für Gesetz Nr. {{ reform.original_id }}</p>
+                <p class="inhaltDivCLASS">Titel: {{ reform.titel }}</p>
+                <p class="inhaltDivCLASS">Beschreibung: {{ reform.beschreibung }}</p>
+                <p class="inhaltDivCLASS">Strafe: {{ reform.strafe }} Jahre</p>
+                <p class="inhaltDivCLASS">Bußgeld: {{ reform.bussgeld }}€</p>
+                <p class="inhaltDivCLASS">Zustimmungen: {{ reform.zustimmung }}</p>
+                <form method="POST" action="{% url 'gesetzReformFreigeben' reform.id %}"class="formularDivCLASS">
+                    {% csrf_token %}
+                    <button type="submit" name="zustimmung" value="ja" class="buttonPrimarCLASS">
+                        Zustimmen
+                    </button>
+                </form>
+
+            </div>
+            {% empty %}
+            <p class="keinInhaltCLASS">Keine Reformen vorhanden.</p>
+            {% endfor %}
+        </div>
+    </div>
+
     {% endif %}
     {% include "rechtApp/banner.html" %}
 </body>
 </html>
+

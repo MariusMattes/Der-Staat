@@ -26,9 +26,9 @@ logger = logging.getLogger(__name__)
 #A
 #Login ohne Meldewesen
 from .jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("67b7b148-2c38-4b5d-826b-978b7644a79d") #für testzwecke
+token = create_jwt("37174cfc-5603-4c2f-88b2-f5f8b1ef51fd") #für testzwecke
 print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #für testzwecke
-#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjdiN2IxNDgtMmMzOC00YjVkLTgyNmItOTc4Yjc2NDRhNzlkIiwiaWF0IjoxNzY4Mjk4MjI4LCJleHAiOjE3NjgyOTg1Mjh9.LMqWfr5avW9mhQ11U-acaoPphJlWFVvdsNgy-VJ0R1Y
+#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzcxNzRjZmMtNTYwMy00YzJmLTg4YjItZjVmOGIxZWY1MWZkIiwiaWF0IjoxNzY4Mjk5NDc4LCJleHAiOjE3NjgyOTk3Nzh9.PllZBiM6nIDyj3xuJFZ_yqlMmgDen2N8oJw7GzORS_k
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
 
@@ -784,10 +784,17 @@ def gesetze(request):
     gesetzentwurf_liste = ladeGesetzentwurf()
     beruf = request.session.get('beruf')
 
+    #A
+    anzahl_legislative = hole_anzahl_legislative()
+    benoetigte_stimmen = math.ceil(anzahl_legislative * 0.5)
+    #/A
+
     return render(request, "rechtApp/gesetze.html", {
         "gesetze": gesetze_liste,
         "gesetzentwurf": gesetzentwurf_liste,
         "beruf": beruf,
+        "anzahl_legislative": anzahl_legislative, #A
+        "benoetigte_stimmen": benoetigte_stimmen, #A
     })
 
 

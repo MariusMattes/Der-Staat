@@ -57,6 +57,21 @@
     </div>
      <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetzentwurf</h2>
+
+        <!-- A -->
+            <div class="karteDivCLASS">
+                <p class="inhaltDivCLASS">
+                    Zurzeit gibt es <b>{{ anzahl_legislative }}</b> Mitglieder der Legislative.
+                </p>
+                <p class="inhaltDivCLASS">
+                    Für die Zustimmung zu einem neuen Gesetz werden
+                    <b>{{ benoetigte_stimmen }}</b> Stimmen benötigt
+                    (einfache Mehrheit).
+                </p>
+            </div>
+    
+        <!-- A -->
+        
         <div class="gesamtDivCLASS">
             {% for gesetz in gesetzentwurf %}
             <div class="karteDivCLASS">

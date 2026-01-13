@@ -1130,3 +1130,7 @@ def diagramm_seite(request):
     return render(request, "rechtApp/diagramm.html")
 
 #Test12
+
+# Statistik-HTML
+def statistik(request):
+    return render(request, 'rechtApp/statistik.html')

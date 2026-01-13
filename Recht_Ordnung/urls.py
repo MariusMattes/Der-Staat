@@ -40,6 +40,7 @@ urlpatterns = [
     path('ro/anzeigen', views.anzeigen, name='anzeigen'),
     path("ro/diagramm/anzeigen.png", views.anzeigen_diagramm, name="anzeigen_diagramm"),
     path("ro/diagramm", views.diagramm_seite, name="diagramm_seite"),
+    path('ro/statistik', views.statistik, name='statistik'),
 
 ]
 

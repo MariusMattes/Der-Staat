@@ -1190,6 +1190,48 @@ def anzeigen_diagramm(request):
 def diagramm_seite(request):
     return render(request, "rechtApp/diagramm.html")
 
+def diagramm_urteile(request):
+
+    if not os.path.exists(urteileJsonPfad):
+        return HttpResponse("Keine Urteile vorhanden", status = 404)
+    
+    with open(urteileJsonPfad, "r", encoding="utf-8") as f:
+        daten = json.load(f)
+
+    if not daten:
+        return HttpResponse("Keine Daten vorhanden", status = 404)
+    
+    df = pd.DataFrame(daten)
+    df["bussgeld"] = pd.to_numeric(df["bussgeld"], errors="coerce").fillna(0)
+    df["strafe"] = pd.to_numeric(df["strafe"], errors="coerce").fillna(0)
+
+    anzahl_bussgeld = (df["bussgeld"] > 0).sum()
+    anzahl_strafe = (df["strafe"] > 0).sum()
+
+    counts = pd.Series(
+        {
+            "Urteile mit Bußgeld": anzahl_bussgeld,
+            "Urteile mit Strafen": anzahl_strafe,
+        }
+    )
+
+    fig, ax = plt.subplots()
+
+    counts.plot(
+        kind="bar",
+        ax = ax,
+        title = "Urteile mit Bußgeld im Vergleich zu Urteile mit Strafe",
+        ylabel= "Anzahl Urteile",
+    )
+
+    plt.tight_layout()
+
+    response = HttpResponse(content_type="image/png")
+    fig.savefig(response, format="png")
+    plt.close(fig)
+
+    return response 
+
 #Test12
 
 # Statistik-HTML

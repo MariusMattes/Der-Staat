@@ -19,6 +19,7 @@ import matplotlib
 matplotlib.use("Agg")  # zwingend für Django
 import matplotlib.pyplot as plt
 import pandas as pd
+import csv
 
 import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
@@ -1301,7 +1302,7 @@ def anzeigen_diagramm(request):
     df = pd.DataFrame(daten)
     counts = df["gesetz_id"].value_counts().sort_index()
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(9, 5))
     counts.plot(
         kind="bar",
         ax=ax,
@@ -1310,7 +1311,7 @@ def anzeigen_diagramm(request):
         ylabel="Anzahl Anzeigen",
     )
 
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=20, ha="right")
+    ax.tick_params(axis="x", labelrotation=0)
 
     plt.tight_layout()
 
@@ -1348,8 +1349,7 @@ def diagramm_urteile(request):
         }
     )
 
-    fig, ax = plt.subplots()
-
+    fig, ax = plt.subplots(figsize=(9, 5))
     counts.plot(
         kind="bar",
         ax = ax,
@@ -1357,7 +1357,7 @@ def diagramm_urteile(request):
         ylabel= "Anzahl Urteile",
     )
 
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=20, ha="right")
+    ax.tick_params(axis="x", labelrotation=0)
 
     plt.tight_layout()
 
@@ -1366,6 +1366,37 @@ def diagramm_urteile(request):
     plt.close(fig)
 
     return response 
+
+def urteile_als_csv_download(request):
+
+    with open (urteileJsonPfad, "r", encoding="utf-8") as file:
+        daten = json.load(file)
+
+    if not daten:
+        return HttpResponse("Keine Daten vorhanden", status = 204)
+    
+    fieldnames = ["id", "gesetz", "bussgeld", "strafe"]
+
+    response = HttpResponse(
+        content_type = "text/csv; charset = utf-8"
+    )
+    response["Content-Disposition"] = 'attachment; filename="urteile_opendata.csv"'
+
+    response.write("\ufeff") #sagt der Anwendung z.B. Excel das es sich um UTF-8 handelt / schreibt das also mit in die CSV
+
+    writer = csv.DictWriter(response, fieldnames=fieldnames, delimiter= ";")
+    writer.writeheader()
+
+    for row in daten:
+        writer.writerow({
+            "id": row.get("id", ""),
+            "gesetz": row.get("gesetz", ""),
+            "bussgeld": row.get("bussgeld", ""),
+            "strafe": row.get("strafe", ""),
+        })
+
+    return response
+
 
 #Test12
 

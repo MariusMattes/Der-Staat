@@ -26,10 +26,11 @@ logger = logging.getLogger(__name__)
 
 #A
 #Login ohne Meldewesen
-from .jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("37174cfc-5603-4c2f-88b2-f5f8b1ef51fd") #für testzwecke
-print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #für testzwecke
+from .jwt_tooling import create_jwt #Hier wird der Token erstellt
+token = create_jwt("37174cfc-5603-4c2f-88b2-f5f8b1ef51fd") #Hier ID eingeben mit der man sich einloggen möchte
+print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #Hier wird der fertige Token im Terminal angezeigt
 #http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzcxNzRjZmMtNTYwMy00YzJmLTg4YjItZjVmOGIxZWY1MWZkIiwiaWF0IjoxNzY4Mjk5NDc4LCJleHAiOjE3NjgyOTk3Nzh9.PllZBiM6nIDyj3xuJFZ_yqlMmgDen2N8oJw7GzORS_k
+
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
 
@@ -39,7 +40,7 @@ gesetzeJsonPfad = os.path.join(allgemeinerPfad, 'gesetze.json')
 anzeigenJsonPfad = os.path.join(allgemeinerPfad, 'anzeigen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
-vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
+vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json') #A
 
 #Einzelne XML-Datei
 #S
@@ -89,7 +90,7 @@ def hole_beruf_von_arbeit(user_id: str):
         logger.error("Arbeits-API Fehler: %s", e)
         return None
 
-
+#S
 def hole_buerger_daten(user_id):
     try:
         response = requests.get(
@@ -107,6 +108,7 @@ def hole_buerger_daten(user_id):
 
     return None
 
+#S
 def hole_buerger_id(vorname, nachname, geburtsdatum):
 
     daten = {

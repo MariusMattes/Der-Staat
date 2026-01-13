@@ -1380,9 +1380,11 @@ def anzeigen_diagramm(request):
 
     return response
 
+#M
 def diagramm_seite(request):
     return render(request, "rechtApp/diagramm.html")
 
+#M
 def diagramm_urteile(request):
 
     if not os.path.exists(urteileJsonPfad):
@@ -1426,6 +1428,7 @@ def diagramm_urteile(request):
 
     return response 
 
+#M
 def urteile_als_csv_download(request):
 
     with open (urteileJsonPfad, "r", encoding="utf-8") as file:
@@ -1456,9 +1459,9 @@ def urteile_als_csv_download(request):
 
     return response
 
-
-#Test12
-
+#S
 # Statistik-HTML
 def statistik(request):
     return render(request, 'rechtApp/statistik.html')
+
+#Test

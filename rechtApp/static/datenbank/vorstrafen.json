@@ -48,5 +48,15 @@
                 "strafe_jahre": 1
             }
         ]
+    },
+    {
+        "buerger_id": "18790d52-080e-4764-bc4c-3597b2705572",
+        "vorstrafen": [
+            {
+                "gesetz_id": 5,
+                "datum_urteil": "2026-01-13",
+                "strafe_jahre": 10
+            }
+        ]
     }
 ]

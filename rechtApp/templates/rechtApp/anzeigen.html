@@ -11,20 +11,25 @@
 {% include "rechtApp/navigationsleiste.html" %}
 
 <div class="hauptbereichDivCLASS">
-    <h2 class="UeberschriftCLASS">Bürger-ID finden</h2>
+    <h2 class="UeberschriftCLASS">Bürger suchen</h2>
     <form method="POST" class="formularDivCLASS">
         {% csrf_token %}
         <input type="hidden" name="action" value="suche_buerger">
 
-        <label>Vorname:</label> 
-        <input class="eingabeFeldCLASS" type="text" name="vorname" required>
-    
+        <label>Bürger-ID:</label>
+        <input class="eingabeFeldCLASS" type="text" name="buerger_id">
+
+        <p><b>oder</b></p>
+
+        <label>Vorname:</label>
+        <input class="eingabeFeldCLASS" type="text" name="vorname">
+
         <label>Nachname:</label>
-        <input class="eingabeFeldCLASS" type="text" name="nachname" required>
+        <input class="eingabeFeldCLASS" type="text" name="nachname">
 
         <label>Geburtsdatum:</label>
-        <input class="eingabeFeldCLASS" type="text" name="geburtsdatum" required>
-        
+        <input class="eingabeFeldCLASS" type="text" name="geburtsdatum">
+
         <button type="submit" class="buttonPrimarCLASS">Suchen</button>
     </form>
 
@@ -33,6 +38,12 @@
     {% elif buerger_id is not none %}
         <p>Keine Person gefunden.</p>
     {% endif %}
+    {% if buerger %}
+    <p><b>Vorname:</b> {{ buerger.vorname }}</p>
+    <p><b>Nachname:</b> {{ buerger.nachname_geburt }}</p>
+    <p><b>Geburtsdatum:</b> {{ buerger.geburtsdatum }}</p>
+    {% endif %}
+
 
 </div>
 
@@ -118,8 +129,6 @@ gesetzSelectElement.addEventListener("change", function () {
     document.getElementById("gesetz_titel_anzeige").value = gesetzTitel;
     document.getElementById("gesetz_titel_hidden").value = gesetzTitel;
 });
-</script>
-
 </script>
 <!-- /A -->
 </body>

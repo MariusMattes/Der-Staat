@@ -15,7 +15,21 @@
             
         </div>
     </div>
+    <h1>Anzeigen pro Gesetz</h1>
 
+    <img
+        src="{% url 'anzeigen_diagramm' %}"
+        alt="Diagramm: Anzahl der Anzeigen pro Gesetz"
+        style="max-width: 900px; width: 100%; border: 1px solid #ccc;"
+    >
+
+    <h1>Urteile mit Bußgeldern und Urteile mit Strafen</h1>
+
+        <img
+        src="{% url 'diagramm_urteile' %}"
+        alt="Diagramm: Anzahl der Anzeigen pro Gesetz"
+        style="max-width: 900px; width: 100%; border: 1px solid #ccc;"
+    >
     </div>
     {% include "rechtApp/banner.html" %}
 </body>

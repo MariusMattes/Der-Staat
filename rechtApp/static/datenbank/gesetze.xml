@@ -3,23 +3,23 @@
   <gesetz>
     <id>1</id>
     <titel>Geschwindigkeitsbegrenzung einhalten</titel>
-    <beschreibung>Man darf nicht schneller als die erlaubte Geschwindigkeit fahren.</beschreibung>
-    <bussgeld>100</bussgeld>
-    <strafe>0</strafe>
+    <beschreibung>Man darf wirklich nicht schneller als die erlaubte Geschwindigkeit fahren. </beschreibung>
+    <bussgeld>0</bussgeld>
+    <strafe>300</strafe>
   </gesetz>
   <gesetz>
     <id>2</id>
     <titel>Öffentliche Ruhestörung verboten</titel>
     <beschreibung>Man darf die Öffentlichkeit nicht stören.</beschreibung>
-    <bussgeld>50</bussgeld>
-    <strafe>0</strafe>
+    <bussgeld>0</bussgeld>
+    <strafe>100</strafe>
   </gesetz>
   <gesetz>
     <id>3</id>
     <titel>Mord verboten</titel>
-    <beschreibung>Es ist verboten, eine andere Person vorsätzlich zu töten.</beschreibung>
+    <beschreibung>Es ist wirklich verboten, eine andere Person vorsätzlich zu töten.</beschreibung>
     <bussgeld>0</bussgeld>
-    <strafe>50</strafe>
+    <strafe>45</strafe>
   </gesetz>
   <gesetz>
     <id>4</id>
@@ -85,7 +85,7 @@
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
   </gesetz>
-    <gesetz>
+  <gesetz>
     <id>12</id>
     <titel>Elterngeld</titel>
     <beschreibung>Für die Dauer von einem Jahren steht jedem Bürger bei Geburt eines Kind monatlich folgender Betrag zur Verfügung:</beschreibung>
@@ -104,7 +104,7 @@
     </api_relevant>
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
-  </gesetz>  
+  </gesetz>
   <gesetz>
     <id>14</id>
     <titel>Vermögenssteuer</titel>
@@ -114,7 +114,7 @@
     </api_relevant>
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
-  </gesetz> 
+  </gesetz>
   <gesetz>
     <id>15</id>
     <titel>Lohnsteuer</titel>
@@ -123,6 +123,6 @@
       <wert>20</wert>
     </api_relevant>
     <bussgeld>0</bussgeld>
-    <strafe>0</strafe> 
+    <strafe>0</strafe>
   </gesetz>
 </gesetze>

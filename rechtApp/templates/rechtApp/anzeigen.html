@@ -57,9 +57,6 @@
         <label>Bürger-ID:</label>
         <input class="eingabeFeldCLASS" type="text" name="anzeige_buerger_id" required>
 
-        <label>Vorname:</label>
-        <input class="eingabeFeldCLASS" type="text" name="vorname" required>
-
         <!-- A -->
         <label>Gesetz:</label>
         <select class="eingabeFeldCLASS" name="gesetz_id" id="gesetz_select" required>
@@ -96,7 +93,6 @@
     {% for anzeige in anzeigen %}
         <div class="karteDivCLASS">
             <p><b>Bürger-ID:</b> {{ anzeige.buerger_id }}</p>
-            <p><b>Vorname:</b> {{ anzeige.vorname }}</p>
             <p><b>Gesetz-ID:</b> {{ anzeige.gesetz_id }}</p>
             <p><b>Begründung:</b> {{ anzeige.begruendung }}</p>
 

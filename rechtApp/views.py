@@ -44,6 +44,8 @@ vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
 #S
 gesetzeXmlPfad = os.path.join(allgemeinerPfad,'gesetze.xml')
 gesetzentwurfXmlPfad = os.path.join(allgemeinerPfad,'gesetzentwurf.xml')
+gesetzereformXmlPfad = os.path.join(allgemeinerPfad,'gesetzereform.xml')
+
 
 #A
 #Bekannte Schnittstellen
@@ -179,6 +181,10 @@ def xmlStrukturierenGesetzentwurf():
     parser = ET.XMLParser(remove_blank_text=True)
     return ET.parse(gesetzentwurfXmlPfad, parser)
 
+def xmlStrukturierenGesetzreform():
+    parser = ET.XMLParser(remove_blank_text=True)
+    return ET.parse(gesetzereformXmlPfad, parser)
+
 def ladeBenutzer():
     try:
         with open(benutzerJsonPfad, 'r', encoding='utf-8') as f:
@@ -275,8 +281,9 @@ def profilseite(request):
         return HttpResponse("Gesetze konnten nicht gefunden werden.")
 
     try:
-        tree = ET.parse(gesetzeXmlPfad)
+        tree = xmlStrukturierenGesetze()
         root = tree.getroot()
+
     except:
         return HttpResponse("Fehler beim Laden der Gesetze.")
 
@@ -411,7 +418,6 @@ def anzeigen(request):
         if action == "neue_anzeige":
             anzeigen_liste.append({
                 "buerger_id": request.POST.get("anzeige_buerger_id").strip(),
-                "vorname": request.POST.get("vorname").strip(),
                 "gesetz_id": request.POST.get("gesetz_id") or None,
                 "gesetz_titel": request.POST.get("gesetz_titel") or None,
                 "begruendung": request.POST.get("begruendung") or None
@@ -623,6 +629,147 @@ def ladeGesetzentwurf():
 
     return gesetze_liste
 
+#S
+def ladeGesetzreformen():
+    if not os.path.exists(gesetzereformXmlPfad):
+        return []
+
+    tree = xmlStrukturierenGesetzreform()
+    root = tree.getroot()
+
+    reformen = []
+    for reform in root.findall("reform"):
+        reformen.append({
+            "id": reform.find("id").text,
+            "original_id": reform.find("original_id").text,
+            "titel": reform.find("titel").text,
+            "beschreibung": reform.find("beschreibung").text,
+            "strafe": reform.find("strafe").text,
+            "bussgeld": reform.find("bussgeld").text,
+            "zustimmung": reform.find("zustimmung").text,
+        })
+
+    return reformen
+
+
+#S
+def gesetzBearbeiten(request):
+    if request.method == "POST":
+        titel = request.POST.get("titel")
+        beschreibung = request.POST.get("beschreibung")
+        bussgeld = request.POST.get("bussgeld")
+        strafe = request.POST.get("strafe")
+
+        gesetze = ladeGesetze()
+
+        original = None
+        for g in gesetze:
+            if g["titel"] == titel:
+                original = g
+                break
+
+        if not original:
+            return HttpResponse("""
+                <script>
+                    alert("Gesetz nicht gefunden.");
+                    window.history.back();
+                </script>
+            """)
+
+        tree = xmlStrukturierenGesetzreform()
+        root = tree.getroot()
+
+        reformen = root.findall("reform")
+        if reformen:
+            letzte_reform = reformen[-1]
+            letzte_id_text = letzte_reform.find("id").text
+            letzte_id = int(letzte_id_text)
+            neue_id = letzte_id + 1
+        else:
+            neue_id = 1
+
+
+        reform = ET.SubElement(root, "reform")
+        ET.SubElement(reform, "id").text = str(neue_id)
+        ET.SubElement(reform, "original_id").text = original["id"]
+
+        # 🔥 HIER DIE ÄNDERUNGEN SPEICHERN
+        ET.SubElement(reform, "titel").text = titel
+        ET.SubElement(reform, "beschreibung").text = beschreibung
+        ET.SubElement(reform, "strafe").text = str(strafe)
+        ET.SubElement(reform, "bussgeld").text = str(bussgeld)
+
+        ET.SubElement(reform, "zustimmung").text = "0"
+        ET.SubElement(reform, "abgestimmt_ids").text = ""
+
+        tree.write(
+            gesetzereformXmlPfad,
+            encoding="utf-8",
+            xml_declaration=True,
+            pretty_print=True
+        )
+
+    return redirect("gesetze")
+
+
+def gesetzReformFreigeben(request, reform_id):
+    if request.method != "POST":
+        return redirect("gesetze")
+
+    benutzer_id = request.session.get("user_id")
+    beruf = request.session.get("beruf")
+
+    if not benutzer_id or beruf != "Legislative":
+        return redirect("gesetze")
+
+    tree = xmlStrukturierenGesetzreform()
+    root = tree.getroot()
+
+    for reform in root.findall("reform"):
+        if reform.find("id").text == str(reform_id):
+
+            abgestimmt_el = reform.find("abgestimmt_ids")
+            bereits = set(filter(None, (abgestimmt_el.text or "").split(",")))
+
+            if str(benutzer_id) in bereits:
+                return HttpResponse("""
+                    <script>
+                        alert("Du hast bereits abgestimmt.");
+                        window.history.back();
+                    </script>
+                """)
+
+            bereits.add(str(benutzer_id))
+            abgestimmt_el.text = ",".join(bereits)
+
+            zustimmung_el = reform.find("zustimmung")
+            neue_zustimmung = int(zustimmung_el.text or "0") + 1
+            zustimmung_el.text = str(neue_zustimmung)
+
+            benoetigt = math.ceil(hole_anzahl_legislative() * 0.5)
+
+            if neue_zustimmung >= benoetigt:
+                tree_g = xmlStrukturierenGesetze()
+                root_g = tree_g.getroot()
+
+                for gesetz in root_g.findall("gesetz"):
+                    if gesetz.find("id").text == reform.find("original_id").text:
+                        gesetz.find("titel").text = reform.find("titel").text
+                        gesetz.find("beschreibung").text = reform.find("beschreibung").text
+                        gesetz.find("strafe").text = reform.find("strafe").text
+                        gesetz.find("bussgeld").text = reform.find("bussgeld").text
+                        break
+
+                tree_g.write(gesetzeXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
+                root.remove(reform)
+
+            tree.write(gesetzereformXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
+            break
+
+    return redirect("gesetze")
+
+
+
 #S und M
 def gesetzErlassen(request): 
     if request.method == "POST":
@@ -792,6 +939,7 @@ def gesetze(request):
     return render(request, "rechtApp/gesetze.html", {
         "gesetze": gesetze_liste,
         "gesetzentwurf": gesetzentwurf_liste,
+        "gesetzreformen": ladeGesetzreformen(),
         "beruf": beruf,
         "anzahl_legislative": anzahl_legislative, #A
         "benoetigte_stimmen": benoetigte_stimmen, #A

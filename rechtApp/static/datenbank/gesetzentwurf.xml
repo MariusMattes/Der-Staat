@@ -1,12 +1,2 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<gesetze>
-  <gesetz>
-    <id>1</id>
-    <titel>André einknasten</titel>
-    <beschreibung>André muss grundsätzlich in den knast</beschreibung>
-    <bussgeld>1000</bussgeld>
-    <strafe>1</strafe>
-    <zustimmung>1</zustimmung>
-    <abgestimmt_ids>4</abgestimmt_ids>
-  </gesetz>
-</gesetze>
+<gesetze/>

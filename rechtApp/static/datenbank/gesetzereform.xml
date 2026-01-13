@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<gesetzreformen>
+  <reform>
+    <id>1</id>
+    <original_id>1</original_id>
+    <titel>Geschwindigkeitsbegrenzung einhalten</titel>
+    <beschreibung>Man darf wirklich wirklich wirklich nicht schneller als die erlaubte Geschwindigkeit fahren. </beschreibung>
+    <strafe>0</strafe>
+    <bussgeld>1000</bussgeld>
+    <zustimmung>1</zustimmung>
+    <abgestimmt_ids>a029e720-d429-4799-8fd4-076ae053bfd6</abgestimmt_ids>
+  </reform>
+</gesetzreformen>

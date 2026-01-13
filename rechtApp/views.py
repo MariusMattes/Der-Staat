@@ -24,10 +24,9 @@ import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
 
 from .jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("7f77bad6-58e5-4e6c-b19f-ad007e437ddc") #für testzwecke
-print(token) #für testzwecke
-#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiN2Y3N2JhZDYtNThlNS00ZTZjLWIxOWYtYWQwMDdlNDM3ZGRjIiwiaWF0IjoxNzY4MjkzNTY0LCJleHAiOjE3NjgyOTM4NjR9._QuxdlTi2RznTXrSw3pcq1EDnezz9O9QVNexyfEUKjk
-
+token = create_jwt("67b7b148-2c38-4b5d-826b-978b7644a79d") #für testzwecke
+print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #für testzwecke
+#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjdiN2IxNDgtMmMzOC00YjVkLTgyNmItOTc4Yjc2NDRhNzlkIiwiaWF0IjoxNzY4Mjk1OTEyLCJleHAiOjE3NjgyOTYyMTJ9.0Vg1jsCO0AKwj4K99ookF_t5iT7_rMS1DYgYrs_2CHE
 #Allgemeiner Datenbankpfad
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')

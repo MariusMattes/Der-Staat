@@ -616,16 +616,30 @@ def ladeGesetzentwurf():
 
     tree = xmlStrukturierenGesetzentwurf()
     root = tree.getroot()
-    
+
+    #
     gesetze_liste = []
-    for gesetz in root.xpath('//gesetz'):
+    for gesetz in root.findall("gesetz"):
+
+        #A
+        api_el = gesetz.find("api_relevant")
+        api_werte = []
+        if api_el is not None:
+            api_werte = [
+                wert_el.text
+                for wert_el in api_el.findall("wert")
+                if wert_el.text
+            ]
+        #/A
+
         gesetze_liste.append({
-            'id': gesetz.find('id').text,
-            'titel': gesetz.find('titel').text,
-            'beschreibung': gesetz.find('beschreibung').text,
-            'strafe': gesetz.find('strafe').text,
-            'bussgeld': gesetz.find('bussgeld').text,
-            'zustimmung': gesetz.find('zustimmung').text
+            "id": gesetz.find("id").text,
+            "titel": gesetz.find("titel").text,
+            "beschreibung": gesetz.find("beschreibung").text,
+            "strafe": gesetz.find("strafe").text,
+            "bussgeld": gesetz.find("bussgeld").text,
+            "zustimmung": gesetz.find("zustimmung").text,
+            "api_relevant": api_werte,
         })
 
     return gesetze_liste
@@ -640,6 +654,16 @@ def ladeGesetzreformen():
 
     reformen = []
     for reform in root.findall("reform"):
+
+        api_el = reform.find("api_relevant")  #A
+        api_werte = []  #A
+        if api_el is not None:  #A
+            api_werte = [  #A
+                wert_el.text  #A
+                for wert_el in api_el.findall("wert")  #A
+                if wert_el.text  #A
+            ]  #A
+
         reformen.append({
             "id": reform.find("id").text,
             "original_id": reform.find("original_id").text,
@@ -648,9 +672,11 @@ def ladeGesetzreformen():
             "strafe": reform.find("strafe").text,
             "bussgeld": reform.find("bussgeld").text,
             "zustimmung": reform.find("zustimmung").text,
+            "api_relevant": api_werte,  #A
         })
 
     return reformen
+
 
 
 #S
@@ -660,6 +686,9 @@ def gesetzBearbeiten(request):
         beschreibung = request.POST.get("beschreibung")
         bussgeld = request.POST.get("bussgeld")
         strafe = request.POST.get("strafe")
+        api_werte = request.POST.getlist("api_relevant[]") #A
+        api_werte = [w.strip() for w in api_werte if w.strip()] #A
+
 
         gesetze = ladeGesetze()
 
@@ -702,6 +731,11 @@ def gesetzBearbeiten(request):
 
         ET.SubElement(reform, "zustimmung").text = "0"
         ET.SubElement(reform, "abgestimmt_ids").text = ""
+
+        if api_werte:  #A
+            api_el = ET.SubElement(reform, "api_relevant")  #A
+            for wert in api_werte:  #A
+                ET.SubElement(api_el, "wert").text = wert  #A
 
         tree.write(
             gesetzereformXmlPfad,
@@ -759,6 +793,17 @@ def gesetzReformFreigeben(request, reform_id):
                         gesetz.find("beschreibung").text = reform.find("beschreibung").text
                         gesetz.find("strafe").text = reform.find("strafe").text
                         gesetz.find("bussgeld").text = reform.find("bussgeld").text
+
+                        api_alt = gesetz.find("api_relevant")  #A
+                        if api_alt is not None:  #A
+                            gesetz.remove(api_alt)  #A
+
+                        api_neu = reform.find("api_relevant")  #A
+                        if api_neu is not None:  #A
+                            api_el = ET.SubElement(gesetz, "api_relevant")  #A
+                            for wert in api_neu.findall("wert"):  #A
+                                ET.SubElement(api_el, "wert").text = wert.text  #A
+
                         break
 
                 tree_g.write(gesetzeXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
@@ -778,6 +823,9 @@ def gesetzErlassen(request):
         beschreibung = request.POST.get("beschreibung")
         bussgeld = request.POST.get("bussgeld")
         strafe = request.POST.get("strafe")
+        api_werte = request.POST.getlist("api_relevant[]")#A
+        api_werte = [w.strip() for w in api_werte if w.strip()]#A
+
 
         tree = xmlStrukturierenGesetzentwurf()
         root = tree.getroot()
@@ -796,6 +844,11 @@ def gesetzErlassen(request):
         ET.SubElement(neues_gesetz, "bussgeld").text = bussgeld
         ET.SubElement(neues_gesetz, "strafe").text = str(strafe)
         ET.SubElement(neues_gesetz, "zustimmung").text = "0"
+
+        if api_werte:  #A
+            api_el = ET.SubElement(neues_gesetz, "api_relevant")  #A
+            for wert in api_werte:  #A
+                ET.SubElement(api_el, "wert").text = wert  #A
 
         tree.write(gesetzentwurfXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
@@ -902,6 +955,12 @@ def gesetzFreigeben(request, gesetz_id):
                     ET.SubElement(neues_gesetz, "beschreibung").text = (gesetz.find("beschreibung").text or "")
                     ET.SubElement(neues_gesetz, "bussgeld").text = (gesetz.find("bussgeld").text or "0")
                     ET.SubElement(neues_gesetz, "strafe").text = (gesetz.find("strafe").text or "0")
+
+                    api_el_alt = gesetz.find("api_relevant")  #A
+                    if api_el_alt is not None:  #A
+                        api_el_neu = ET.SubElement(neues_gesetz, "api_relevant")  #A
+                        for wert in api_el_alt.findall("wert"):  #A
+                            ET.SubElement(api_el_neu, "wert").text = wert.text  #A
 
                     # In gesetze.xml speichern
                     tree_gesetze.write(

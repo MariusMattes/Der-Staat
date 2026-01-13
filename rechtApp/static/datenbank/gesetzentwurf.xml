@@ -1,2 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<gesetze/>
+<gesetze>
+  <gesetz>
+    <id>1</id>
+    <titel>Test</titel>
+    <beschreibung>Test Gesetz</beschreibung>
+    <bussgeld>50</bussgeld>
+    <strafe>100</strafe>
+    <zustimmung>0</zustimmung>
+    <api_relevant>
+      <wert>Wert1</wert>
+      <wert>Wert2</wert>
+      <wert>Wert3</wert>
+    </api_relevant>
+  </gesetz>
+</gesetze>

@@ -968,26 +968,54 @@ def erstelle_zip_backup(dateipfad: Path) -> tuple[io.BytesIO, str]:
 @csrf_exempt                                                                            # okay fürs Testen, später falls möglich Token Auth
 def backup(request):
                                                                                         # Pi ruft /backup?backup=static auf Kann lokal getestet werden mit "http://127.0.0.1:8000/backup?backup=static"
-    schluessel = request.GET.get("backup")
-    if not schluessel:
-        return JsonResponse({"status": "error", "message": "Parameter 'backup' fehlt"}, status=400)
+    userIP = request.META['REMOTE_ADDR']
+    check = checkIfIPIsAllowed(userIP)
+    if check == True:
+    
+        schluessel = request.GET.get("backup")
+        if not schluessel:
+            return JsonResponse({"status": "error", "message": "Parameter 'backup' fehlt"}, status=400)
 
-    dateipfad = BACKUP_ORDNER.get(schluessel)
-    if not dateipfad:
-        return JsonResponse({
-            "status": "error",
-            "message": f"Unbekannter Ordner-Key '{schluessel}'. Erlaubt: {list(BACKUP_ORDNER.keys())}"
-        }, status=400)
+        dateipfad = BACKUP_ORDNER.get(schluessel)
+        if not dateipfad:
+            return JsonResponse({
+                "status": "error",
+                "message": f"Unbekannter Ordner-Key '{schluessel}'. Erlaubt: {list(BACKUP_ORDNER.keys())}"
+            }, status=400)
 
-    try:
-        mem, zip_dateiname = erstelle_zip_backup(dateipfad)
+        try:
+            mem, zip_dateiname = erstelle_zip_backup(dateipfad)
 
-        response = HttpResponse(mem.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{zip_dateiname}"'     # Datei wird als Download gesendet/vom "Requester" runtergeladen
-        return response
+            response = HttpResponse(mem.getvalue(), content_type="application/zip")
+            response["Content-Disposition"] = f'attachment; filename="{zip_dateiname}"'     # Datei wird als Download gesendet/vom "Requester" runtergeladen
+            return response
 
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({
+        "ip": userIP,
+        "autorisiert": "backup download wird gestartet",
+        })
+#F
+def checkIfIPIsAllowed (IP):
+    checkIPPath = Path(settings.BASE_DIR) / "rechtApp" / "static" / "data" / "settings" / "allowedIPs.json"
+    
+    with open(checkIPPath, "r") as file:
+        settingsData = file.read()
+
+    settingsData = json.loads(settingsData)
+
+    autorisiert = False
+    print(autorisiert)
+    for department in settingsData:
+        if IP in department["IP"]:
+            autorisiert = True
+            print(autorisiert)
+    if autorisiert:
+        return True
+    elif not autorisiert:
+        return False
 
 #A
 def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_titel: str):

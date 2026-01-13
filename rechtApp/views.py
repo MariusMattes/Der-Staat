@@ -23,11 +23,12 @@ import pandas as pd
 import logging #logbuch für fehlersuche
 logger = logging.getLogger(__name__) 
 
+#A
+#Login ohne Meldewesen
 from .jwt_tooling import create_jwt #für testzwecke
 token = create_jwt("67b7b148-2c38-4b5d-826b-978b7644a79d") #für testzwecke
 print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #für testzwecke
-#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjdiN2IxNDgtMmMzOC00YjVkLTgyNmItOTc4Yjc2NDRhNzlkIiwiaWF0IjoxNzY4Mjk1OTEyLCJleHAiOjE3NjgyOTYyMTJ9.0Vg1jsCO0AKwj4K99ookF_t5iT7_rMS1DYgYrs_2CHE
-#Allgemeiner Datenbankpfad
+#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjdiN2IxNDgtMmMzOC00YjVkLTgyNmItOTc4Yjc2NDRhNzlkIiwiaWF0IjoxNzY4Mjk4MjI4LCJleHAiOjE3NjgyOTg1Mjh9.LMqWfr5avW9mhQ11U-acaoPphJlWFVvdsNgy-VJ0R1Y
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
 
@@ -69,6 +70,7 @@ ARBEIT_LEGISLATIVE_API = "http://[2001:7c0:2320:2:f816:3eff:feb6:6731]:8000/api/
 #     except requests.RequestException:
 #         return beruf
 
+#A
 def hole_beruf_von_arbeit(user_id: str):
     try:
         url = f"{ARBEIT_API_URL}{user_id}"
@@ -223,17 +225,10 @@ def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str, st
 #S
 def profilseite(request):
 
-    # ==============================
-    # NEU: Bürger-ID aus JWT-Session (Meldewesen)
-    # ==============================
     user_id = request.session.get("user_id")
     if not user_id:
         return HttpResponse("Nicht eingeloggt.", status=401)
 
-    # ==============================
-    # ALT: Lokaler Benutzername aus eigener Benutzerverwaltung
-    # → obsolet, da Login künftig über Meldewesen/JWT erfolgt
-    # ==============================
     # benutzername = request.session.get("benutzername")
     # if not benutzername:
     #     return redirect("login")
@@ -259,9 +254,7 @@ def profilseite(request):
 
     vorname = benutzer.get("vorname", "")
     nachname = benutzer.get("nachname_neu") or benutzer.get("nachname_geburt", "")
-    # ==============================
-    # Urteile laden (unverändert)
-    # ==============================
+
     try:
         with open(urteileJsonPfad, "r", encoding="utf-8") as f:
             urteile_liste = json.load(f)
@@ -270,17 +263,10 @@ def profilseite(request):
 
     eigene_urteile = []
 
-    # ==============================
-    # ALT: Filter nach benutzername
-    # → obsolet
-    # ==============================
     # for urteil in urteile_liste:
     #     if urteil["person"] == benutzername:
     #         eigene_urteile.append(urteil)
 
-    # ==============================
-    # NEU: Filter nach buerger_id
-    # ==============================
     for urteil in urteile_liste:
         if str(urteil.get("buerger_id")) == str(user_id):
             eigene_urteile.append(urteil)
@@ -335,12 +321,6 @@ def profilseite(request):
         request,
         "rechtApp/profilseite.html",
         {
-            # ==============================
-            # ALT: lokaler Benutzer
-            # "benutzer": benutzer_daten,
-            # ==============================
-
-            # NEU
             "vorname": vorname,
             "nachname": nachname,
             "user_id": user_id,
@@ -391,26 +371,43 @@ def anzeigen(request):
     if request.method == "POST":
         action = request.POST.get("action")
 
-        # ==========================================
-        # Bürger-Suche über Meldewesen (unverändert)
-        # ==========================================
         if action == "suche_buerger":
+            buerger_id = request.POST.get("buerger_id", "").strip()
+
+            #A
+            if buerger_id:
+                buerger = hole_buerger_daten(buerger_id)
+
+                if buerger:
+                    return render(request, "rechtApp/anzeigen.html", {
+                        "anzeigen": anzeigen_liste,
+                        "beruf": beruf,
+                        "buerger_id": buerger_id,
+                        "gesetze": gesetze,
+                        "buerger": buerger,
+                    })
+
+                return render(request, "rechtApp/anzeigen.html", {
+                    "anzeigen": anzeigen_liste,
+                    "beruf": beruf,
+                    "buerger_id": None,
+                    "gesetze": gesetze,
+                })
+            #/A
             vorname = request.POST.get("vorname", "").strip()
             nachname = request.POST.get("nachname", "").strip()
             geburtsdatum = request.POST.get("geburtsdatum", "").strip()
 
-            buerger_id = hole_buerger_id(vorname, nachname, geburtsdatum)
+            if vorname and nachname and geburtsdatum:
+                buerger_id = hole_buerger_id(vorname, nachname, geburtsdatum)
 
             return render(request, "rechtApp/anzeigen.html", {
                 "anzeigen": anzeigen_liste,
                 "beruf": beruf,
                 "buerger_id": buerger_id,
-                "gesetze": gesetze
+                "gesetze": gesetze,
             })
 
-        # ==========================================
-        # Neue Anzeige anlegen (unverändert)
-        # ==========================================
         if action == "neue_anzeige":
             anzeigen_liste.append({
                 "buerger_id": request.POST.get("anzeige_buerger_id").strip(),
@@ -425,21 +422,9 @@ def anzeigen(request):
 
             return redirect("anzeigen")
 
-        # ==========================================
-        # Anzeige entscheiden
-        # ==========================================
         if action in ["zustimmen", "ablehnen"]:
             anzeige_index = int(request.POST.get("anzeige_index", -1))
 
-            # --------------------------------------------------
-            # ALT: Richter über lokalen Benutzernamen
-            # → obsolet, da Authentifizierung künftig über JWT
-            # --------------------------------------------------
-            # richter = request.session.get("benutzername", "Unbekannt")
-
-            # --------------------------------------------------
-            # NEU: Richter = Bürger-ID aus JWT-Session
-            # --------------------------------------------------
             richter = request.session.get("user_id")
 
             if 0 <= anzeige_index < len(anzeigen_liste):
@@ -470,10 +455,7 @@ def anzeigen(request):
                         else:
                             neue_id = 1
 
-                        # --------------------------------------------------
-                        # ALT: Urteil mit person = Vorname
-                        # → obsolet, da Identifikation jetzt über buerger_id
-                        # --------------------------------------------------
+
                         # urteile_liste.append({
                         #     "id": neue_id,
                         #     "buerger_id": anzeige["buerger_id"],
@@ -487,9 +469,7 @@ def anzeigen(request):
                         bussgeld_betrag = int(gesetz_daten["bussgeld"]) if gesetz_daten.get("bussgeld") else 0
                         strafe_jahre = int(gesetz_daten["strafe"]) if gesetz_daten.get("strafe") else 0
 
-                        # --------------------------------------------------
-                        # NEU: Urteil eindeutig über buerger_id
-                        # --------------------------------------------------
+
                         urteile_liste.append({
                             "id": neue_id,
                             "buerger_id": anzeige["buerger_id"],
@@ -529,9 +509,6 @@ def anzeigen(request):
                         #/A
 
                 else:
-                    # ==========================================
-                    # Anzeige abgelehnt (unverändert)
-                    # ==========================================
                     ablehnPfad = os.path.join(
                         os.path.dirname(anzeigenJsonPfad),
                         "anzeigeAbgelehnt.json"

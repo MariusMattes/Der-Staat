@@ -42,7 +42,7 @@ urlpatterns = [
     path("ro/diagramm", views.diagramm_seite, name="diagramm_seite"),
     path('ro/statistik', views.statistik, name='statistik'),
     path("ro/diagramm/urteile.png", views.diagramm_urteile, name = "diagramm_urteile"),
-
+    path("ro/opendata/urteile.csv", views.urteile_als_csv_download, name="urteile__als_csv_download")
 ]
 
 """

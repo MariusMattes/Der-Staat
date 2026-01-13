@@ -1190,4 +1190,8 @@ def anzeigen_diagramm(request):
 def diagramm_seite(request):
     return render(request, "rechtApp/diagramm.html")
 
-#Test123
+#Test12
+
+# Statistik-HTML
+def statistik(request):
+    return render(request, 'rechtApp/statistik.html')

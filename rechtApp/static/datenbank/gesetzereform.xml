@@ -2,12 +2,15 @@
 <gesetzreformen>
   <reform>
     <id>1</id>
-    <original_id>1</original_id>
-    <titel>Geschwindigkeitsbegrenzung einhalten</titel>
-    <beschreibung>Man darf wirklich wirklich wirklich nicht schneller als die erlaubte Geschwindigkeit fahren. </beschreibung>
+    <original_id>14</original_id>
+    <titel>Vermögenssteuer</titel>
+    <beschreibung>Die Vermögensteuer ist wöchentlich vom jeweiligen Vermögen zu entrichten und beträgt in Prozent:</beschreibung>
     <strafe>0</strafe>
-    <bussgeld>1000</bussgeld>
-    <zustimmung>1</zustimmung>
-    <abgestimmt_ids>a029e720-d429-4799-8fd4-076ae053bfd6</abgestimmt_ids>
+    <bussgeld>0</bussgeld>
+    <zustimmung>0</zustimmung>
+    <abgestimmt_ids></abgestimmt_ids>
+    <api_relevant>
+      <wert>3</wert>
+    </api_relevant>
   </reform>
 </gesetzreformen>

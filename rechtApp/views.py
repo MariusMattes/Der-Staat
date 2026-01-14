@@ -26,10 +26,11 @@ logger = logging.getLogger(__name__)
 
 #A
 #Login ohne Meldewesen
-from .jwt_tooling import create_jwt #für testzwecke
-token = create_jwt("67b7b148-2c38-4b5d-826b-978b7644a79d") #für testzwecke
-print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #für testzwecke
-#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjdiN2IxNDgtMmMzOC00YjVkLTgyNmItOTc4Yjc2NDRhNzlkIiwiaWF0IjoxNzY4Mjk4MjI4LCJleHAiOjE3NjgyOTg1Mjh9.LMqWfr5avW9mhQ11U-acaoPphJlWFVvdsNgy-VJ0R1Y
+from .jwt_tooling import create_jwt #Hier wird der Token erstellt
+token = create_jwt("37174cfc-5603-4c2f-88b2-f5f8b1ef51fd") #Hier ID eingeben mit der man sich einloggen möchte
+print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #Hier wird der fertige Token im Terminal angezeigt
+#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzcxNzRjZmMtNTYwMy00YzJmLTg4YjItZjVmOGIxZWY1MWZkIiwiaWF0IjoxNzY4Mjk5NDc4LCJleHAiOjE3NjgyOTk3Nzh9.PllZBiM6nIDyj3xuJFZ_yqlMmgDen2N8oJw7GzORS_k
+
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')
 
@@ -39,7 +40,7 @@ gesetzeJsonPfad = os.path.join(allgemeinerPfad, 'gesetze.json')
 anzeigenJsonPfad = os.path.join(allgemeinerPfad, 'anzeigen.json')
 urteileJsonPfad = os.path.join(allgemeinerPfad, 'urteile.json')
 benutzerJsonPfad = os.path.join(allgemeinerPfad, 'benutzer.json')
-vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json')
+vorstrafenJsonPfad = os.path.join(allgemeinerPfad, 'vorstrafen.json') #A
 
 #Einzelne XML-Datei
 #S
@@ -89,7 +90,7 @@ def hole_beruf_von_arbeit(user_id: str):
         logger.error("Arbeits-API Fehler: %s", e)
         return None
 
-
+#S
 def hole_buerger_daten(user_id):
     try:
         response = requests.get(
@@ -107,6 +108,7 @@ def hole_buerger_daten(user_id):
 
     return None
 
+#S
 def hole_buerger_id(vorname, nachname, geburtsdatum):
 
     daten = {
@@ -616,16 +618,30 @@ def ladeGesetzentwurf():
 
     tree = xmlStrukturierenGesetzentwurf()
     root = tree.getroot()
-    
+
+    #
     gesetze_liste = []
-    for gesetz in root.xpath('//gesetz'):
+    for gesetz in root.findall("gesetz"):
+
+        #A
+        api_el = gesetz.find("api_relevant")
+        api_werte = []
+        if api_el is not None:
+            api_werte = [
+                wert_el.text
+                for wert_el in api_el.findall("wert")
+                if wert_el.text
+            ]
+        #/A
+
         gesetze_liste.append({
-            'id': gesetz.find('id').text,
-            'titel': gesetz.find('titel').text,
-            'beschreibung': gesetz.find('beschreibung').text,
-            'strafe': gesetz.find('strafe').text,
-            'bussgeld': gesetz.find('bussgeld').text,
-            'zustimmung': gesetz.find('zustimmung').text
+            "id": gesetz.find("id").text,
+            "titel": gesetz.find("titel").text,
+            "beschreibung": gesetz.find("beschreibung").text,
+            "strafe": gesetz.find("strafe").text,
+            "bussgeld": gesetz.find("bussgeld").text,
+            "zustimmung": gesetz.find("zustimmung").text,
+            "api_relevant": api_werte,
         })
 
     return gesetze_liste
@@ -640,6 +656,16 @@ def ladeGesetzreformen():
 
     reformen = []
     for reform in root.findall("reform"):
+
+        api_el = reform.find("api_relevant")  #A
+        api_werte = []  #A
+        if api_el is not None:  #A
+            api_werte = [  #A
+                wert_el.text  #A
+                for wert_el in api_el.findall("wert")  #A
+                if wert_el.text  #A
+            ]  #A
+
         reformen.append({
             "id": reform.find("id").text,
             "original_id": reform.find("original_id").text,
@@ -648,9 +674,11 @@ def ladeGesetzreformen():
             "strafe": reform.find("strafe").text,
             "bussgeld": reform.find("bussgeld").text,
             "zustimmung": reform.find("zustimmung").text,
+            "api_relevant": api_werte,  #A
         })
 
     return reformen
+
 
 
 #S
@@ -660,6 +688,9 @@ def gesetzBearbeiten(request):
         beschreibung = request.POST.get("beschreibung")
         bussgeld = request.POST.get("bussgeld")
         strafe = request.POST.get("strafe")
+        api_werte = request.POST.getlist("api_relevant[]") #A
+        api_werte = [w.strip() for w in api_werte if w.strip()] #A
+
 
         gesetze = ladeGesetze()
 
@@ -702,6 +733,11 @@ def gesetzBearbeiten(request):
 
         ET.SubElement(reform, "zustimmung").text = "0"
         ET.SubElement(reform, "abgestimmt_ids").text = ""
+
+        if api_werte:  #A
+            api_el = ET.SubElement(reform, "api_relevant")  #A
+            for wert in api_werte:  #A
+                ET.SubElement(api_el, "wert").text = wert  #A
 
         tree.write(
             gesetzereformXmlPfad,
@@ -759,6 +795,17 @@ def gesetzReformFreigeben(request, reform_id):
                         gesetz.find("beschreibung").text = reform.find("beschreibung").text
                         gesetz.find("strafe").text = reform.find("strafe").text
                         gesetz.find("bussgeld").text = reform.find("bussgeld").text
+
+                        api_alt = gesetz.find("api_relevant")  #A
+                        if api_alt is not None:  #A
+                            gesetz.remove(api_alt)  #A
+
+                        api_neu = reform.find("api_relevant")  #A
+                        if api_neu is not None:  #A
+                            api_el = ET.SubElement(gesetz, "api_relevant")  #A
+                            for wert in api_neu.findall("wert"):  #A
+                                ET.SubElement(api_el, "wert").text = wert.text  #A
+
                         break
 
                 tree_g.write(gesetzeXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
@@ -778,6 +825,9 @@ def gesetzErlassen(request):
         beschreibung = request.POST.get("beschreibung")
         bussgeld = request.POST.get("bussgeld")
         strafe = request.POST.get("strafe")
+        api_werte = request.POST.getlist("api_relevant[]")#A
+        api_werte = [w.strip() for w in api_werte if w.strip()]#A
+
 
         tree = xmlStrukturierenGesetzentwurf()
         root = tree.getroot()
@@ -796,6 +846,11 @@ def gesetzErlassen(request):
         ET.SubElement(neues_gesetz, "bussgeld").text = bussgeld
         ET.SubElement(neues_gesetz, "strafe").text = str(strafe)
         ET.SubElement(neues_gesetz, "zustimmung").text = "0"
+
+        if api_werte:  #A
+            api_el = ET.SubElement(neues_gesetz, "api_relevant")  #A
+            for wert in api_werte:  #A
+                ET.SubElement(api_el, "wert").text = wert  #A
 
         tree.write(gesetzentwurfXmlPfad, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
@@ -903,6 +958,12 @@ def gesetzFreigeben(request, gesetz_id):
                     ET.SubElement(neues_gesetz, "bussgeld").text = (gesetz.find("bussgeld").text or "0")
                     ET.SubElement(neues_gesetz, "strafe").text = (gesetz.find("strafe").text or "0")
 
+                    api_el_alt = gesetz.find("api_relevant")  #A
+                    if api_el_alt is not None:  #A
+                        api_el_neu = ET.SubElement(neues_gesetz, "api_relevant")  #A
+                        for wert in api_el_alt.findall("wert"):  #A
+                            ET.SubElement(api_el_neu, "wert").text = wert.text  #A
+
                     # In gesetze.xml speichern
                     tree_gesetze.write(
                         gesetzeXmlPfad,
@@ -932,11 +993,18 @@ def gesetze(request):
     gesetzentwurf_liste = ladeGesetzentwurf()
     beruf = request.session.get('beruf')
 
+    #A
+    anzahl_legislative = hole_anzahl_legislative()
+    benoetigte_stimmen = math.ceil(anzahl_legislative * 0.5)
+    #/A
+
     return render(request, "rechtApp/gesetze.html", {
         "gesetze": gesetze_liste,
         "gesetzentwurf": gesetzentwurf_liste,
         "gesetzreformen": ladeGesetzreformen(),
         "beruf": beruf,
+        "anzahl_legislative": anzahl_legislative, #A
+        "benoetigte_stimmen": benoetigte_stimmen, #A
     })
 
 
@@ -1242,26 +1310,54 @@ def erstelle_zip_backup(dateipfad: Path) -> tuple[io.BytesIO, str]:
 @csrf_exempt                                                                            # okay fürs Testen, später falls möglich Token Auth
 def backup(request):
                                                                                         # Pi ruft /backup?backup=static auf Kann lokal getestet werden mit "http://127.0.0.1:8000/backup?backup=static"
-    schluessel = request.GET.get("backup")
-    if not schluessel:
-        return JsonResponse({"status": "error", "message": "Parameter 'backup' fehlt"}, status=400)
+    userIP = request.META['REMOTE_ADDR']
+    check = checkIfIPIsAllowed(userIP)
+    if check == True:
+    
+        schluessel = request.GET.get("backup")
+        if not schluessel:
+            return JsonResponse({"status": "error", "message": "Parameter 'backup' fehlt"}, status=400)
 
-    dateipfad = BACKUP_ORDNER.get(schluessel)
-    if not dateipfad:
-        return JsonResponse({
-            "status": "error",
-            "message": f"Unbekannter Ordner-Key '{schluessel}'. Erlaubt: {list(BACKUP_ORDNER.keys())}"
-        }, status=400)
+        dateipfad = BACKUP_ORDNER.get(schluessel)
+        if not dateipfad:
+            return JsonResponse({
+                "status": "error",
+                "message": f"Unbekannter Ordner-Key '{schluessel}'. Erlaubt: {list(BACKUP_ORDNER.keys())}"
+            }, status=400)
 
-    try:
-        mem, zip_dateiname = erstelle_zip_backup(dateipfad)
+        try:
+            mem, zip_dateiname = erstelle_zip_backup(dateipfad)
 
-        response = HttpResponse(mem.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{zip_dateiname}"'     # Datei wird als Download gesendet/vom "Requester" runtergeladen
-        return response
+            response = HttpResponse(mem.getvalue(), content_type="application/zip")
+            response["Content-Disposition"] = f'attachment; filename="{zip_dateiname}"'     # Datei wird als Download gesendet/vom "Requester" runtergeladen
+            return response
 
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({
+        "ip": userIP,
+        "autorisiert": "backup download wird gestartet",
+        })
+#F
+def checkIfIPIsAllowed (IP):
+    checkIPPath = Path(settings.BASE_DIR) / "rechtApp" / "static" / "data" / "settings" / "allowedIPs.json"
+    
+    with open(checkIPPath, "r") as file:
+        settingsData = file.read()
+
+    settingsData = json.loads(settingsData)
+
+    autorisiert = False
+    print(autorisiert)
+    for department in settingsData:
+        if IP in department["IP"]:
+            autorisiert = True
+            print(autorisiert)
+    if autorisiert:
+        return True
+    elif not autorisiert:
+        return False
 
 #A
 def sende_bussgeld_an_bank(buerger_id: str, betrag: int, gesetz_id: int, gesetz_titel: str):
@@ -1314,9 +1410,11 @@ def anzeigen_diagramm(request):
 
     return response
 
+#M
 def diagramm_seite(request):
     return render(request, "rechtApp/diagramm.html")
 
+#M
 def diagramm_urteile(request):
 
     if not os.path.exists(urteileJsonPfad):
@@ -1360,6 +1458,7 @@ def diagramm_urteile(request):
 
     return response 
 
+#M
 def urteile_als_csv_download(request):
 
     with open (urteileJsonPfad, "r", encoding="utf-8") as file:
@@ -1390,9 +1489,9 @@ def urteile_als_csv_download(request):
 
     return response
 
-
-#Test12
-
+#S
 # Statistik-HTML
 def statistik(request):
     return render(request, 'rechtApp/statistik.html')
+
+#Test

@@ -36,6 +36,21 @@
 
     {% if beruf == "Legislative" %}
     <div class="hauptbereichDivCLASS">
+        <!-- A -->
+         <div class="gesamtDivCLASS">
+            <div class="karteDivCLASS">
+                <p class="inhaltDivCLASS">
+                    Zurzeit gibt es <b>{{ anzahl_legislative }}</b> Mitglieder der Legislative.
+                </p>
+                <p class="inhaltDivCLASS">
+                    Für die Zustimmung zu einem neuen Gesetz werden
+                    <b>{{ benoetigte_stimmen }}</b> Stimmen benötigt
+                    (einfache Mehrheit).
+                </p>
+            </div>
+        </div>
+        <!-- /A -->
+
         <h2 class="UeberschriftCLASS">Gesetz bearbeiten:</h2>
         <form method="POST" action="{% url 'gesetzBearbeiten' %}" class="formularDivCLASS">
             {% csrf_token %}
@@ -45,6 +60,18 @@
 
             <label>Beschreibung:</label>
             <textarea class="eingabeFeldCLASS" name="beschreibung" required></textarea>
+
+            <!-- A -->
+            <label>API-relevante Werte:</label>
+
+            <div id="api-relevant-container">
+                <input class="eingabeFeldCLASS" type="text" name="api_relevant[]" placeholder="Wert eingeben">
+            </div>
+
+            <button type="button" class="buttonSekundaerCLASS" onclick="addApiRelevantReform()">
+                + Weiteren Wert hinzufügen
+            </button>
+            <!-- /A -->
 
             <label>Bußgeld:</label>
             <input class="eingabeFeldCLASS" type="number" name="bussgeld" value="0" min="0" required>
@@ -70,6 +97,20 @@
             <label>Beschreibung:</label>
             <textarea class="eingabeFeldCLASS" name="beschreibung" required></textarea>
 
+            <!-- A -->
+            <label>API-relevante Werte:</label>
+
+            <div id="api-relevant-container-erstellen">
+                <input class="eingabeFeldCLASS" type="text" name="api_relevant[]" placeholder="Wert eingeben">
+            </div>
+
+            <button type="button"
+                    class="buttonSekundaerCLASS"
+                    onclick="addApiRelevantErstellen()">
+                + Weiteren Wert hinzufügen
+            </button>
+            <!-- /A -->
+
             <label>Bußgeld:</label>
             <input class="eingabeFeldCLASS" type="number" name="bussgeld" value="0" min="0" required>
 
@@ -78,15 +119,27 @@
 
             <button type="submit" class="buttonPrimarCLASS">Gesetz speichern</button>
         </form>
+
     </div>
     <div class="hauptbereichDivCLASS">
         <h2 class="UeberschriftCLASS">Gesetzentwurf</h2>
+
+        
         <div class="gesamtDivCLASS">
             {% for gesetz in gesetzentwurf %}
             <div class="karteDivCLASS">
                 <p class="inhaltNummerDivCLASS">Entwurfnr. {{ gesetz.id }}</p>
                 <p class="inhaltDivCLASS">Titel: {{ gesetz.titel }}</p>
-                <p class="inhaltDivCLASS">Beschreibung: {{ gesetz.beschreibung }}</p>
+                <p class="inhaltDivCLASS">Beschreibung: {{ gesetz.beschreibung }}
+                <!-- A -->
+                    {% if gesetz.api_relevant %}
+                        <br>
+                        {% for wert in gesetz.api_relevant %}
+                            {{ wert }}<br>
+                        {% endfor %}
+                    {% endif %}
+                </p>    
+                <!-- /A     -->
                 <p class="inhaltDivCLASS">Strafe: {{ gesetz.strafe }} Jahre</p>
                 <p class="inhaltDivCLASS">Bußgeld: {{ gesetz.bussgeld }}€</p>
                 <p class="inhaltDivCLASS">Zustimmungen: {{ gesetz.zustimmung }}</p>
@@ -111,7 +164,16 @@
 
                 <p class="inhaltNummerDivCLASS">Reform für Gesetz Nr. {{ reform.original_id }}</p>
                 <p class="inhaltDivCLASS">Titel: {{ reform.titel }}</p>
-                <p class="inhaltDivCLASS">Beschreibung: {{ reform.beschreibung }}</p>
+                <p class="inhaltDivCLASS">Beschreibung: {{ reform.beschreibung }}
+                    <!-- A -->
+                    {% if reform.api_relevant %}
+                        <br>
+                        {% for wert in reform.api_relevant %}
+                            {{ wert }}<br>
+                        {% endfor %}
+                    {% endif %}
+                    <!-- /A -->
+                </p>
                 <p class="inhaltDivCLASS">Strafe: {{ reform.strafe }} Jahre</p>
                 <p class="inhaltDivCLASS">Bußgeld: {{ reform.bussgeld }}€</p>
                 <p class="inhaltDivCLASS">Zustimmungen: {{ reform.zustimmung }}</p>
@@ -131,6 +193,30 @@
 
     {% endif %}
     {% include "rechtApp/banner.html" %}
+    <!-- A -->
+    <script>
+    function addApiRelevantReform() {
+        const container = document.getElementById("api-relevant-container");
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = "api_relevant[]";
+        input.className = "eingabeFeldCLASS";
+        input.placeholder = "Wert eingeben";
+        container.appendChild(input);
+    }
+    </script>
+    <script>
+    function addApiRelevantErstellen() {
+        const container = document.getElementById("api-relevant-container-erstellen");
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = "api_relevant[]";
+        input.className = "eingabeFeldCLASS";
+        input.placeholder = "Wert eingeben";
+        container.appendChild(input);
+    }
+    </script>
+    <!-- /A -->
 </body>
 </html>
 

@@ -1489,6 +1489,36 @@ def urteile_als_csv_download(request):
 
     return response
 
+
+
+def urteile_xml_download(request):
+    
+    with open(urteileJsonPfad, "r", encoding="utf-8") as f:
+        daten = json.load(f)
+
+    if not daten:
+        return HttpResponse(status=204)
+
+    root = ET.Element("urteile")
+
+    for row in daten:
+        urteil = ET.SubElement(root, "urteil")
+
+        ET.SubElement(urteil, "id").text = str(row.get("id", ""))
+        ET.SubElement(urteil, "gesetz").text = str(row.get("gesetz", ""))
+        ET.SubElement(urteil, "bussgeld").text = str(row.get("bussgeld", ""))
+        ET.SubElement(urteil, "strafe").text = str(row.get("strafe", ""))
+
+    tree = ET.ElementTree(root)
+
+    response = HttpResponse(content_type="application/xml; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="urteile_opendata.xml"'
+
+    tree.write(response, encoding="utf-8", xml_declaration=True)
+
+    return response
+
+
 #S
 # Statistik-HTML
 def statistik(request):

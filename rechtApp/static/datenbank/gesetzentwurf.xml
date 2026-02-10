@@ -2,11 +2,15 @@
 <gesetze>
   <gesetz>
     <id>1</id>
-    <titel>André einknasten</titel>
-    <beschreibung>André muss grundsätzlich in den knast</beschreibung>
-    <bussgeld>1000</bussgeld>
-    <strafe>1</strafe>
-    <zustimmung>1</zustimmung>
-    <abgestimmt_ids>4</abgestimmt_ids>
+    <titel>Test</titel>
+    <beschreibung>Test Gesetz</beschreibung>
+    <bussgeld>50</bussgeld>
+    <strafe>100</strafe>
+    <zustimmung>0</zustimmung>
+    <api_relevant>
+      <wert>Wert1</wert>
+      <wert>Wert2</wert>
+      <wert>Wert3</wert>
+    </api_relevant>
   </gesetz>
 </gesetze>

@@ -3,9 +3,9 @@
   <gesetz>
     <id>1</id>
     <titel>Geschwindigkeitsbegrenzung einhalten</titel>
-    <beschreibung>Man darf wirklich nicht schneller als die erlaubte Geschwindigkeit fahren. </beschreibung>
-    <bussgeld>0</bussgeld>
-    <strafe>300</strafe>
+    <beschreibung>Man darf wirklich wirklich wirklich nicht schneller als die erlaubte Geschwindigkeit fahren. </beschreibung>
+    <bussgeld>1000</bussgeld>
+    <strafe>0</strafe>
   </gesetz>
   <gesetz>
     <id>2</id>
@@ -124,5 +124,12 @@
     </api_relevant>
     <bussgeld>0</bussgeld>
     <strafe>0</strafe>
+  </gesetz>
+  <gesetz>
+    <id>16</id>
+    <titel>André einknasten</titel>
+    <beschreibung>André muss grundsätzlich in den knast</beschreibung>
+    <bussgeld>1000</bussgeld>
+    <strafe>1</strafe>
   </gesetz>
 </gesetze>

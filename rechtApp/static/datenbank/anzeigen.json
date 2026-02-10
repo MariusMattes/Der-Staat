@@ -33,21 +33,5 @@
         "gesetz_id": "5",
         "gesetz_titel": null,
         "begruendung": "War viel zu schnell unterwegs"
-<<<<<<< HEAD
-    },
-    {
-        "buerger_id": "18790d52-080e-4764-bc4c-3597b2705572",
-        "vorname": "Kind13",
-        "gesetz_id": "5",
-        "gesetz_titel": null,
-        "begruendung": "War viel zu schnell unterwegs"
-    },
-    {
-        "buerger_id": "7f77bad6-58e5-4e6c-b19f-ad007e437ddc",
-        "gesetz_id": "2",
-        "gesetz_titel": "Öffentliche Ruhestörung verboten",
-        "begruendung": "Einfach aus Prinzip"
-=======
->>>>>>> 691bfd5ac6fe3f0c6a4e0b044b5b414123efa784
     }
 ]

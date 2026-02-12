@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 from .jwt_tooling import create_jwt #Hier wird der Token erstellt
 token = create_jwt("37174cfc-5603-4c2f-88b2-f5f8b1ef51fd") #Hier ID eingeben mit der man sich einloggen möchte
 print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #Hier wird der fertige Token im Terminal angezeigt
-#http://127.0.0.1:8000/ro/jwt-login?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzcxNzRjZmMtNTYwMy00YzJmLTg4YjItZjVmOGIxZWY1MWZkIiwiaWF0IjoxNzY4Mjk5NDc4LCJleHAiOjE3NjgyOTk3Nzh9.PllZBiM6nIDyj3xuJFZ_yqlMmgDen2N8oJw7GzORS_k
+#http://127.0.0.1:8000/ro/jwt-login?token=[hier token einfügen]
 
 #S
 allgemeinerPfad = os.path.join(settings.BASE_DIR, 'rechtApp', 'static', 'datenbank')

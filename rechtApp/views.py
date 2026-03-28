@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 #A
 #Login ohne Meldewesen
 from .jwt_tooling import create_jwt #Hier wird der Token erstellt
-token = create_jwt("37174cfc-5603-4c2f-88b2-f5f8b1ef51fd") #Hier ID eingeben mit der man sich einloggen möchte
+token = create_jwt("67b7b148-2c38-4b5d-826b-978b7644a79d") #Hier ID eingeben mit der man sich einloggen möchte
 print(f"Diesen Token in die http://127.0.0.1:8000/ro/jwt-login?token= einfügen: {token}") #Hier wird der fertige Token im Terminal angezeigt
 #http://127.0.0.1:8000/ro/jwt-login?token=[hier token einfügen]
 
@@ -221,10 +221,22 @@ def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str, st
     if "vorstrafen" not in akte or not isinstance(akte["vorstrafen"], list):
         akte["vorstrafen"] = []
 
+    jetzt = datetime.now()
+
+    # API-Wert holen (z.B. Sekunden)
+    api_werte = hole_api_relevant_werte(gesetz_id)
+    haftdauer_sekunden = int(api_werte[0]) if api_werte else 0
+
+    if haftdauer_sekunden > 0:
+        haft_ende = jetzt + timedelta(seconds=haftdauer_sekunden)
+    else:
+        haft_ende = jetzt + timedelta(days=365 * int(strafe_jahre))
+
     akte["vorstrafen"].append({
         "gesetz_id": int(gesetz_id),
         "datum_urteil": datum_urteil,
-        "strafe_jahre": strafe_jahre
+        "strafe_jahre": strafe_jahre,
+        "haft_ende": haft_ende.isoformat()
     })
 
     speichere_vorstrafen_daten(daten)
@@ -234,6 +246,7 @@ def fuege_vorstrafe_hinzu(buerger_id: str, gesetz_id: int, datum_urteil: str, st
 #S
 def profilseite(request):
 
+    pruefe_abgelaufene_strafen() #ohne cronjob
     user_id = request.session.get("user_id")
     if not user_id:
         return HttpResponse("Nicht eingeloggt.", status=401)
@@ -1187,29 +1200,36 @@ def vorstrafen_api(request, buerger_id):
 
 #A
 def pruefe_abgelaufene_strafen():
-    heute = date.today()
+    jetzt = datetime.now()
     haftstatus_pro_buerger = {}
 
-    for akte in lade_vorstrafen_daten():
+    daten = lade_vorstrafen_daten()
+
+    for akte in daten:
         buerger_id = akte["buerger_id"]
         haftstatus_pro_buerger[buerger_id] = False
 
         for vorstrafe in akte.get("vorstrafen", []):
-            datum_urteil = datetime.fromisoformat(vorstrafe["datum_urteil"]).date()
-            strafe_jahre = int(vorstrafe.get("strafe_jahre", 0))
-            ende = datum_urteil + timedelta(days=365 * strafe_jahre)
 
-            if heute < ende:
+            haft_ende_str = vorstrafe.get("haft_ende")
+
+            if haft_ende_str:
+                ende = datetime.fromisoformat(haft_ende_str)
+            else:
+                datum_urteil = datetime.fromisoformat(vorstrafe["datum_urteil"])
+                strafe_jahre = int(vorstrafe.get("strafe_jahre", 0))
+                ende = datum_urteil + timedelta(days=365 * strafe_jahre)
+
+            if jetzt < ende:
                 haftstatus_pro_buerger[buerger_id] = True
 
     for buerger_id in haftstatus_pro_buerger:
-        haftstatus_aktiv = haftstatus_pro_buerger[buerger_id] #hatfstatus aktiv ist wert des schlüssels buerger_id (False/True)
+        haftstatus_aktiv = haftstatus_pro_buerger[buerger_id]
 
-        if haftstatus_aktiv is False:
-            sende_haftstatus_an_meldewesen(
-                buerger_id=buerger_id,
-                haft_status=False
-            )
+        sende_haftstatus_an_meldewesen(
+            buerger_id=buerger_id,
+            haft_status=haftstatus_aktiv
+        )
 
 
 #A

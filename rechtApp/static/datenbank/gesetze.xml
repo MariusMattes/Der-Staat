@@ -132,4 +132,14 @@
     <bussgeld>1000</bussgeld>
     <strafe>1</strafe>
   </gesetz>
+  <gesetz>
+    <id>17</id>
+    <titel>Testhaft</titel>
+    <beschreibung>Sehr kurze Haft für Demo (in Sekunden)</beschreibung>
+    <api_relevant>
+        <wert>60</wert>   
+    </api_relevant>
+    <bussgeld>0</bussgeld>
+    <strafe>0</strafe>
+</gesetz>
 </gesetze>
